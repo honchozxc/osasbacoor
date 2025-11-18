@@ -135,3 +135,22 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+import os
+
+# Render.com deployment settings
+if 'RENDER' in os.environ:
+    # Render provides this environment variable
+    ALLOWED_HOSTS.append(os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''))
+
+    # Static files configuration for production
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+    # Add WhiteNoise middleware (add to the beginning of MIDDLEWARE)
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+    # Security settings for production
+    DEBUG = False
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
