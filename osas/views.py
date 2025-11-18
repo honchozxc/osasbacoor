@@ -6119,7 +6119,8 @@ def download_complaint_pdf(request, complaint_id):
     p.drawString(50, y_position, "STATEMENT:")
     statement_y = y_position - 15
 
-    statement_text = f'<para leading=12><font name="Helvetica" size=10>{complaint.statement.replace("\n", "<br/>")}</font></para>'
+    clean_statement = complaint.statement.replace("\n", "<br/>")
+    statement_text = f'<para leading=12><font name="Helvetica" size=10>{clean_statement}</font></para>'
     statement = Paragraph(statement_text, style=normal_style)
     statement.wrap(col_width, height)
     statement.drawOn(p, 50, statement_y - statement.height)
