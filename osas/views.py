@@ -6131,7 +6131,8 @@ def download_complaint_pdf(request, complaint_id):
         p.drawString(50 + col_width + 20, y_position, "WITNESSES:")
         witnesses_y = y_position - 15
 
-        witnesses_text = f'<para leading=12><font name="Helvetica" size=10>{complaint.witnesses.replace("\n", "<br/>")}</font></para>'
+        witnesses_clean = complaint.witnesses.replace("\n", "<br/>")
+        witnesses_text = f'<para leading=12><font name="Helvetica" size=10>{witnesses_clean}</font></para>'
         witnesses = Paragraph(witnesses_text, style=normal_style)
         witnesses.wrap(col_width, height)
         witnesses.drawOn(p, 50 + col_width + 20, witnesses_y - witnesses.height)
@@ -6234,7 +6235,8 @@ def download_complaint_pdf(request, complaint_id):
         p.drawString(50, y_position, "ADMIN NOTES:")
         y_position -= 15
 
-        notes_text = f'<para leading=12><font name="Helvetica" size=10>{complaint.notes.replace("\n", "<br/>")}</font></para>'
+        notes_clean = complaint.notes.replace("\n", "<br/>")
+        notes_text = f'<para leading=12><font name="Helvetica" size=10>{notes_clean}</font></para>'
         notes = Paragraph(notes_text, style=normal_style)
         notes.wrap(width - 100, height)
         notes.drawOn(p, 50, y_position - notes.height)
