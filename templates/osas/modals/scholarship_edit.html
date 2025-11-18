@@ -1,0 +1,128 @@
+{% extends 'osas/dashboard.html' %}
+{% load static %}
+
+{% block section-content %}
+<div class="scholarship-edit-container">
+    <h2>Edit Scholarship Page Content</h2>
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+                <p>{{ field }}: {{ error }}</p>
+            {% endfor %}
+        {% endfor %}
+    </div>
+    {% endif %}
+    <form method="post" id="scholarshipPageForm" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label>Logo Image</label>
+            <div class="custom-file">
+                <input type="file" name="hero_image" class="custom-file-input" id="id_hero_image">
+                <label class="custom-file-label" for="id_hero_image">Choose image...</label>
+            </div>
+            {% if form.instance.hero_image %}
+                <div class="current-image mt-2">
+                    <small>Current Image:</small><br>
+                    <img src="{{ form.instance.hero_image.url }}" style="max-width: 200px; max-height: 150px;">
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label>Hero Title</label>
+            {{ form.hero_title }}
+        </div>
+
+        <div class="form-group">
+            <label>Hero Subtitle</label>
+            {{ form.hero_subtitle }}
+        </div>
+
+        <!-- Add the hidden faq_content field -->
+        {{ form.faq_content }}
+
+        <div class="form-group">
+            <label>FAQ Content</label>
+            <div id="faqContainer">
+                <!-- FAQ items will be added here by JavaScript -->
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" id="addFaq">Add FAQ Item</button>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'dashboard' %}">Cancel</a>
+    </form>
+</div>
+
+<script>
+document.getElementById('id_hero_image').addEventListener('change', function(e) {
+    var fileName = e.target.files[0].name;
+    var nextSibling = e.target.nextElementSibling;
+    nextSibling.innerText = fileName;
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize FAQ items
+    const faqItems = JSON.parse('{{ faq_json|escapejs }}') || [];
+    const faqContainer = document.getElementById('faqContainer');
+    const faqInput = document.getElementById('id_faq_content');
+
+    // Render FAQ items
+    function renderFaqItems() {
+        faqContainer.innerHTML = '';
+        faqItems.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'faq-item mb-3 p-3 border';
+            div.innerHTML = `
+                <div class="form-group">
+                    <label>Question</label>
+                    <input type="text" class="form-control faq-question" value="${item.question || ''}" data-index="${index}">
+                </div>
+                <div class="form-group">
+                    <label>Answer</label>
+                    <textarea class="form-control faq-answer" rows="3" data-index="${index}">${item.answer || ''}</textarea>
+                </div>
+                <button type="button" class="btn btn-sm btn-danger remove-faq">Remove FAQ</button>
+            `;
+            faqContainer.appendChild(div);
+        });
+        // Update hidden input
+        faqInput.value = JSON.stringify(faqItems);
+    }
+
+    // Add new FAQ item
+    document.getElementById('addFaq').addEventListener('click', function() {
+        faqItems.push({question: "", answer: ""});
+        renderFaqItems();
+    });
+
+    // Remove FAQ item
+    faqContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-faq')) {
+            const index = e.target.closest('.faq-item').querySelector('.faq-question').dataset.index;
+            faqItems.splice(index, 1);
+            renderFaqItems();
+        }
+    });
+
+    // Update FAQ items when changed
+    faqContainer.addEventListener('input', function(e) {
+        if (e.target.classList.contains('faq-question')) {
+            const index = e.target.dataset.index;
+            faqItems[index].question = e.target.value;
+            faqInput.value = JSON.stringify(faqItems);
+        }
+        if (e.target.classList.contains('faq-answer')) {
+            const index = e.target.dataset.index;
+            faqItems[index].answer = e.target.value;
+            faqInput.value = JSON.stringify(faqItems);
+        }
+    });
+
+    // Initial render
+    renderFaqItems();
+});
+</script>
+{% endblock %}

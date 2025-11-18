@@ -1,0 +1,99 @@
+<div id="approveNSTPEnlistmentModal" class="modal">
+  <div class="modal-overlay" onclick="closeApproveNSTPEnlistmentModal()"></div>
+  <div class="modal-container">
+    <div class="modal-header">
+      <div class="header-content">
+        <h2>Confirm NSTP Enlistment Approval</h2>
+        <p class="header-description">Review the enlistment details before approving or rejecting</p>
+      </div>
+      <button class="modal-close" onclick="closeApproveNSTPEnlistmentModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <form id="approveNSTPEnlistmentForm" class="approval-form">
+      <input type="hidden" name="enlistment_id" id="approveNSTPEnlistmentId" value="">
+      <input type="hidden" name="action" id="approveNSTPAction" value="approve">
+
+      <div class="form-body">
+        <div class="form-intro">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <p>Please confirm you want to update the status of this NSTP enlistment.</p>
+        </div>
+
+        <div id="approveNSTPEnlistmentFormResponse" class="form-response"></div>
+
+        <div class="form-main-layout">
+          <div class="application-details-column">
+            <div class="form-section">
+              <h3 class="section-title">Student Information</h3>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Student Number</span>
+                  <span id="approveNSTPStudentNumber" class="detail-value">-</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Name</span>
+                  <span id="approveNSTPStudentName" class="detail-value">-</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Program</span>
+                  <span id="approveNSTPProgram" class="detail-value">-</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3 class="section-title">Enlistment Details</h3>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Semester</span>
+                  <span id="approveNSTPSemester" class="detail-value">-</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Academic Year</span>
+                  <span id="approveNSTPAcademicYear" class="detail-value">-</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Current Status</span>
+                  <span id="approveNSTPCurrentStatus" class="status-badge">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="approveNSTPActionSelect">Action</label>
+          <select id="approveNSTPActionSelect" name="action_select" class="form-input" onchange="updateNSTPAction(this.value)">
+            <option value="approve">Approve</option>
+            <option value="reject">Reject</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="approveNSTPNotes">Notes (Optional)</label>
+          <textarea id="approveNSTPNotes" name="notes" rows="3" class="form-input"
+                    placeholder="Add any notes about this action..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" onclick="closeApproveNSTPEnlistmentModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">
+          <span class="btn-text">Confirm Action</span>
+          <span class="btn-loader">
+            <svg viewBox="0 0 50 50">
+              <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

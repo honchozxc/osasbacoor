@@ -1,0 +1,219 @@
+<div id="viewOJTApplicationModal" class="modal">
+    <div class="modal-overlay" onclick="closeViewOJTApplicationModal()"></div>
+    <div class="modal-container modal-large">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>OJT Application Details</h2>
+                <p class="header-description">View complete application information and requirements</p>
+            </div>
+            <button class="modal-close" onclick="closeViewOJTApplicationModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="form-body">
+            <div class="form-intro">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                <p>Complete details of the OJT application. This is a view-only modal.</p>
+            </div>
+
+            <div class="form-main-layout">
+                <!-- Left Column - Student & Application Details -->
+                <div class="application-details-column">
+                    <div class="form-section">
+                        <h3 class="section-title">Student Information</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Student Name</span>
+                                <span id="viewOJTStudentName" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Student Number</span>
+                                <span id="viewOJTStudentNumber" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Course & Section</span>
+                                <span id="viewOJTCourseSection" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Year Level</span>
+                                <span id="viewOJTYearLevel" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">Application Details</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Company</span>
+                                <span id="viewOJTCompany" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Application Date</span>
+                                <span id="viewOJTApplicationDate" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Current Status</span>
+                                <span id="viewOJTCurrentStatus" class="status-badge">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">OJT Period</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Start Date</span>
+                                <span id="viewOJTStartDate" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">End Date</span>
+                                <span id="viewOJTEndDate" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Duration</span>
+                                <span id="viewOJTDuration" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Required Hours</span>
+                                <span id="viewOJTHours" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Approval Information (Only show if approved) -->
+                    <div id="viewOJTApprovalInfo" class="form-section" style="display: none;">
+                        <h3 class="section-title">Approval Information</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Approved By</span>
+                                <span id="viewOJTApprovedBy" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Approved At</span>
+                                <span id="viewOJTApprovedAt" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Review Information (Only show if reviewed) -->
+                    <div id="viewOJTReviewInfo" class="form-section" style="display: none;">
+                        <h3 class="section-title">Review Information</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Reviewed By</span>
+                                <span id="viewOJTReviewedBy" class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Reviewed At</span>
+                                <span id="viewOJTReviewedAt" class="detail-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Company & Requirements -->
+                <div class="documents-column">
+                    <div class="form-section">
+                        <h3 class="section-title">Company Information</h3>
+                        <div class="company-info-card">
+                            <div class="company-header">
+                                <h4 id="viewOJTCompanyName">-</h4>
+                                <span id="viewOJTCompanyStatus" class="status-badge">-</span>
+                            </div>
+                            <div class="company-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Address</span>
+                                    <span id="viewOJTCompanyAddress" class="detail-value">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Contact</span>
+                                    <span id="viewOJTCompanyContact" class="detail-value">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Email</span>
+                                    <span id="viewOJTCompanyEmail" class="detail-value">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Website</span>
+                                    <span id="viewOJTCompanyWebsite" class="detail-value">-</span>
+                                </div>
+                            </div>
+                            <div class="company-description">
+                                <span class="detail-label">Description</span>
+                                <p id="viewOJTCompanyDescription" class="detail-value">-</p>
+                            </div>
+                            <div class="company-slots">
+                                <h5>Slot Information</h5>
+                                <div class="slots-grid">
+                                    <div class="slot-item">
+                                        <span class="slot-label">Available</span>
+                                        <span id="viewOJTAvailableSlots" class="slot-value">-</span>
+                                    </div>
+                                    <div class="slot-item">
+                                        <span class="slot-label">Filled</span>
+                                        <span id="viewOJTFilledSlots" class="slot-value">-</span>
+                                    </div>
+                                    <div class="slot-item">
+                                        <span class="slot-label">Remaining</span>
+                                        <span id="viewOJTRemainingSlots" class="slot-value">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">Requirements Status</h3>
+                        <div class="requirements-list" id="viewOJTRequirementsList">
+                            <!-- Requirements will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cover Letter & Skills -->
+            <div class="form-section">
+                <h3 class="section-title">Application Content</h3>
+                <div class="content-grid">
+                    <div class="content-item">
+                        <label class="content-label">Cover Letter</label>
+                        <div id="viewOJTCoverLetter" class="content-text">-</div>
+                    </div>
+                    <div class="content-item">
+                        <label class="content-label">Skills & Qualifications</label>
+                        <div id="viewOJTSkills" class="content-text">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review Notes & Rejection Reason -->
+            <div class="form-section">
+                <h3 class="section-title">Additional Information</h3>
+                <div class="content-grid">
+                    <div class="content-item">
+                        <label class="content-label">Review Notes</label>
+                        <div id="viewOJTReviewNotes" class="content-text">-</div>
+                    </div>
+                    <div class="content-item">
+                        <label class="content-label">Rejection Reason</label>
+                        <div id="viewOJTRejectionReason" class="content-text">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="closeViewOJTApplicationModal()">
+                Close
+            </button>
+        </div>
+    </div>
+</div>

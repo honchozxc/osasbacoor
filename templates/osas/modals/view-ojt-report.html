@@ -1,0 +1,173 @@
+{% block ojt-report-view-modal %}
+<div id="reportViewModal" class="modal">
+    <div class="modal-overlay" onclick="closeReportViewModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>OJT Report Details</h2>
+                <p class="header-description">Comprehensive overview of OJT report and activities</p>
+            </div>
+            <button class="modal-close" onclick="closeReportViewModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="form-body">
+            <div class="report-layout-container">
+                <!-- TOP SECTION - Report Information -->
+                <div class="report-info-section">
+                    <div class="report-main-card">
+                        <!-- Report Header -->
+                        <div class="report-header">
+                            <div class="report-title-section">
+                                <h3 class="report-title" id="viewReportTitle">-</h3>
+                                <div class="report-meta-info">
+                                    <span class="report-type-badge" id="viewReportType">-</span>
+                                    <span class="report-status-badge" id="viewReportStatus">-</span>
+                                    <span class="report-date" id="viewReportDate">-</span>
+                                </div>
+                            </div>
+                            <div class="report-submitter-section">
+                                <div class="submitter-info">
+                                    <span class="submitter-label">Submitted by:</span>
+                                    <span class="submitter-name" id="viewReportSubmitter">-</span>
+                                    <span class="submit-date" id="viewReportSubmitDate">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Student Information -->
+                        <div class="report-details-grid">
+                            <div class="details-column">
+                                <div class="details-group">
+                                    <h4 class="details-group-title">
+                                        <i class='bx bx-user'></i>
+                                        Student Information
+                                    </h4>
+                                    <div class="student-info-content">
+                                        <div class="info-item">
+                                            <span class="info-label">Name:</span>
+                                            <span class="info-value" id="viewStudentName">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Course:</span>
+                                            <span class="info-value" id="viewStudentCourse">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Year & Section:</span>
+                                            <span class="info-value" id="viewStudentYearSection">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reporting Period (for weekly/monthly reports) -->
+                        <div class="report-period-section" id="viewReportPeriodSection">
+                            <h4 class="section-title">
+                                <i class='bx bx-calendar'></i>
+                                Reporting Period
+                            </h4>
+                            <div class="period-dates">
+                                <div class="period-item">
+                                    <span class="period-label">Start Date:</span>
+                                    <span class="period-value" id="viewPeriodStart">-</span>
+                                </div>
+                                <div class="period-item">
+                                    <span class="period-label">End Date:</span>
+                                    <span class="period-value" id="viewPeriodEnd">-</span>
+                                </div>
+                                <div class="period-item">
+                                    <span class="period-label">Duration:</span>
+                                    <span class="period-value" id="viewPeriodDuration">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MIDDLE SECTION - Report Content -->
+                <div class="report-content-section">
+                    <div class="content-card">
+                        <!-- Report Description -->
+                        <div class="content-group">
+                            <h4 class="content-title">
+                                <i class='bx bx-notepad'></i>
+                                Report Description & Activities
+                            </h4>
+                            <div class="content-text" id="viewReportDescription">
+                                <!-- Report description will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Issues & Challenges -->
+                        <div class="content-group" id="viewIssuesSection">
+                            <h4 class="content-title">
+                                <i class='bx bx-error-circle'></i>
+                                Issues & Challenges
+                            </h4>
+                            <div class="content-text" id="viewReportIssues">
+                                <!-- Issues content will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM SECTION - Review & Attachments -->
+                <div class="report-footer-section">
+                    <div class="footer-grid">
+                        <!-- Review Information -->
+                        <div class="footer-column">
+                            <div class="review-section" id="viewReviewSection">
+                                <h4 class="section-title">
+                                    <i class='bx bx-check-shield'></i>
+                                    Review Information
+                                </h4>
+                                <div class="review-content">
+                                    <div class="review-item">
+                                        <span class="review-label">Reviewed by:</span>
+                                        <span class="review-value" id="viewReviewedBy">-</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="review-label">Review Date:</span>
+                                        <span class="review-value" id="viewReviewedAt">-</span>
+                                    </div>
+                                    <div class="review-item full-width">
+                                        <span class="review-label">Feedback:</span>
+                                        <div class="feedback-content" id="viewReviewFeedback">
+                                            <!-- Feedback content will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Attachments -->
+                        <div class="footer-column">
+                            <div class="attachments-section">
+                                <h4 class="section-title">
+                                    <i class='bx bx-paperclip'></i>
+                                    Attachments
+                                    <span class="attachments-count" id="viewAttachmentsCount">0 files</span>
+                                </h4>
+                                <div class="attachments-list" id="viewReportAttachments">
+                                    <!-- Attachments will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-close-modal" onclick="closeReportViewModal()">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock ojt-report-view-modal %}

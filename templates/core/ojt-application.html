@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OJT Application</title>
+    <link rel="stylesheet" href="{% static 'css/core/ojt-application.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    {% include 'core/navbar.html' %}
+
+    <!-- OJT Application Content -->
+    <div class="ojt-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">OJT Application</h1>
+                <p class="app-subtitle">Apply for On-the-Job Training Opportunities</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Available Companies Section -->
+            <section class="companies-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Available Companies</h2>
+                        <p class="card-subtitle">Companies with available OJT slots</p>
+                    </div>
+                    <div class="card-body">
+                        {% if available_companies %}
+                            <div class="table-container">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Company Name</th>
+                                            <th>Address</th>
+                                            <th>Available Slots</th>
+                                            <th>Status</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for company in available_companies %}
+                                            <tr data-company-id="{{ company.id }}">
+                                                <td>
+                                                    <strong>{{ company.name }}</strong>
+                                                </td>
+                                                <td>{{ company.address|truncatewords:8 }}</td>
+                                                <td>{{ company.remaining_slots }}/{{ company.available_slots }}</td>
+                                                <td>
+                                                    <span class="badge badge-{{ company.status|lower }}">
+                                                        {{ company.status }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {% if company.description %}
+                                                        <small class="text-light">{{ company.description|truncatewords:15 }}</small>
+                                                    {% else %}
+                                                        <small class="text-muted">No description available</small>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                                <p>No companies available for OJT at the moment.</p>
+                                <p class="text-light">Please check back later for new opportunities.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <!-- Application Form Section -->
+            <section class="application-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Application Form</h2>
+                        <p class="card-subtitle">Fill out your OJT application details</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Display Messages -->
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <!-- Student Information -->
+                        <div class="student-info">
+                            <h5>Student Information</h5>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Full Name</span>
+                                    <span class="info-value">{{ current_student.get_full_name }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Course</span>
+                                    <span class="info-value">{{ current_student.course.name|default:"Not specified" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Section</span>
+                                    <span class="info-value">{{ current_student.section|default:"Not specified" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Year Level</span>
+                                    <span class="info-value">{{ current_student.year_level|default:"Not specified" }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Application Form -->
+                        <form method="post" enctype="multipart/form-data" id="ojt-application-form">
+                            {% csrf_token %}
+
+                            <!-- Display form errors -->
+                            {% if form.errors %}
+                                <div class="alert alert-error">
+                                    <strong>Please correct the following errors:</strong>
+                                    <ul>
+                                        {% for field, errors in form.errors.items %}
+                                            {% for error in errors %}
+                                                <li>{{ field|title }}: {{ error }}</li>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+
+                            <!-- Display formset errors -->
+                            {% if requirement_formset.errors %}
+                                <div class="alert alert-error">
+                                    <strong>Please correct the following requirement errors:</strong>
+                                    <ul>
+                                        {% for form in requirement_formset %}
+                                            {% if form.errors %}
+                                                {% for field, errors in form.errors.items %}
+                                                    {% for error in errors %}
+                                                        <li>Requirement {{ forloop.parentloop.counter }}: {{ field|title }} - {{ error }}</li>
+                                                    {% endfor %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+
+                            {% if requirement_formset.non_form_errors %}
+                                <div class="alert alert-error">
+                                    <strong>Requirement errors:</strong>
+                                    <ul>
+                                        {% for error in requirement_formset.non_form_errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+
+                            <!-- Company Selection -->
+                            <div class="form-group">
+                                <label for="{{ form.company.id_for_label }}" class="form-label">
+                                    Company Selection *
+                                </label>
+                                {{ form.company }}
+                                {% if form.company.errors %}
+                                    <div class="form-errors">
+                                        {% for error in form.company.errors %}
+                                            <small class="error-text">{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Company Information Display -->
+                                <div id="company-info" class="company-info" style="display: none;">
+                                    <h6>Company Details</h6>
+                                    <div class="info-grid compact">
+                                        <div class="info-item">
+                                            <span class="info-label">Name</span>
+                                            <span class="info-value" id="company-name">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Address</span>
+                                            <span class="info-value" id="company-address">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Contact</span>
+                                            <span class="info-value" id="company-contact">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Total Slots</span>
+                                            <span class="info-value" id="company-total-slots">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Available Slots</span>
+                                            <span class="info-value" id="company-available-slots">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Filled Slots</span>
+                                            <span class="info-value" id="company-filled-slots">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Status</span>
+                                            <span class="info-value">
+                                                <span id="company-status-badge" class="badge">-</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="info-item full-width">
+                                        <span class="info-label">Description</span>
+                                        <span class="info-value" id="company-description">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Proposed OJT Period -->
+                            <div class="form-group">
+                                <label class="form-label">Proposed OJT Period *</label>
+                                <div class="date-grid">
+                                    <div class="date-input-group">
+                                        <label class="date-label">Start Date</label>
+                                        {{ form.proposed_start_date }}
+                                        {% if form.proposed_start_date.errors %}
+                                            <div class="form-errors">
+                                                {% for error in form.proposed_start_date.errors %}
+                                                    <small class="error-text">{{ error }}</small>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="date-input-group">
+                                        <label class="date-label">End Date</label>
+                                        {{ form.proposed_end_date }}
+                                        {% if form.proposed_end_date.errors %}
+                                            <div class="form-errors">
+                                                {% for error in form.proposed_end_date.errors %}
+                                                    <small class="error-text">{{ error }}</small>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="form-text">OJT period must be at least 30 days and not exceed 1 year</div>
+                            </div>
+
+                            <!-- Proposed Hours -->
+                            <div class="form-group">
+                                <label for="{{ form.proposed_hours.id_for_label }}" class="form-label">
+                                    Total OJT Hours *
+                                </label>
+                                {{ form.proposed_hours }}
+                                {% if form.proposed_hours.errors %}
+                                    <div class="form-errors">
+                                        {% for error in form.proposed_hours.errors %}
+                                            <small class="error-text">{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Minimum 240 hours required for OJT completion</div>
+                            </div>
+
+                            <!-- Cover Letter -->
+                            <div class="form-group">
+                                <label for="{{ form.cover_letter.id_for_label }}" class="form-label">
+                                    Cover Letter
+                                </label>
+                                {{ form.cover_letter }}
+                                {% if form.cover_letter.errors %}
+                                    <div class="form-errors">
+                                        {% for error in form.cover_letter.errors %}
+                                            <small class="error-text">{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Explain why you want to do OJT at this company</div>
+                            </div>
+
+                            <!-- Skills -->
+                            <div class="form-group">
+                                <label for="{{ form.skills.id_for_label }}" class="form-label">
+                                    Skills and Qualifications
+                                </label>
+                                {{ form.skills }}
+                                {% if form.skills.errors %}
+                                    <div class="form-errors">
+                                        {% for error in form.skills.errors %}
+                                            <small class="error-text">{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">List your relevant skills and qualifications</div>
+                            </div>
+
+                            <!-- Requirements Upload Section -->
+                            <div class="requirements-section">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <strong>OJT Requirements *</strong>
+                                    </label>
+                                    <div class="form-text">
+                                        Upload at least 1 requirement document. Each requirement must include a document type and file.
+                                    </div>
+
+                                    <!-- Requirements Summary -->
+                                    <div class="requirements-summary">
+                                        <div class="summary-grid">
+                                            <div class="summary-item">
+                                                <span class="summary-value" id="total-requirements">0</span>
+                                                <span class="summary-label">Total Requirements</span>
+                                            </div>
+                                            <div class="summary-item">
+                                                <span class="summary-value" id="uploaded-requirements">0</span>
+                                                <span class="summary-label">Uploaded</span>
+                                            </div>
+                                            <div class="summary-item">
+                                                <span class="summary-value" id="pending-requirements">0</span>
+                                                <span class="summary-label">Pending</span>
+                                            </div>
+                                        </div>
+                                        <div class="upload-progress">
+                                            <div class="progress-bar" id="completion-progress">
+                                                <span class="progress-text" id="progress-text">0%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Drag and Drop Zone -->
+                                    <div class="drop-zone" id="drop-zone">
+                                        <div class="drop-zone-content">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                <polyline points="17 8 12 3 7 8"/>
+                                                <line x1="12" y1="3" x2="12" y2="15"/>
+                                            </svg>
+                                            <p>Drag and drop files here or click "Add Requirement" below</p>
+                                            <small class="form-text">Supported formats: PDF, DOC, DOCX, JPG, PNG (Max 5MB per file)</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Requirements Container -->
+                                    <div id="requirements-container">
+                                        <!-- Existing requirements from formset -->
+                                        {{ requirement_formset.management_form }}
+                                        {% for form in requirement_formset %}
+                                            <div class="requirement-item" data-requirement-id="{{ forloop.counter0 }}">
+                                                <div class="requirement-header">
+                                                    <h4 class="requirement-title">Requirement #{{ forloop.counter }}</h4>
+                                                    <span class="requirement-status status-pending">Pending</span>
+                                                </div>
+                                                <div class="requirement-fields">
+                                                    {{ form.id }}
+                                                    <div class="form-group">
+                                                        <label class="form-label">Document Type *</label>
+                                                        {{ form.requirement_type }}
+                                                        {% if form.requirement_type.errors %}
+                                                            <div class="form-errors">
+                                                                {% for error in form.requirement_type.errors %}
+                                                                    <small class="error-text">{{ error }}</small>
+                                                                {% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">File *</label>
+                                                        <div class="file-upload-wrapper">
+                                                            {{ form.file }}
+                                                            <div class="file-upload-btn">
+                                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                                    <polyline points="17 8 12 3 7 8"/>
+                                                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                                                </svg>
+                                                                Choose File
+                                                            </div>
+                                                            <div class="file-name-display"></div>
+                                                        </div>
+                                                        {% if form.file.errors %}
+                                                            <div class="form-errors">
+                                                                {% for error in form.file.errors %}
+                                                                    <small class="error-text">{{ error }}</small>
+                                                                {% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    {% if requirement_formset.can_delete %}
+                                                        <div class="form-group">
+                                                            <label class="checkbox-label">
+                                                                {{ form.DELETE }} Remove this requirement
+                                                            </label>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+
+                                    <!-- Add Requirement Button -->
+                                    <button type="button" id="add-requirement" class="add-requirement">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <line x1="12" y1="5" x2="12" y2="19"/>
+                                            <line x1="5" y1="12" x2="19" y2="12"/>
+                                        </svg>
+                                        Add Requirement
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="form-actions">
+                                <button type="reset" class="btn btn-outline">
+                                    Clear Form
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="submit-btn">
+                                    Submit Application
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{% static 'js/core/ojt-application.js' %}"></script>
+
+    {% include 'core/footer.html' %}
+
+</body>
+</html>

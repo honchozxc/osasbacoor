@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Discipline Unit</title>
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link rel="stylesheet" href="{% static 'css/core/student_discipline_unit.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    {% include 'core/navbar.html' %}
+
+    <div class="neon-bg"></div>
+
+    <div class="osas-container">
+        <!-- Hero Header Section -->
+        <header class="osas-main-header animate__animated animate__fadeIn">
+            <div class="header-content">
+                <h1 class="osas-main-title">{{ discipline_content.title }}</h1>
+                <p class="osas-tagline">{{ discipline_content.tagline }}</p>
+                <div class="header-decoration">
+                    <div class="decoration-circle blue"></div>
+                    <div class="decoration-circle gold"></div>
+                    <div class="decoration-line"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="osas-main-grid">
+            <!-- About Section (Full Width) -->
+            <section class="osas-about-section wide-card animate__animated animate__fadeInUp">
+                <div class="osas-about-card glass-card">
+                    <h2 class="osas-section-title">About</h2>
+                    <div class="osas-about-text">{{ discipline_content.about_text|safe }}</div>
+                </div>
+            </section>
+
+            <!-- Principles and Approach Side by Side -->
+            <div class="principles-approach-container">
+                <!-- Principles Section -->
+                <section class="osas-section grid-card animate__animated animate__fadeInUp">
+                    <div class="osas-goals-card glass-card">
+                        <div class="osas-icon-title">
+                            <i class="fas fa-balance-scale neon-icon"></i>
+                            <h2 class="osas-section-title">{{ discipline_content.principles_title }}</h2>
+                        </div>
+                        <ul class="osas-principles-list">
+                            {% for item in discipline_content.principles_items %}
+                            <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- Approach Section -->
+                <section class="osas-section grid-card animate__animated animate__fadeInUp">
+                    <div class="osas-about-card glass-card">
+                        <div class="osas-icon-title">
+                            <i class="fas fa-route neon-icon"></i>
+                            <h2 class="osas-section-title">{{ discipline_content.approach_title }}</h2>
+                        </div>
+                        <div class="osas-about-text">{{ discipline_content.approach_text|safe }}</div>
+                        <ul class="osas-approach-list">
+                            {% for item in discipline_content.approach_items %}
+                            <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Filing a Complaint Section -->
+            <section class="osas-section grid-card wide-card animate__animated animate__fadeInUp">
+                <div class="osas-goals-card glass-card">
+                    <div class="osas-icon-title">
+                        <i class="fas fa-file-alt neon-icon"></i>
+                        <h2 class="osas-section-title">{{ discipline_content.filing_title }}</h2>
+                    </div>
+                    <div class="osas-about-text">{{ discipline_content.filing_text|safe }}</div>
+
+                    <!-- Complaint Types -->
+                    <div class="complaint-types-container">
+                        {% for type in discipline_content.complaint_types %}
+                        <div class="complaint-type glass-card">
+                            <div class="complaint-type-header">
+                                <i class="fas {{ type.icon }} neon-icon"></i>
+                                <h5>{{ type.title }}</h5>
+                            </div>
+                            <ul>
+                                {% for item in type.items %}
+                                <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <!-- How to File Section -->
+            <section class="osas-courses-section wide-card animate__animated animate__fadeInUp">
+                <div class="section-container glass-card">
+                    <h2 class="osas-section-title">{{ discipline_content.how_to_file_title }}</h2>
+                    <div class="osas-courses-grid">
+                        {% for step in discipline_content.how_to_file_steps %}
+                        <div class="course-card glass-card hover-glow">
+                            <div class="step-icon">
+                                <span class="step-number">{{ forloop.counter }}</span>
+                                <i class="fas {{ step.icon }}"></i>
+                            </div>
+                            <h3>{{ step.title }}</h3>
+                            <p class="subtext">{{ step.description }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <!-- Process Notes -->
+            <section class="osas-section wide-card animate__animated animate__fadeInUp">
+                <div class="section-container glass-card">
+                    <h2 class="osas-section-title">Process Information</h2>
+                    <div class="process-notes">
+                        {% for note in discipline_content.process_notes %}
+                        <div class="note-card glass-card">
+                            <div class="note-icon-container">
+                                <i class="fas {{ note.icon }} neon-icon"></i>
+                            </div>
+                            <h4>{{ note.title }}</h4>
+                            <p>{{ note.description }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Make a Complaint Button Section -->
+        <div class="complaint-button-container">
+            <a href="/create-complaint" class="complaint-button">
+                <i class="fas fa-file-alt button-icon"></i> Make a Complaint
+            </a>
+        </div>
+    </div>
+
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h3 id="modalTitle">Authentication Required</h3>
+            <p id="modalMessage">You must be logged in to file a complaint.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary close-modal-btn">Okay</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal elements
+        const authModal = document.getElementById('authModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const closeModalButtons = document.querySelectorAll('.close-modal, .close-modal-btn');
+
+        // Complaint button
+        const complaintButton = document.querySelector('.complaint-button-container a');
+
+        // Function to show modal
+        function showModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            authModal.style.display = 'block';
+            setTimeout(() => {
+                authModal.classList.add('show');
+            }, 10);
+        }
+
+        // Function to hide modal
+        function hideModal() {
+            authModal.classList.remove('show');
+            setTimeout(() => {
+                authModal.style.display = 'none';
+            }, 300);
+        }
+
+        // Close modal when clicking X or cancel button
+        closeModalButtons.forEach(button => {
+            button.addEventListener('click', hideModal);
+        });
+
+        // Close modal when clicking outside
+        authModal.addEventListener('click', function(e) {
+            if (e.target === authModal) {
+                hideModal();
+            }
+        });
+
+        // Complaint button click handler
+        if (complaintButton) {
+            complaintButton.addEventListener('click', function(e) {
+                // Check if user is authenticated via Django template variable
+                const isAuthenticated = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
+
+                if (!isAuthenticated) {
+                    e.preventDefault();
+                    showModal(
+                        'Authentication Required',
+                        'You must login before you can file a complaint.'
+                    );
+                    return;
+                }
+            });
+        }
+    });
+</script>
+    {% include 'core/footer.html' %}
+</body>
+</html>

@@ -1,0 +1,3538 @@
+/* Header Filters Styles */
+.accomplishment-reports-container .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.accomplishment-reports-container .header-filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Header Search Box */
+.accomplishment-reports-container .header-filters .search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 200px;
+}
+
+.accomplishment-reports-container .header-filters .search-box i {
+    position: absolute;
+    left: 12px;
+    color: var(--ar-primary);
+    font-size: 1.1rem;
+    z-index: 2;
+}
+
+.accomplishment-reports-container .header-filters .search-input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    border: 2px solid var(--ar-border);
+    border-radius: 8px;
+    background: var(--ar-surface);
+    color: var(--ar-text);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.accomplishment-reports-container .header-filters .search-input:focus {
+    outline: none;
+    border-color: var(--ar-primary);
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+}
+
+/* Header Filter Groups */
+.accomplishment-reports-container .header-filters .filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.accomplishment-reports-container .header-filters .filter-select {
+    padding: 10px 12px;
+    border: 2px solid var(--ar-border);
+    border-radius: 8px;
+    background: var(--ar-surface);
+    color: var(--ar-text);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23003366' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 14px;
+    padding-right: 32px;
+    min-width: 120px;
+}
+
+.accomplishment-reports-container .header-filters .filter-select:focus {
+    outline: none;
+    border-color: var(--ar-primary);
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+}
+
+/* Header Secondary Button */
+.accomplishment-reports-container .header-filters .secondary-btn {
+    padding: 10px 16px;
+    background: transparent;
+    color: var(--ar-text);
+    border: 2px solid var(--ar-border);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.accomplishment-reports-container .header-filters .secondary-btn:hover {
+    background: var(--ar-background);
+    border-color: var(--ar-text-light);
+}
+
+/* Responsive Design for Header Filters */
+@media (max-width: 1024px) {
+    .accomplishment-reports-container .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .accomplishment-reports-container .header-filters {
+        order: -1;
+        justify-content: space-between;
+    }
+
+    .accomplishment-reports-container .header-filters .search-box {
+        min-width: auto;
+        flex: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .accomplishment-reports-container .header-filters {
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .accomplishment-reports-container .header-filters .search-box,
+    .accomplishment-reports-container .header-filters .filter-group,
+    .accomplishment-reports-container .header-filters .secondary-btn {
+        width: 100%;
+    }
+
+    .accomplishment-reports-container .header-filters .filter-select {
+        min-width: auto;
+    }
+}
+
+.accomplishment-reports-container .search-filter-container {
+    display: none;
+}
+
+/* Action Button AR*/
+#accomplishment-reports-table .actions-cell {
+    padding: 8px 12px;
+}
+
+#accomplishment-reports-table .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100%;
+    min-height: 100%;
+    flex-wrap: wrap;
+    align-content: center;
+}
+
+/* Base AR Button Style */
+#accomplishment-reports-table .btn-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    background: none;
+    transition: all 0.2s ease;
+    margin: 1px 0;
+    color: var(--white);
+    font-size: 1.1rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#accomplishment-reports-table .btn-icon:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* View AR Button */
+#accomplishment-reports-table .btn-view-ar {
+    color: var(--info);
+    background-color: rgba(72, 149, 239, 0.1);
+    border: 1px solid rgba(72, 149, 239, 0.2);
+}
+
+#accomplishment-reports-table .btn-view-ar:hover {
+    background-color: rgba(72, 149, 239, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#accomplishment-reports-table .btn-view-ar:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+#accomplishment-reports-table .btn-view-ar:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.3);
+}
+
+/* Edit AR Button */
+#accomplishment-reports-table .btn-edit-ar {
+    color: var(--warning);
+    background-color: rgba(248, 150, 30, 0.1);
+    border: 1px solid rgba(248, 150, 30, 0.2);
+}
+
+#accomplishment-reports-table .btn-edit-ar:hover {
+    background-color: rgba(248, 150, 30, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#accomplishment-reports-table .btn-edit-ar:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+#accomplishment-reports-table .btn-edit-ar:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(248, 150, 30, 0.3);
+}
+
+/* Archive AR Button */
+#accomplishment-reports-table .btn-archive-ar {
+    color: var(--archive);
+    background-color: rgba(111, 66, 193, 0.1);
+    border: 1px solid rgba(111, 66, 193, 0.2);
+}
+
+#accomplishment-reports-table .btn-archive-ar:hover {
+    background-color: rgba(111, 66, 193, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#accomplishment-reports-table .btn-archive-ar:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+#accomplishment-reports-table .btn-archive-ar:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.3);
+}
+
+/* Tooltip Styles for AR Buttons */
+#accomplishment-reports-table .btn-view-ar[title]:hover::after,
+#accomplishment-reports-table .btn-edit-ar[title]:hover::after,
+#accomplishment-reports-table .btn-archive-ar[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 100;
+    margin-bottom: 5px;
+}
+
+/* Responsive Design for AR Action Buttons */
+@media (max-width: 768px) {
+    #accomplishment-reports-table .action-buttons {
+        gap: 4px;
+    }
+
+    #accomplishment-reports-table .btn-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 1rem;
+    }
+
+    #accomplishment-reports-table .btn-view-ar[title]:hover::after,
+    #accomplishment-reports-table .btn-edit-ar[title]:hover::after,
+    #accomplishment-reports-table .btn-archive-ar[title]:hover::after {
+        display: none;
+    }
+}
+
+/* Specific styling for the accomplishment reports table container */
+#accomplishment-reports-table-container .actions-cell {
+    min-width: 140px;
+}
+
+/* Ensure buttons are properly aligned in table cells */
+#accomplishment-reports-table td.actions-cell {
+    vertical-align: middle;
+}
+
+/* Hover effects specifically for accomplishment report rows */
+#accomplishment-reports-table tbody tr:hover .btn-view-ar {
+    background-color: rgba(72, 149, 239, 0.15);
+}
+
+#accomplishment-reports-table tbody tr:hover .btn-edit-ar {
+    background-color: rgba(248, 150, 30, 0.15);
+}
+
+#accomplishment-reports-table tbody tr:hover .btn-archive-ar {
+    background-color: rgba(111, 66, 193, 0.15);
+}
+
+/* Focus states for accessibility */
+#accomplishment-reports-table .btn-view-ar:focus-visible,
+#accomplishment-reports-table .btn-edit-ar:focus-visible,
+#accomplishment-reports-table .btn-archive-ar:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+/* Active state animations */
+#accomplishment-reports-table .btn-view-ar:active i,
+#accomplishment-reports-table .btn-edit-ar:active i,
+#accomplishment-reports-table .btn-archive-ar:active i {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
+
+/* Icon sizing consistency */
+#accomplishment-reports-table .btn-view-ar i,
+#accomplishment-reports-table .btn-edit-ar i,
+#accomplishment-reports-table .btn-archive-ar i {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+/* Disabled state for AR buttons */
+#accomplishment-reports-table .btn-view-ar:disabled,
+#accomplishment-reports-table .btn-edit-ar:disabled,
+#accomplishment-reports-table .btn-archive-ar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+#accomplishment-reports-table .btn-view-ar:disabled:hover,
+#accomplishment-reports-table .btn-edit-ar:disabled:hover,
+#accomplishment-reports-table .btn-archive-ar:disabled:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: none;
+    box-shadow: none;
+}
+
+/* ---------------------------------------------- Create AR Modal --------------------------------------------------- */
+/* Modern CSS for Accomplishment Report Modal */
+#accomplishmentCreateModal {
+    --ar-primary: #003366;
+    --ar-primary-light: #00478f;
+    --ar-primary-dark: #002244;
+    --ar-secondary: #4ecdc4;
+    --ar-accent: #ff6b6b;
+    --ar-surface: #ffffff;
+    --ar-background: #f8fafc;
+    --ar-border: #e2e8f0;
+    --ar-text: #2d3748;
+    --ar-text-light: #718096;
+    --ar-success: #48bb78;
+    --ar-error: #f56565;
+    --ar-warning: #ed8936;
+    --ar-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --ar-gradient: linear-gradient(135deg, var(--ar-primary) 0%, var(--ar-primary-light) 100%);
+}
+
+#accomplishmentCreateModal.modal.active {
+    display: flex;
+}
+
+#accomplishmentCreateModal .modal-container {
+    background: var(--ar-surface);
+    border-radius: 16px;
+    box-shadow: var(--ar-shadow);
+    border: 1px solid var(--ar-border);
+    max-width: 900px;
+    width: 95%;
+    max-height: 90vh;
+    overflow: hidden;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#accomplishmentCreateModal.modal.active .modal-container {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+#accomplishmentCreateModal .modal-header {
+    background: var(--ar-gradient);
+    color: white;
+    padding: 24px 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+#accomplishmentCreateModal .modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(40%, -40%);
+}
+
+#accomplishmentCreateModal .modal-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    position: relative;
+    z-index: 1;
+}
+
+#accomplishmentCreateModal .header-description {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+#accomplishmentCreateModal .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+#accomplishmentCreateModal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+#accomplishmentCreateModal .form-body {
+    padding: 32px;
+    background: var(--ar-background);
+    max-height: calc(90vh - 200px);
+    overflow-y: auto;
+}
+
+#accomplishmentCreateModal .form-intro {
+    background: var(--ar-surface);
+    border: 1px solid var(--ar-border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+#accomplishmentCreateModal .form-intro svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+#accomplishmentCreateModal .form-intro p {
+    margin: 0;
+    color: var(--ar-text);
+    line-height: 1.6;
+}
+
+#accomplishmentCreateModal .required-asterisk {
+    color: var(--ar-error);
+    font-weight: 600;
+}
+
+#accomplishmentCreateModal .form-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+#accomplishmentCreateModal .form-group {
+    margin-bottom: 20px;
+}
+
+#accomplishmentCreateModal label {
+    display: block;
+    font-weight: 600;
+    color: var(--ar-text);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+#accomplishmentCreateModal .form-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--ar-border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background: var(--ar-surface);
+    color: var(--ar-text);
+}
+
+#accomplishmentCreateModal .form-input:focus {
+    outline: none;
+    border-color: var(--ar-primary);
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+}
+
+#accomplishmentCreateModal .form-input:hover {
+    border-color: #cbd5e0;
+}
+
+#accomplishmentCreateModal .form-input.error {
+    border-color: var(--ar-error);
+    box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1);
+}
+
+#accomplishmentCreateModal textarea.form-input {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.5;
+}
+
+#accomplishmentCreateModal .form-help {
+    color: var(--ar-text-light);
+    font-size: 0.85rem;
+    margin-top: 6px;
+    display: block;
+}
+
+/* File Upload Styles */
+#accomplishmentCreateModal .file-upload-group {
+    margin-top: 32px;
+}
+
+#accomplishmentCreateModal .file-upload-container {
+    margin-top: 8px;
+}
+
+#accomplishmentCreateModal .file-upload-box {
+    border: 2px dashed var(--ar-border);
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--ar-surface);
+}
+
+#accomplishmentCreateModal .file-upload-box:hover {
+    border-color: var(--ar-primary);
+    background: rgba(0, 51, 102, 0.02);
+}
+
+#accomplishmentCreateModal .file-upload-box.small {
+    padding: 16px;
+    margin-bottom: 8px;
+}
+
+#accomplishmentCreateModal .file-upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: var(--ar-text-light);
+}
+
+#accomplishmentCreateModal .file-upload-content svg {
+    color: var(--ar-primary);
+}
+
+#accomplishmentCreateModal .file-upload-content p {
+    margin: 0;
+    font-weight: 600;
+    color: var(--ar-text);
+}
+
+#accomplishmentCreateModal .file-upload-content small {
+    font-size: 0.85rem;
+}
+
+#accomplishmentCreateModal .file-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: var(--ar-surface);
+    border: 1px solid var(--ar-border);
+    border-radius: 8px;
+}
+
+#accomplishmentCreateModal .file-info.small {
+    padding: 8px 12px;
+    margin-top: 8px;
+}
+
+#accomplishmentCreateModal .file-name {
+    flex: 1;
+    font-weight: 500;
+    color: var(--ar-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#accomplishmentCreateModal .file-size {
+    color: var(--ar-text-light);
+    font-size: 0.85rem;
+}
+
+#accomplishmentCreateModal .file-remove {
+    background: none;
+    border: none;
+    color: var(--ar-error);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+#accomplishmentCreateModal .file-remove:hover {
+    background: rgba(245, 101, 101, 0.1);
+}
+
+/* Attachments Section */
+#accomplishmentCreateModal .attachments-section {
+    background: var(--ar-surface);
+    border: 1px solid var(--ar-border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 8px;
+}
+
+#accomplishmentCreateModal .attachments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+#accomplishmentCreateModal .attachments-header span {
+    font-weight: 600;
+    color: var(--ar-text);
+}
+
+#accomplishmentCreateModal .attachments-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#accomplishmentCreateModal .attachment-field {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    background: var(--ar-background);
+    border: 1px solid var(--ar-border);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+#accomplishmentCreateModal .attachment-field:hover {
+    border-color: var(--ar-primary);
+    box-shadow: 0 2px 8px rgba(0, 51, 102, 0.1);
+}
+
+#accomplishmentCreateModal .attachment-inputs {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 12px;
+}
+
+#accomplishmentCreateModal .attachment-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+#accomplishmentCreateModal .attachment-remove {
+    background: none;
+    border: none;
+    color: var(--ar-error);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+#accomplishmentCreateModal .attachment-remove:hover {
+    background: rgba(245, 101, 101, 0.1);
+    transform: scale(1.1);
+}
+
+#accomplishmentCreateModal .attachments-help {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ar-border);
+    color: var(--ar-text-light);
+    font-size: 0.85rem;
+}
+
+/* Form Response */
+#accomplishmentCreateModal .form-response {
+    margin-bottom: 20px;
+}
+
+#accomplishmentCreateModal .response-message {
+    padding: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+}
+
+#accomplishmentCreateModal .response-success {
+    background: rgba(72, 187, 120, 0.1);
+    border: 1px solid rgba(72, 187, 120, 0.2);
+    color: #2f855a;
+}
+
+#accomplishmentCreateModal .response-error {
+    background: rgba(245, 101, 101, 0.1);
+    border: 1px solid rgba(245, 101, 101, 0.2);
+    color: #c53030;
+}
+
+/* Modal Footer */
+#accomplishmentCreateModal .modal-footer {
+    padding: 24px 32px;
+    background: var(--ar-surface);
+    border-top: 1px solid var(--ar-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+#accomplishmentCreateModal .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+#accomplishmentCreateModal .btn-cancel {
+    background: var(--ar-surface);
+    color: var(--ar-text);
+    border: 2px solid var(--ar-border);
+}
+
+#accomplishmentCreateModal .btn-cancel:hover {
+    background: var(--ar-background);
+    border-color: var(--ar-text-light);
+}
+
+#accomplishmentCreateModal .btn-primary {
+    background: var(--ar-primary);
+    color: white;
+    border: 2px solid var(--ar-primary);
+}
+
+#accomplishmentCreateModal .btn-primary:hover {
+    background: var(--ar-primary-light);
+    border-color: var(--ar-primary-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.3);
+}
+
+#accomplishmentCreateModal .btn-outline {
+    background: transparent;
+    color: var(--ar-primary);
+    border: 2px solid var(--ar-primary);
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+#accomplishmentCreateModal .btn-outline:hover {
+    background: var(--ar-primary);
+    color: white;
+}
+
+#accomplishmentCreateModal .btn.is-loading .btn-text {
+    opacity: 0;
+}
+
+#accomplishmentCreateModal .btn-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+#accomplishmentCreateModal .btn.is-loading .btn-loader {
+    opacity: 1;
+}
+
+#accomplishmentCreateModal .btn-loader svg {
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+#accomplishmentCreateModal .btn-loader circle {
+    stroke: currentColor;
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+    stroke-linecap: round;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Error Messages */
+#accomplishmentCreateModal .error-message {
+    color: var(--ar-error);
+    font-size: 0.85rem;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #accomplishmentCreateModal .modal-container {
+        width: 98%;
+        margin: 10px;
+        max-height: 95vh;
+    }
+
+    #accomplishmentCreateModal .form-body {
+        padding: 20px;
+        max-height: calc(95vh - 200px);
+    }
+
+    #accomplishmentCreateModal .form-columns {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    #accomplishmentCreateModal .attachment-inputs {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    #accomplishmentCreateModal .attachment-details {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    #accomplishmentCreateModal .attachments-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    #accomplishmentCreateModal .modal-footer {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+
+    #accomplishmentCreateModal .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    #accomplishmentCreateModal .modal-header {
+        padding: 20px;
+    }
+
+    #accomplishmentCreateModal .modal-header h2 {
+        font-size: 1.5rem;
+    }
+
+    #accomplishmentCreateModal .form-intro {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+
+    #accomplishmentCreateModal .file-upload-box {
+        padding: 24px;
+    }
+}
+
+/* Scrollbar Styling */
+#accomplishmentCreateModal .form-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+#accomplishmentCreateModal .form-body::-webkit-scrollbar-track {
+    background: var(--ar-background);
+}
+
+#accomplishmentCreateModal .form-body::-webkit-scrollbar-thumb {
+    background: var(--ar-border);
+    border-radius: 3px;
+}
+
+#accomplishmentCreateModal .form-body::-webkit-scrollbar-thumb:hover {
+    background: var(--ar-text-light);
+}
+
+/* Focus States for Accessibility */
+#accomplishmentCreateModal .form-input:focus-visible,
+#accomplishmentCreateModal .btn:focus-visible,
+#accomplishmentCreateModal .file-upload-box:focus-visible {
+    outline: 2px solid var(--ar-primary);
+    outline-offset: 2px;
+}
+
+/* Animation for new attachment fields */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#accomplishmentCreateModal .attachment-field {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* -------------------------------------------- Accomplishment View Modal --------------------------------------------*/
+/* Accomplishment View Modal Styles - Specific to #accomplishmentViewModal */
+#accomplishmentViewModal {
+    --ar-primary: #003366;
+    --ar-primary-light: #00478f;
+    --ar-primary-dark: #002244;
+    --ar-secondary: #4ecdc4;
+    --ar-accent: #ff6b6b;
+    --ar-surface: #ffffff;
+    --ar-background: #f8fafc;
+    --ar-border: #e2e8f0;
+    --ar-text: #2d3748;
+    --ar-text-light: #718096;
+    --ar-success: #48bb78;
+    --ar-error: #f56565;
+    --ar-warning: #ed8936;
+    --ar-info: #4299e1;
+    --ar-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --ar-gradient: linear-gradient(135deg, var(--ar-primary) 0%, var(--ar-primary-light) 100%);
+}
+
+#accomplishmentViewModal.modal.active {
+    display: flex;
+}
+
+#accomplishmentViewModal .modal-container {
+    background: var(--ar-surface);
+    border-radius: 16px;
+    box-shadow: var(--ar-shadow);
+    border: 1px solid var(--ar-border);
+    max-width: 1000px;
+    width: 95%;
+    max-height: 90vh;
+    overflow: hidden;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#accomplishmentViewModal.modal.active .modal-container {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+#accomplishmentViewModal .modal-header {
+    background: var(--ar-gradient);
+    color: white;
+    padding: 24px 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+#accomplishmentViewModal .modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(40%, -40%);
+}
+
+#accomplishmentViewModal .modal-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    position: relative;
+    z-index: 1;
+}
+
+#accomplishmentViewModal .header-description {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* Close Button - Specific to Accomplishment View Modal */
+#accomplishmentViewModal .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 10px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    color: white;
+}
+
+#accomplishmentViewModal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg) scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#accomplishmentViewModal .modal-close:active {
+    transform: rotate(90deg) scale(0.95);
+}
+
+#accomplishmentViewModal .modal-close svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    transition: transform 0.2s ease;
+}
+
+#accomplishmentViewModal .form-body {
+    padding: 0;
+    background: var(--ar-background);
+    max-height: calc(90vh - 140px);
+    overflow-y: auto;
+}
+
+/* Accomplishment Layout Container */
+#accomplishmentViewModal .accomplishment-layout-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Info Section */
+#accomplishmentViewModal .accomplishment-info-section {
+    padding: 24px 32px;
+    background: var(--ar-surface);
+    border-bottom: 1px solid var(--ar-border);
+}
+
+#accomplishmentViewModal .accomplishment-main-card {
+    background: transparent;
+    padding: 0;
+}
+
+#accomplishmentViewModal .accomplishment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--ar-border);
+}
+
+#accomplishmentViewModal .accomplishment-title-section h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ar-primary);
+    line-height: 1.3;
+}
+
+#accomplishmentViewModal .accomplishment-meta-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Badge Styles */
+#accomplishmentViewModal .accomplishment-type-badge,
+#accomplishmentViewModal .semester-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid transparent;
+}
+
+#accomplishmentViewModal .accomplishment-type-badge.type-event {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    color: #1976d2;
+    border-color: #90caf9;
+}
+#accomplishmentViewModal .accomplishment-type-badge.type-meeting {
+    background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+    color: #7b1fa2;
+    border-color: #ce93d8;
+}
+#accomplishmentViewModal .accomplishment-type-badge.type-training {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    color: #388e3c;
+    border-color: #a5d6a7;
+}
+#accomplishmentViewModal .accomplishment-type-badge.type-community {
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    color: #f57c00;
+    border-color: #ffb74d;
+}
+#accomplishmentViewModal .accomplishment-type-badge.type-achievement {
+    background: linear-gradient(135deg, #fff8e1, #ffecb3);
+    color: #ffa000;
+    border-color: #ffd54f;
+}
+#accomplishmentViewModal .accomplishment-type-badge.type-other {
+    background: linear-gradient(135deg, #f5f5f5, #eeeeee);
+    color: #616161;
+    border-color: #e0e0e0;
+}
+
+#accomplishmentViewModal .semester-badge.semester-1st {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    color: #1976d2;
+    border-color: #90caf9;
+}
+#accomplishmentViewModal .semester-badge.semester-2nd {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    color: #388e3c;
+    border-color: #a5d6a7;
+}
+#accomplishmentViewModal .semester-badge.semester-summer {
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    color: #f57c00;
+    border-color: #ffb74d;
+}
+
+#accomplishmentViewModal .date-conducted {
+    color: var(--ar-text-light);
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: var(--ar-background);
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--ar-border);
+}
+
+#accomplishmentViewModal .accomplishment-submitter-section {
+    text-align: right;
+    min-width: 200px;
+}
+
+#accomplishmentViewModal .submitter-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#accomplishmentViewModal .submitter-label {
+    font-size: 0.75rem;
+    color: var(--ar-text-light);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#accomplishmentViewModal .submitter-name {
+    font-weight: 700;
+    color: var(--ar-primary);
+    font-size: 1rem;
+}
+
+#accomplishmentViewModal .organization-name {
+    font-size: 0.875rem;
+    color: var(--ar-text);
+    font-style: italic;
+    background: var(--ar-background);
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+#accomplishmentViewModal .submit-date {
+    font-size: 0.75rem;
+    color: var(--ar-text-light);
+    margin-top: 2px;
+}
+
+/* Details Grid */
+#accomplishmentViewModal .accomplishment-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+#accomplishmentViewModal .details-group {
+    background: var(--ar-surface);
+    border: 2px solid var(--ar-border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+#accomplishmentViewModal .details-group:hover {
+    border-color: var(--ar-primary);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.1);
+    transform: translateY(-2px);
+}
+
+#accomplishmentViewModal .details-group-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ar-primary);
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--ar-border);
+}
+
+#accomplishmentViewModal .details-group-title i {
+    color: var(--ar-primary);
+    font-size: 1.2rem;
+}
+
+#accomplishmentViewModal .details-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#accomplishmentViewModal .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--ar-border);
+    transition: background-color 0.2s ease;
+}
+
+#accomplishmentViewModal .info-item:hover {
+    background: var(--ar-background);
+    margin: 0 -8px;
+    padding: 8px;
+    border-radius: 6px;
+    border-bottom-color: transparent;
+}
+
+#accomplishmentViewModal .info-item:last-child {
+    border-bottom: none;
+}
+
+#accomplishmentViewModal .info-label {
+    font-weight: 600;
+    color: var(--ar-text);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#accomplishmentViewModal .info-value {
+    font-weight: 700;
+    color: var(--ar-primary);
+    text-align: right;
+    font-size: 0.95rem;
+}
+
+/* Content Section */
+#accomplishmentViewModal .accomplishment-content-section {
+    padding: 24px 32px;
+    background: var(--ar-surface);
+    border-bottom: 1px solid var(--ar-border);
+}
+
+#accomplishmentViewModal .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+#accomplishmentViewModal .content-card {
+    background: var(--ar-surface);
+    border: 2px solid var(--ar-border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    height: fit-content;
+}
+
+#accomplishmentViewModal .content-card:hover {
+    border-color: var(--ar-primary);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.1);
+}
+
+#accomplishmentViewModal .content-card.full-width {
+    grid-column: 1 / -1;
+}
+
+#accomplishmentViewModal .content-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ar-primary);
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--ar-border);
+}
+
+#accomplishmentViewModal .content-title i {
+    color: var(--ar-primary);
+    font-size: 1.3rem;
+}
+
+#accomplishmentViewModal .content-text {
+    line-height: 1.7;
+    color: var(--ar-text);
+    font-size: 0.95rem;
+}
+
+#accomplishmentViewModal .content-text-inner {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 8px;
+    background: var(--ar-background);
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--ar-border);
+}
+
+#accomplishmentViewModal .content-text-inner::-webkit-scrollbar {
+    width: 6px;
+}
+
+#accomplishmentViewModal .content-text-inner::-webkit-scrollbar-track {
+    background: var(--ar-background);
+    border-radius: 3px;
+}
+
+#accomplishmentViewModal .content-text-inner::-webkit-scrollbar-thumb {
+    background: var(--ar-border);
+    border-radius: 3px;
+}
+
+#accomplishmentViewModal .content-text-inner::-webkit-scrollbar-thumb:hover {
+    background: var(--ar-text-light);
+}
+
+#accomplishmentViewModal .no-content-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--ar-text-light);
+    background: var(--ar-background);
+    border-radius: 8px;
+    border: 2px dashed var(--ar-border);
+}
+
+#accomplishmentViewModal .no-content-message i {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+#accomplishmentViewModal .no-content-message p {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* Files Section */
+#accomplishmentViewModal .accomplishment-files-section {
+    padding: 24px 32px;
+    background: var(--ar-surface);
+}
+
+#accomplishmentViewModal .files-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+#accomplishmentViewModal .files-section {
+    background: var(--ar-surface);
+    border: 2px solid var(--ar-border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+#accomplishmentViewModal .files-section:hover {
+    border-color: var(--ar-primary);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.1);
+}
+
+#accomplishmentViewModal .files-section .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ar-primary);
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--ar-border);
+}
+
+#accomplishmentViewModal .files-count {
+    background: var(--ar-primary);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: auto;
+}
+
+/* Main Report File */
+#accomplishmentViewModal .file-item-content.main-report-file {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--ar-background), #f1f5f9);
+    border-radius: 12px;
+    border: 2px solid var(--ar-border);
+    transition: all 0.3s ease;
+}
+
+#accomplishmentViewModal .file-item-content.main-report-file:hover {
+    border-color: var(--ar-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 51, 102, 0.15);
+}
+
+#accomplishmentViewModal .file-icon {
+    font-size: 2rem;
+    color: var(--ar-error);
+    background: rgba(245, 101, 101, 0.1);
+    padding: 12px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#accomplishmentViewModal .file-info {
+    flex: 1;
+}
+
+#accomplishmentViewModal .file-name {
+    font-weight: 700;
+    color: var(--ar-primary);
+    margin-bottom: 6px;
+    font-size: 1rem;
+}
+
+#accomplishmentViewModal .file-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: var(--ar-text-light);
+}
+
+#accomplishmentViewModal .file-type {
+    background: var(--ar-primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.7rem;
+}
+
+#accomplishmentViewModal .file-download-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--ar-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid var(--ar-primary);
+}
+
+#accomplishmentViewModal .file-download-btn:hover {
+    background: var(--ar-primary-light);
+    border-color: var(--ar-primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.3);
+}
+
+/* Supporting Files */
+#accomplishmentViewModal .supporting-files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+#accomplishmentViewModal .supporting-files-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+#accomplishmentViewModal .supporting-files-list::-webkit-scrollbar-track {
+    background: var(--ar-background);
+    border-radius: 3px;
+}
+
+#accomplishmentViewModal .supporting-files-list::-webkit-scrollbar-thumb {
+    background: var(--ar-border);
+    border-radius: 3px;
+}
+
+#accomplishmentViewModal .supporting-files-list::-webkit-scrollbar-thumb:hover {
+    background: var(--ar-text-light);
+}
+
+#accomplishmentViewModal .supporting-file-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--ar-background);
+    border-radius: 10px;
+    border: 2px solid var(--ar-border);
+    transition: all 0.3s ease;
+}
+
+#accomplishmentViewModal .supporting-file-item:hover {
+    border-color: var(--ar-primary);
+    background: var(--ar-surface);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.1);
+}
+
+#accomplishmentViewModal .supporting-file-item .file-icon {
+    font-size: 1.5rem;
+    color: var(--ar-info);
+    background: rgba(66, 153, 225, 0.1);
+    padding: 8px;
+    border-radius: 8px;
+}
+
+#accomplishmentViewModal .supporting-file-item .file-info {
+    flex: 1;
+}
+
+#accomplishmentViewModal .supporting-file-item .file-name {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+#accomplishmentViewModal .supporting-file-item .file-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+#accomplishmentViewModal .supporting-file-item .file-description {
+    font-style: italic;
+    color: var(--ar-text);
+    font-size: 0.8rem;
+}
+
+#accomplishmentViewModal .file-download {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: var(--ar-primary);
+    border-radius: 8px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid var(--ar-primary);
+}
+
+#accomplishmentViewModal .file-download:hover {
+    background: var(--ar-primary-light);
+    border-color: var(--ar-primary-light);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.3);
+}
+
+/* Empty States */
+#accomplishmentViewModal .no-file-message,
+#accomplishmentViewModal .no-files-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--ar-text-light);
+    background: var(--ar-background);
+    border-radius: 12px;
+    border: 2px dashed var(--ar-border);
+}
+
+#accomplishmentViewModal .no-file-message i,
+#accomplishmentViewModal .no-files-message i {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+#accomplishmentViewModal .no-files-subtext {
+    font-size: 0.85rem;
+    margin-top: 4px;
+    opacity: 0.7;
+}
+
+/* Modal Footer */
+#accomplishmentViewModal .modal-footer {
+    padding: 20px 32px;
+    background: var(--ar-surface);
+    border-top: 1px solid var(--ar-border);
+    display: flex;
+    justify-content: flex-end;
+}
+
+#accomplishmentViewModal .btn-close-modal {
+    padding: 12px 32px;
+    background: var(--ar-primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid var(--ar-primary);
+}
+
+#accomplishmentViewModal .btn-close-modal:hover {
+    background: var(--ar-primary-light);
+    border-color: var(--ar-primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 51, 102, 0.3);
+}
+
+#accomplishmentViewModal .btn-close-modal:active {
+    transform: translateY(0);
+}
+
+/* Loading Overlay */
+#accomplishmentViewModal .modal-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 16px;
+}
+
+#accomplishmentViewModal .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--ar-border);
+    border-top: 4px solid var(--ar-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 12px;
+}
+
+#accomplishmentViewModal .loading-text {
+    color: var(--ar-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    #accomplishmentViewModal .modal-container {
+        max-width: 95%;
+        margin: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    #accomplishmentViewModal .modal-container {
+        width: 98%;
+        margin: 10px;
+        max-height: 95vh;
+    }
+
+    #accomplishmentViewModal .form-body {
+        max-height: calc(95vh - 140px);
+    }
+
+    #accomplishmentViewModal .accomplishment-header {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    #accomplishmentViewModal .accomplishment-submitter-section {
+        text-align: center;
+        width: 100%;
+    }
+
+    #accomplishmentViewModal .accomplishment-details-grid,
+    #accomplishmentViewModal .content-grid,
+    #accomplishmentViewModal .files-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    #accomplishmentViewModal .accomplishment-info-section,
+    #accomplishmentViewModal .accomplishment-content-section,
+    #accomplishmentViewModal .accomplishment-files-section {
+        padding: 20px;
+    }
+
+    #accomplishmentViewModal .file-item-content.main-report-file {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+
+    #accomplishmentViewModal .file-meta {
+        justify-content: center;
+    }
+
+    #accomplishmentViewModal .modal-footer {
+        padding: 16px 20px;
+    }
+
+    #accomplishmentViewModal .btn-close-modal {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    #accomplishmentViewModal .modal-header {
+        padding: 20px;
+    }
+
+    #accomplishmentViewModal .modal-header h2 {
+        font-size: 1.5rem;
+    }
+
+    #accomplishmentViewModal .accomplishment-title-section h3 {
+        font-size: 1.3rem;
+    }
+
+    #accomplishmentViewModal .accomplishment-meta-info {
+        justify-content: center;
+    }
+
+    #accomplishmentViewModal .details-group,
+    #accomplishmentViewModal .content-card,
+    #accomplishmentViewModal .files-section {
+        padding: 16px;
+    }
+}
+
+/* Scrollbar Styling */
+#accomplishmentViewModal .form-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+#accomplishmentViewModal .form-body::-webkit-scrollbar-track {
+    background: var(--ar-background);
+}
+
+#accomplishmentViewModal .form-body::-webkit-scrollbar-thumb {
+    background: var(--ar-border);
+    border-radius: 4px;
+}
+
+#accomplishmentViewModal .form-body::-webkit-scrollbar-thumb:hover {
+    background: var(--ar-text-light);
+}
+
+/* Focus States for Accessibility */
+#accomplishmentViewModal .modal-close:focus-visible,
+#accomplishmentViewModal .btn-close-modal:focus-visible,
+#accomplishmentViewModal .file-download-btn:focus-visible,
+#accomplishmentViewModal .file-download:focus-visible {
+    outline: 3px solid var(--ar-primary);
+    outline-offset: 2px;
+}
+
+/* Animation for modal content */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#accomplishmentViewModal .accomplishment-info-section,
+#accomplishmentViewModal .accomplishment-content-section,
+#accomplishmentViewModal .accomplishment-files-section {
+    animation: slideInUp 0.5s ease-out;
+}
+
+#accomplishmentViewModal .accomplishment-content-section {
+    animation-delay: 0.1s;
+    animation-fill-mode: both;
+}
+
+#accomplishmentViewModal .accomplishment-files-section {
+    animation-delay: 0.2s;
+    animation-fill-mode: both;
+}
+
+/* -------------------------------------------- Accomplishment Edit Modal --------------------------------------------*/
+/* Modern CSS for Accomplishment Report Edit Modal */
+#accomplishmentEditModal {
+    --ar-primary: #003366;
+    --ar-primary-light: #00478f;
+    --ar-primary-dark: #002244;
+    --ar-secondary: #4ecdc4;
+    --ar-accent: #ff6b6b;
+    --ar-surface: #ffffff;
+    --ar-background: #f8fafc;
+    --ar-border: #e2e8f0;
+    --ar-text: #2d3748;
+    --ar-text-light: #718096;
+    --ar-success: #48bb78;
+    --ar-error: #f56565;
+    --ar-warning: #ed8936;
+    --ar-info: #4299e1;
+    --ar-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --ar-gradient: linear-gradient(135deg, var(--ar-primary) 0%, var(--ar-primary-light) 100%);
+    --ar-shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+#accomplishmentEditModal.modal.active {
+    display: flex;
+}
+
+#accomplishmentEditModal .modal-container {
+    background: var(--ar-surface);
+    border-radius: 20px;
+    box-shadow: var(--ar-shadow-lg);
+    border: 1px solid var(--ar-border);
+    max-width: 950px;
+    width: 95%;
+    max-height: 92vh;
+    overflow: hidden;
+    transform: translateY(25px) scale(0.98);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#accomplishmentEditModal.modal.active .modal-container {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+#accomplishmentEditModal .modal-header {
+    background: var(--ar-gradient);
+    color: white;
+    padding: 28px 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+#accomplishmentEditModal .modal-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border-radius: 50%;
+    transform: rotate(25deg);
+}
+
+#accomplishmentEditModal .modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -5%;
+    width: 150px;
+    height: 150px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border-radius: 50%;
+    transform: rotate(-15deg);
+}
+
+#accomplishmentEditModal .modal-header h2 {
+    font-size: 1.9rem;
+    font-weight: 800;
+    margin: 0 0 10px 0;
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+#accomplishmentEditModal .header-description {
+    font-size: 1.05rem;
+    opacity: 0.95;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+}
+
+#accomplishmentEditModal .modal-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border: none;
+    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+#accomplishmentEditModal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+#accomplishmentEditModal .modal-close:active {
+    transform: rotate(90deg) scale(0.95);
+}
+
+#accomplishmentEditModal .modal-close svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    stroke-width: 2.8;
+    transition: transform 0.2s ease;
+}
+
+#accomplishmentEditModal .form-body {
+    padding: 0;
+    background: linear-gradient(135deg, var(--ar-background) 0%, #f1f5f9 100%);
+    max-height: calc(92vh - 180px);
+    overflow-y: auto;
+}
+
+/* Form Intro */
+#accomplishmentEditModal .form-intro {
+    background: var(--ar-surface);
+    border: 1px solid var(--ar-border);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 32px 40px 28px;
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.05);
+    border-left: 4px solid var(--ar-primary);
+}
+
+#accomplishmentEditModal .form-intro svg {
+    flex-shrink: 0;
+    margin-top: 4px;
+    color: var(--ar-primary);
+    filter: drop-shadow(0 2px 4px rgba(0, 51, 102, 0.2));
+}
+
+#accomplishmentEditModal .form-intro p {
+    margin: 0;
+    color: var(--ar-text);
+    line-height: 1.7;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+#accomplishmentEditModal .required-asterisk {
+    color: var(--ar-error);
+    font-weight: 700;
+    font-size: 1.1em;
+}
+
+/* Form Response */
+#accomplishmentEditModal .form-response {
+    margin: 0 40px 28px;
+}
+
+#accomplishmentEditModal .response-message {
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid transparent;
+}
+
+#accomplishmentEditModal .response-success {
+    background: linear-gradient(135deg, rgba(72, 187, 120, 0.12) 0%, rgba(72, 187, 120, 0.06) 100%);
+    border-color: rgba(72, 187, 120, 0.3);
+    color: #1f6d3d;
+}
+
+#accomplishmentEditModal .response-error {
+    background: linear-gradient(135deg, rgba(245, 101, 101, 0.12) 0%, rgba(245, 101, 101, 0.06) 100%);
+    border-color: rgba(245, 101, 101, 0.3);
+    color: #c42a2a;
+}
+
+/* Form Sections */
+#accomplishmentEditModal .form-section {
+    background: var(--ar-surface);
+    border-radius: 16px;
+    padding: 32px 40px;
+    margin: 0 40px 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--ar-border);
+    transition: all 0.3s ease;
+}
+
+#accomplishmentEditModal .form-section:hover {
+    box-shadow: 0 6px 24px rgba(0, 51, 102, 0.1);
+    border-color: var(--ar-primary-light);
+    transform: translateY(-2px);
+}
+
+#accomplishmentEditModal .section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 28px 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--ar-primary);
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--ar-border);
+    position: relative;
+}
+
+#accomplishmentEditModal .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: var(--ar-primary);
+    border-radius: 2px;
+}
+
+#accomplishmentEditModal .section-title i {
+    color: var(--ar-primary);
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, var(--ar-primary) 0%, var(--ar-primary-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Form Columns */
+#accomplishmentEditModal .form-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-bottom: 8px;
+}
+
+/* Form Groups */
+#accomplishmentEditModal .form-group {
+    margin-bottom: 24px;
+    position: relative;
+}
+
+#accomplishmentEditModal label {
+    display: block;
+    font-weight: 700;
+    color: var(--ar-text);
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+    text-transform: none;
+}
+
+#accomplishmentEditModal .form-input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid var(--ar-border);
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--ar-surface);
+    color: var(--ar-text);
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+#accomplishmentEditModal .form-input:focus {
+    outline: none;
+    border-color: var(--ar-primary);
+    box-shadow: 0 0 0 4px rgba(0, 51, 102, 0.15), 0 4px 12px rgba(0, 51, 102, 0.1);
+    transform: translateY(-1px);
+}
+
+#accomplishmentEditModal .form-input:hover {
+    border-color: #cbd5e0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+#accomplishmentEditModal .form-input.error {
+    border-color: var(--ar-error);
+    box-shadow: 0 0 0 4px rgba(245, 101, 101, 0.15), 0 4px 12px rgba(245, 101, 101, 0.1);
+    background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+}
+
+#accomplishmentEditModal textarea.form-input {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+    font-family: inherit;
+}
+
+#accomplishmentEditModal .form-help {
+    color: var(--ar-text-light);
+    font-size: 0.85rem;
+    margin-top: 8px;
+    display: block;
+    font-style: italic;
+    line-height: 1.5;
+}
+
+/* File Upload Styles */
+#accomplishmentEditModal .file-upload-container {
+    margin-top: 12px;
+}
+
+#accomplishmentEditModal .file-upload-box {
+    border: 2px dashed var(--ar-border);
+    border-radius: 14px;
+    padding: 36px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--ar-surface);
+    position: relative;
+    overflow: hidden;
+}
+
+#accomplishmentEditModal .file-upload-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--ar-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+#accomplishmentEditModal .file-upload-box:hover {
+    border-color: var(--ar-primary);
+    background: linear-gradient(135deg, rgba(0, 51, 102, 0.02) 0%, rgba(0, 51, 102, 0.01) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 51, 102, 0.12);
+}
+
+#accomplishmentEditModal .file-upload-box:hover::before {
+    transform: scaleX(1);
+}
+
+#accomplishmentEditModal .file-upload-box.dragover {
+    border-color: var(--ar-primary);
+    background: linear-gradient(135deg, rgba(0, 51, 102, 0.08) 0%, rgba(0, 51, 102, 0.04) 100%);
+    transform: scale(1.02);
+}
+
+#accomplishmentEditModal .file-upload-box.small {
+    padding: 20px;
+    margin-bottom: 12px;
+}
+
+#accomplishmentEditModal .file-upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    color: var(--ar-text-light);
+}
+
+#accomplishmentEditModal .file-upload-content i {
+    font-size: 3rem;
+    color: var(--ar-primary);
+    filter: drop-shadow(0 4px 8px rgba(0, 51, 102, 0.2));
+}
+
+#accomplishmentEditModal .file-upload-content p {
+    margin: 0;
+    font-weight: 700;
+    color: var(--ar-text);
+    font-size: 1.1rem;
+}
+
+#accomplishmentEditModal .file-upload-content small {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+#accomplishmentEditModal .file-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 14px;
+    padding: 16px 20px;
+    background: var(--ar-surface);
+    border: 1px solid var(--ar-border);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+}
+
+#accomplishmentEditModal .file-info:hover {
+    border-color: var(--ar-primary);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.1);
+}
+
+#accomplishmentEditModal .file-info.small {
+    padding: 12px 16px;
+    margin-top: 10px;
+}
+
+#accomplishmentEditModal .file-name {
+    flex: 1;
+    font-weight: 600;
+    color: var(--ar-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.95rem;
+}
+
+#accomplishmentEditModal .file-size {
+    color: var(--ar-text-light);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+#accomplishmentEditModal .file-count {
+    background: var(--ar-primary);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-left: 8px;
+}
+
+#accomplishmentEditModal .file-remove {
+    background: none;
+    border: none;
+    color: var(--ar-error);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#accomplishmentEditModal .file-remove:hover {
+    background: rgba(245, 101, 101, 0.1);
+    transform: scale(1.1);
+}
+
+/* Current Files Display */
+#accomplishmentEditModal .current-file-display,
+#accomplishmentEditModal .current-attachments {
+    margin-top: 8px;
+}
+
+#accomplishmentEditModal .current-file-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    background: linear-gradient(135deg, var(--ar-background) 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 2px solid var(--ar-border);
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+#accomplishmentEditModal .current-file-item:hover {
+    border-color: var(--ar-primary);
+    box-shadow: 0 4px 16px rgba(0, 51, 102, 0.12);
+    transform: translateY(-2px);
+}
+
+#accomplishmentEditModal .current-file-item.main-report {
+    background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+    border-color: rgba(245, 101, 101, 0.3);
+}
+
+#accomplishmentEditModal .current-file-item.supporting-file {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-color: rgba(66, 153, 225, 0.3);
+}
+
+#accomplishmentEditModal .file-icon {
+    font-size: 2rem;
+    color: var(--ar-primary);
+    background: rgba(0, 51, 102, 0.1);
+    padding: 12px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+#accomplishmentEditModal .current-file-item.main-report .file-icon {
+    color: var(--ar-error);
+    background: rgba(245, 101, 101, 0.1);
+}
+
+#accomplishmentEditModal .current-file-item.supporting-file .file-icon {
+    color: var(--ar-info);
+    background: rgba(66, 153, 225, 0.1);
+}
+
+#accomplishmentEditModal .file-details {
+    flex: 1;
+}
+
+#accomplishmentEditModal .file-name {
+    font-weight: 700;
+    color: var(--ar-primary);
+    margin-bottom: 6px;
+    font-size: 1rem;
+}
+
+#accomplishmentEditModal .file-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: var(--ar-text-light);
+    flex-wrap: wrap;
+}
+
+#accomplishmentEditModal .file-description {
+    font-style: italic;
+    color: var(--ar-text);
+    font-size: 0.9rem;
+    margin-top: 4px;
+}
+
+#accomplishmentEditModal .file-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+#accomplishmentEditModal .file-download,
+#accomplishmentEditModal .file-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+#accomplishmentEditModal .file-download {
+    background: var(--ar-primary);
+    color: white;
+}
+
+#accomplishmentEditModal .file-download:hover {
+    background: var(--ar-primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.3);
+}
+
+#accomplishmentEditModal .file-remove {
+    background: var(--ar-error);
+    color: white;
+}
+
+#accomplishmentEditModal .file-remove:hover {
+    background: #e53e3e;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+}
+
+/* Current Files List */
+#accomplishmentEditModal .current-files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* No File Messages */
+#accomplishmentEditModal .no-file-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--ar-text-light);
+    background: var(--ar-background);
+    border-radius: 12px;
+    border: 2px dashed var(--ar-border);
+    transition: all 0.3s ease;
+}
+
+#accomplishmentEditModal .no-file-message:hover {
+    border-color: var(--ar-primary);
+    background: linear-gradient(135deg, rgba(0, 51, 102, 0.02) 0%, rgba(0, 51, 102, 0.01) 100%);
+}
+
+#accomplishmentEditModal .no-file-message i {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+#accomplishmentEditModal .file-removed-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+    border: 1px solid rgba(245, 101, 101, 0.3);
+    border-radius: 10px;
+    color: var(--ar-error);
+    font-weight: 600;
+}
+
+/* Submission Info Section */
+#accomplishmentEditModal .submission-info-section {
+    background: linear-gradient(135deg, var(--ar-background) 0%, #f1f5f9 100%);
+    border-radius: 16px;
+    padding: 28px 40px;
+    margin: 0 40px 32px;
+    margin-bottom: 70px;
+    border: 1px solid var(--ar-border);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+#accomplishmentEditModal .info-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 20px 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--ar-primary);
+}
+
+#accomplishmentEditModal .info-title i {
+    color: var(--ar-primary);
+    font-size: 1.4rem;
+}
+
+#accomplishmentEditModal .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+#accomplishmentEditModal .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--ar-border);
+}
+
+#accomplishmentEditModal .info-item:last-child {
+    border-bottom: none;
+}
+
+#accomplishmentEditModal .info-label {
+    font-weight: 600;
+    color: var(--ar-text);
+    font-size: 0.9rem;
+}
+
+#accomplishmentEditModal .info-value {
+    font-weight: 700;
+    color: var(--ar-primary);
+    text-align: right;
+    font-size: 0.95rem;
+}
+
+/* Modal Footer */
+#accomplishmentEditModal .modal-footer {
+    padding: 24px 40px;
+    background: var(--ar-surface);
+    border-top: 1px solid var(--ar-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+}
+
+#accomplishmentEditModal .btn {
+    padding: 14px 32px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.3px;
+}
+
+#accomplishmentEditModal .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+#accomplishmentEditModal .btn:hover::before {
+    left: 100%;
+}
+
+#accomplishmentEditModal .btn-cancel {
+    background: var(--ar-surface);
+    color: var(--ar-text);
+    border: 2px solid var(--ar-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+#accomplishmentEditModal .btn-cancel:hover {
+    background: var(--ar-background);
+    border-color: var(--ar-text-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+#accomplishmentEditModal .btn-primary {
+    background: var(--ar-primary);
+    color: white;
+    border: 2px solid var(--ar-primary);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.25);
+}
+
+#accomplishmentEditModal .btn-primary:hover {
+    background: var(--ar-primary-light);
+    border-color: var(--ar-primary-light);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 51, 102, 0.4);
+}
+
+#accomplishmentEditModal .btn.is-loading .btn-text {
+    opacity: 0;
+}
+
+#accomplishmentEditModal .btn-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+#accomplishmentEditModal .btn.is-loading .btn-loader {
+    opacity: 1;
+}
+
+#accomplishmentEditModal .btn-loader svg {
+    width: 22px;
+    height: 22px;
+    animation: spin 1s linear infinite;
+}
+
+#accomplishmentEditModal .btn-loader circle {
+    stroke: currentColor;
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+    stroke-linecap: round;
+}
+
+/* Error Messages */
+#accomplishmentEditModal .error-message {
+    color: var(--ar-error);
+    font-size: 0.9rem;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    padding: 8px 12px;
+    background: rgba(245, 101, 101, 0.08);
+    border-radius: 6px;
+    border-left: 3px solid var(--ar-error);
+}
+
+/* Loading Overlay */
+#accomplishmentEditModal .modal-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 20px;
+}
+
+#accomplishmentEditModal .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--ar-border);
+    border-top: 4px solid var(--ar-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.15);
+}
+
+#accomplishmentEditModal .loading-text {
+    color: var(--ar-primary);
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    #accomplishmentEditModal .modal-container {
+        max-width: 90%;
+        margin: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    #accomplishmentEditModal .modal-container {
+        width: 95%;
+        margin: 20px;
+        max-height: 95vh;
+    }
+
+    #accomplishmentEditModal .form-body {
+        max-height: calc(95vh - 160px);
+    }
+
+    #accomplishmentEditModal .modal-header {
+        padding: 24px;
+    }
+
+    #accomplishmentEditModal .form-section,
+    #accomplishmentEditModal .form-intro,
+    #accomplishmentEditModal .form-response,
+    #accomplishmentEditModal .submission-info-section {
+        margin: 0 24px 30px;
+        padding: 24px;
+    }
+
+    #accomplishmentEditModal .form-columns {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    #accomplishmentEditModal .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #accomplishmentEditModal .modal-footer {
+        padding: 20px 24px;
+        flex-direction: column-reverse;
+        gap: 12px;
+    }
+
+    #accomplishmentEditModal .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    #accomplishmentEditModal .current-file-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+
+    #accomplishmentEditModal .file-actions {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    #accomplishmentEditModal .modal-header {
+        padding: 20px;
+    }
+
+    #accomplishmentEditModal .modal-header h2 {
+        font-size: 1.6rem;
+    }
+
+    #accomplishmentEditModal .form-section,
+    #accomplishmentEditModal .form-intro,
+    #accomplishmentEditModal .form-response,
+    #accomplishmentEditModal .submission-info-section {
+        margin: 0 16px 16px;
+        padding: 20px;
+    }
+
+    #accomplishmentEditModal .file-upload-box {
+        padding: 24px;
+    }
+
+    #accomplishmentEditModal .file-upload-box.small {
+        padding: 16px;
+    }
+}
+
+/* Scrollbar Styling */
+#accomplishmentEditModal .form-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+#accomplishmentEditModal .form-body::-webkit-scrollbar-track {
+    background: var(--ar-background);
+    border-radius: 4px;
+}
+
+#accomplishmentEditModal .form-body::-webkit-scrollbar-thumb {
+    background: var(--ar-border);
+    border-radius: 4px;
+}
+
+#accomplishmentEditModal .form-body::-webkit-scrollbar-thumb:hover {
+    background: var(--ar-text-light);
+}
+
+/* Focus States for Accessibility */
+#accomplishmentEditModal .form-input:focus-visible,
+#accomplishmentEditModal .btn:focus-visible,
+#accomplishmentEditModal .file-upload-box:focus-visible,
+#accomplishmentEditModal .file-download:focus-visible,
+#accomplishmentEditModal .file-remove:focus-visible {
+    outline: 3px solid var(--ar-primary);
+    outline-offset: 2px;
+}
+
+/* Animations */
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#accomplishmentEditModal .form-section {
+    animation: slideInUp 0.6s ease-out;
+}
+
+#accomplishmentEditModal .form-section:nth-child(1) { animation-delay: 0.1s; }
+#accomplishmentEditModal .form-section:nth-child(2) { animation-delay: 0.2s; }
+#accomplishmentEditModal .form-section:nth-child(3) { animation-delay: 0.3s; }
+#accomplishmentEditModal .form-section:nth-child(4) { animation-delay: 0.4s; }
+#accomplishmentEditModal .form-section:nth-child(5) { animation-delay: 0.5s; }
+
+/* Organization Section Specific */
+#accomplishmentEditModal #editOrganizationSection {
+    background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+    border-color: rgba(72, 187, 120, 0.3);
+}
+
+#accomplishmentEditModal #editOrganizationSection .section-title {
+    color: #2f855a;
+}
+
+#accomplishmentEditModal #editOrganizationSection .section-title::after {
+    background: #2f855a;
+}
+
+/* Enhanced transitions for better UX */
+#accomplishmentEditModal * {
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* ------------------------------------- Accomplishment Report Archive Modal ---------------------------------------- */
+/* Archive Modal Specific Styles */
+#accomplishmentArchiveModal {
+    --ar-primary: #003366;
+    --ar-primary-light: #00478f;
+    --ar-primary-dark: #002244;
+    --ar-secondary: #4ecdc4;
+    --ar-accent: #ff6b6b;
+    --ar-surface: #ffffff;
+    --ar-background: #f8fafc;
+    --ar-border: #e2e8f0;
+    --ar-text: #2d3748;
+    --ar-text-light: #718096;
+    --ar-success: #48bb78;
+    --ar-error: #f56565;
+    --ar-warning: #ed8936;
+    --ar-archive: #6f42c1;
+    --ar-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --ar-gradient: linear-gradient(135deg, var(--ar-primary) 0%, var(--ar-primary-light) 100%);
+    --ar-archive-gradient: linear-gradient(135deg, #6f42c1 0%, #8c68d6 100%);
+}
+
+#accomplishmentArchiveModal.modal.active {
+    display: flex;
+}
+
+#accomplishmentArchiveModal .modal-container {
+    background: var(--ar-primary);
+    border-radius: 16px;
+    box-shadow: var(--ar-shadow);
+    border: 1px solid var(--ar-border);
+    max-width: 800px;
+    width: 95%;
+    max-height: 90vh;
+    overflow: hidden;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#accomplishmentArchiveModal.modal.active .modal-container {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+#accomplishmentArchiveModal .modal-header {
+    background: var(--ar-primary);
+    color: white;
+    padding: 24px 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+#accomplishmentArchiveModal .modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(40%, -40%);
+}
+
+#accomplishmentArchiveModal .modal-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    position: relative;
+    z-index: 1;
+}
+
+#accomplishmentArchiveModal .header-description {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+#accomplishmentArchiveModal .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+#accomplishmentArchiveModal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+/* Form Body */
+#accomplishmentArchiveModal .form-body {
+    padding: 0;
+    background: var(--ar-background);
+    max-height: calc(90vh - 140px);
+    overflow-y: auto;
+}
+
+/* Form Intro */
+#accomplishmentArchiveModal .form-intro {
+    background: var(--ar-surface);
+    border: 1px solid var(--ar-border);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 24px 32px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    border-left: 4px solid var(--ar-warning);
+}
+
+#accomplishmentArchiveModal .form-intro svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+#accomplishmentArchiveModal .form-intro p {
+    margin: 0;
+    color: var(--ar-text);
+    line-height: 1.6;
+    font-weight: 500;
+}
+
+/* Section Titles */
+#accomplishmentArchiveModal .section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 16px 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ar-primary);
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--ar-border);
+}
+
+#accomplishmentArchiveModal .section-title i {
+    color: var(--ar-primary);
+    font-size: 1.3rem;
+}
+
+#accomplishmentArchiveModal .warning-title {
+    color: var(--ar-warning);
+}
+
+#accomplishmentArchiveModal .warning-title i {
+    color: var(--ar-warning);
+}
+
+/* Report Preview Section */
+#accomplishmentArchiveModal .report-preview-section {
+    padding: 0 32px 24px;
+}
+
+#accomplishmentArchiveModal .report-preview-card {
+    background: var(--ar-surface);
+    border: 2px solid var(--ar-border);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+#accomplishmentArchiveModal .report-preview-card:hover {
+    border-color: var(--ar-primary);
+    box-shadow: 0 4px 16px rgba(0, 51, 102, 0.1);
+}
+
+#accomplishmentArchiveModal .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--ar-border);
+}
+
+#accomplishmentArchiveModal .preview-title {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--ar-primary);
+    line-height: 1.4;
+    flex: 1;
+}
+
+#accomplishmentArchiveModal .preview-badges {
+    display: flex;
+    gap: 8px;
+    margin-left: 16px;
+}
+
+/* Badge Styles */
+#accomplishmentArchiveModal .type-badge,
+#accomplishmentArchiveModal .semester-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid transparent;
+}
+
+#accomplishmentArchiveModal .type-badge {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    color: #1976d2;
+    border-color: #90caf9;
+}
+
+#accomplishmentArchiveModal .semester-badge {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    color: #388e3c;
+    border-color: #a5d6a7;
+}
+
+/* Preview Grid Layout */
+#accomplishmentArchiveModal .preview-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+#accomplishmentArchiveModal .preview-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#accomplishmentArchiveModal .preview-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--ar-border);
+}
+
+#accomplishmentArchiveModal .preview-item:last-child {
+    border-bottom: none;
+}
+
+#accomplishmentArchiveModal .preview-item.full-width {
+    grid-column: 1 / -1;
+}
+
+#accomplishmentArchiveModal .preview-label {
+    font-weight: 600;
+    color: var(--ar-text);
+    font-size: 0.9rem;
+}
+
+#accomplishmentArchiveModal .preview-value {
+    font-weight: 700;
+    color: var(--ar-primary);
+    text-align: right;
+    font-size: 0.95rem;
+}
+
+#accomplishmentArchiveModal .file-value {
+    color: var(--ar-text);
+    font-weight: 600;
+}
+
+/* Academic Info Section */
+#accomplishmentArchiveModal .academic-info-section {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--ar-background) 0%, #f1f5f9 100%);
+    border-radius: 8px;
+    border: 1px solid var(--ar-border);
+}
+
+/* Description Preview */
+#accomplishmentArchiveModal .description-preview-section {
+    margin-bottom: 20px;
+}
+
+#accomplishmentArchiveModal .preview-description-content {
+    margin-top: 8px;
+    padding: 16px;
+    background: var(--ar-background);
+    border: 1px solid var(--ar-border);
+    border-radius: 8px;
+    line-height: 1.6;
+    color: var(--ar-text);
+    max-height: 120px;
+    overflow-y: auto;
+    font-size: 0.9rem;
+}
+
+/* Files Preview */
+#accomplishmentArchiveModal .files-preview-section {
+    margin-top: 16px;
+}
+
+#accomplishmentArchiveModal .files-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+#accomplishmentArchiveModal .file-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--ar-background);
+    border-radius: 8px;
+    border: 1px solid var(--ar-border);
+}
+
+/* Form Section */
+#accomplishmentArchiveModal .form-section {
+    padding: 0 32px 24px;
+}
+
+#accomplishmentArchiveModal .form-group {
+    margin-bottom: 0;
+}
+
+#accomplishmentArchiveModal .form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--ar-text);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+#accomplishmentArchiveModal .label-optional {
+    color: var(--ar-text-light);
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+
+#accomplishmentArchiveModal .form-textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--ar-border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background: var(--ar-surface);
+    color: var(--ar-text);
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+#accomplishmentArchiveModal .form-textarea:focus {
+    outline: none;
+    border-color: var(--ar-primary);
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+}
+
+#accomplishmentArchiveModal .form-textarea:hover {
+    border-color: #cbd5e0;
+}
+
+#accomplishmentArchiveModal .form-helper {
+    color: var(--ar-text-light);
+    font-size: 0.85rem;
+    margin-top: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Archive Impact Section */
+#accomplishmentArchiveModal .archive-impact-section {
+    padding: 0 32px 24px;
+}
+
+#accomplishmentArchiveModal .impact-warning-card {
+    background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+    border: 2px solid rgba(245, 101, 101, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+#accomplishmentArchiveModal .impact-summary {
+    margin: 0 0 16px 0;
+    font-weight: 600;
+    color: var(--ar-error);
+}
+
+#accomplishmentArchiveModal .impact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+}
+
+#accomplishmentArchiveModal .impact-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    color: var(--ar-text);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+#accomplishmentArchiveModal .impact-list li i {
+    color: var(--ar-error);
+    font-size: 1.1rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+#accomplishmentArchiveModal .organization-impact {
+    margin-top: 16px;
+}
+
+#accomplishmentArchiveModal .impact-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(66, 153, 225, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(66, 153, 225, 0.2);
+}
+
+#accomplishmentArchiveModal .impact-notice i {
+    color: var(--ar-info);
+    font-size: 1.2rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+#accomplishmentArchiveModal .impact-notice-content {
+    color: var(--ar-text);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Form Response */
+#accomplishmentArchiveModal .form-response {
+    margin: 0 32px 24px;
+}
+
+/* Modal Footer */
+#accomplishmentArchiveModal .modal-footer {
+    padding: 20px 32px;
+    background: var(--ar-surface);
+    border-top: 1px solid var(--ar-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+#accomplishmentArchiveModal .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+#accomplishmentArchiveModal .btn-cancel {
+    background: var(--ar-surface);
+    color: var(--ar-text);
+    border: 2px solid var(--ar-border);
+}
+
+#accomplishmentArchiveModal .btn-cancel:hover {
+    background: var(--ar-background);
+    border-color: var(--ar-text-light);
+}
+
+#accomplishmentArchiveModal .btn-warning {
+    background: var(--ar-primary);
+    color: white;
+    border: 2px solid var(--ar-archive);
+}
+
+#accomplishmentArchiveModal .btn-warning:hover {
+    background: #5a32a3;
+    border-color: #5a32a3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+}
+
+#accomplishmentArchiveModal .btn.is-loading .btn-text {
+    opacity: 0;
+}
+
+#accomplishmentArchiveModal .btn-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+#accomplishmentArchiveModal .btn.is-loading .btn-loader {
+    opacity: 1;
+}
+
+#accomplishmentArchiveModal .btn-loader svg {
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+#accomplishmentArchiveModal .btn-loader circle {
+    stroke: currentColor;
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+    stroke-linecap: round;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #accomplishmentArchiveModal .modal-container {
+        width: 98%;
+        margin: 10px;
+        max-height: 95vh;
+    }
+
+    #accomplishmentArchiveModal .form-body {
+        max-height: calc(95vh - 140px);
+    }
+
+    #accomplishmentArchiveModal .modal-header {
+        padding: 20px;
+    }
+
+    #accomplishmentArchiveModal .form-intro,
+    #accomplishmentArchiveModal .report-preview-section,
+    #accomplishmentArchiveModal .form-section,
+    #accomplishmentArchiveModal .archive-impact-section,
+    #accomplishmentArchiveModal .form-response {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+
+    #accomplishmentArchiveModal .preview-details-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    #accomplishmentArchiveModal .files-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    #accomplishmentArchiveModal .preview-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    #accomplishmentArchiveModal .preview-badges {
+        margin-left: 0;
+    }
+
+    #accomplishmentArchiveModal .modal-footer {
+        flex-direction: column-reverse;
+        gap: 8px;
+        padding: 16px 20px;
+    }
+
+    #accomplishmentArchiveModal .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    #accomplishmentArchiveModal .modal-header h2 {
+        font-size: 1.5rem;
+    }
+
+    #accomplishmentArchiveModal .form-intro {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+
+    #accomplishmentArchiveModal .report-preview-card {
+        padding: 16px;
+    }
+}
+
+/* Scrollbar Styling */
+#accomplishmentArchiveModal .form-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+#accomplishmentArchiveModal .form-body::-webkit-scrollbar-track {
+    background: var(--ar-background);
+}
+
+#accomplishmentArchiveModal .form-body::-webkit-scrollbar-thumb {
+    background: var(--ar-border);
+    border-radius: 3px;
+}
+
+#accomplishmentArchiveModal .form-body::-webkit-scrollbar-thumb:hover {
+    background: var(--ar-text-light);
+}
+
+/* Focus States for Accessibility */
+#accomplishmentArchiveModal .form-textarea:focus-visible,
+#accomplishmentArchiveModal .btn:focus-visible {
+    outline: 2px solid var(--ar-primary);
+    outline-offset: 2px;
+}

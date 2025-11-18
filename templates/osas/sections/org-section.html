@@ -1,0 +1,359 @@
+{% block content %}
+<div class="organization-management-container">
+    <div class="section-header">
+        <div class="header-content">
+            <div class="title-section">
+                {% if user.user_type != 15 %}
+                <h2 class="section-heading">Organization Management</h2>
+                {% else %}
+                <h2 class="section-heading">Manage Your Organization Information</h2>
+                {% endif %}
+                <div class="divider"></div>
+            </div>
+            {% if user.is_superuser or user.user_type == 10 or user.user_type == 1 %}
+            <div class="header-actions">
+                <div id="organization-management-container" class="organization-management-container">
+                    <!-- Search and Filters Row -->
+                    <div class="search-filters-row">
+                        <!-- Search -->
+                        <div class="search-container">
+                            <div class="search-input-wrapper">
+                                <i class='bx bx-search search-icon'></i>
+                                <input type="text"
+                                       id="organizationSearch"
+                                       class="search-input"
+                                       placeholder="Search organizations...">
+                                <div class="search-actions">
+                                    <button class="btn-clear-search" id="clearSearch" title="Clear search">
+                                        <i class='bx bx-x'></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Type Filter -->
+                        <div class="filter-group compact">
+                            <select id="organizationTypeFilter" class="filter-select compact">
+                                <option value="all">All Types</option>
+                                <option value="student">Student</option>
+                                <option value="sociocultural">Sociocultural</option>
+                            </select>
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="filter-group compact">
+                            <select id="organizationStatusFilter" class="filter-select compact">
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="pending">Pending</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="expired">Expired</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Add Organization Button -->
+                <button class="primary-btn" onclick="openOrganizationCreateModal()">
+                    <i class='bx bx-plus'></i> Add Organization
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    {% if user.is_superuser or user.user_type == 10 or user.user_type == 1 %}
+    <div class="statistics-container">
+        <div class="statistics-grid">
+            <div class="statistic-card">
+                <div class="statistic-icon total">
+                    <i class='bx bxs-group'></i>
+                </div>
+                <div class="statistic-content">
+                    <h3 class="statistic-value">{{ total_organizations }}</h3>
+                    <p class="statistic-label">Total Organizations</p>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon active">
+                    <i class='bx bx-check-circle'></i>
+                </div>
+                <div class="statistic-content">
+                    <h3 class="statistic-value">{{ active_organizations_count }}</h3>
+                    <p class="statistic-label">Active Organizations</p>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon pending">
+                    <i class='bx bx-time'></i>
+                </div>
+                <div class="statistic-content">
+                    <h3 class="statistic-value">{{ pending_organizations_count }}</h3>
+                    <p class="statistic-label">Pending Registration</p>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon student">
+                    <i class='bx bx-user-voice'></i>
+                </div>
+                <div class="statistic-content">
+                    <h3 class="statistic-value">{{ student_organizations_count }}</h3>
+                    <p class="statistic-label">Student Organizations</p>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon sociocultural">
+                    <i class='bx bx-palette'></i>
+                </div>
+                <div class="statistic-content">
+                    <h3 class="statistic-value">{{ sociocultural_organizations_count }}</h3>
+                    <p class="statistic-label">Sociocultural Organizations</p>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon renewal">
+                    <i class='bx bx-refresh'></i>
+                </div>
+                <div class="statistic-content">
+                    <h3 class="statistic-value">{{ total_renewals_count|default:0 }}</h3>
+                    <p class="statistic-label">Total Renewals</p>
+                    {% if average_renewals %}
+                    <small class="statistic-subtext">Avg: {{ average_renewals }} per org</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Organizations Table Section -->
+    <div class="table-section">
+        <div id="organizations-table-container" class="table-container">
+            <!-- Loading overlay for table only -->
+            <div id="organizations-loading" class="table-loading-overlay" style="display: none;">
+                <div class="table-loading-spinner">
+                    <div class="spinner"></div>
+                    <span>Loading organizations...</span>
+                </div>
+            </div>
+
+            <table class="data-table" id="organizations-table">
+                <thead>
+                    <tr>
+                        <th>Organization Name</th>
+                        <th>Acronym</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Valid Until</th>
+                        <th>Renewals</th>
+                        <th>Members</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for organization in organizations %}
+                    <tr data-created-at="{{ organization.created_at|date:'c' }}" data-status="{{ organization.organization_status }}">
+                        <td>
+                            <div class="organization-info">
+                                {% if organization.organization_logo %}
+                                <img src="{{ organization.organization_logo.url }}" alt="{{ organization.organization_name }}" class="organization-logo">
+                                {% else %}
+                                <div class="organization-logo placeholder">
+                                    <i class='bx bxs-group'></i>
+                                </div>
+                                {% endif %}
+                                <div class="organization-details">
+                                    <strong>{{ organization.organization_name }}</strong>
+                                    <small>{{ organization.organization_email }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ organization.organization_acronym }}</td>
+                        <td>
+                            <span class="type-badge {% if organization.organization_type == 'student' %}student{% else %}sociocultural{% endif %}">
+                                {{ organization.get_organization_type_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% with status=organization.organization_status %}
+                            <span class="status-badge
+                                {% if status == 'active' %}active
+                                {% elif status == 'pending' %}pending
+                                {% elif status == 'expired' %}expired
+                                {% elif status == 'rejected' %}rejected
+                                {% elif status == 'cancelled' %}cancelled
+                                {% else %}inactive{% endif %}">
+                                {% if status == 'active' %}Active
+                                {% elif status == 'pending' %}Pending
+                                {% elif status == 'expired' %}Expired
+                                {% elif status == 'rejected' %}Rejected
+                                {% elif status == 'cancelled' %}Cancelled
+                                {% else %}Inactive{% endif %}
+                            </span>
+                            {% if status == 'pending' %}
+                            <br>
+                            <small class="requirements-status {% if organization.all_requirements_submitted %}requirements-complete{% else %}requirements-incomplete{% endif %}">
+                                {% if organization.all_requirements_submitted %}
+                                ✓ Ready for approval
+                                {% else %}
+                                ⚠ Requirements incomplete
+                                {% endif %}
+                            </small>
+                            {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td>
+                            {% if organization.organization_valid_until %}
+                                {% with needs_renewal=organization.organization_needs_renewal %}
+                                <span class="{% if needs_renewal %}expired-text{% endif %}">
+                                    {{ organization.organization_valid_until|date:"M d, Y" }}
+                                </span>
+                                {% if needs_renewal %}
+                                <br><small class="renewal-notice">Needs Renewal</small>
+                                {% endif %}
+                                {% endwith %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="renewal-count">
+                                <span class="renewal-badge {% if organization.renew_count > 0 %}has-renewals{% else %}no-renewals{% endif %}">
+                                    <i class='bx bx-refresh'></i>
+                                    {{ organization.renew_count }}
+                                </span>
+                                {% if organization.renew_count > 0 %}
+                                <small class="renewal-text">renewal{{ organization.renew_count|pluralize }}</small>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="member-count">
+                                {{ organization.organization_member_count }} members
+                            </span>
+                        </td>
+                        <td class="actions-cell">
+                            <div class="action-buttons">
+                                <button class="btn-icon btn-view-organization" onclick="openOrganizationViewModal({{ organization.id }})" title="View Organization">
+                                    <i class="ri-eye-fill"></i>
+                                </button>
+
+                                {% if user.is_superuser or user.user_type == 10 or user.user_type == 1 or user.user_type == 15 %}
+                                    <button class="btn-icon btn-edit-organization" onclick="openEditOrganizationModal({{ organization.id }})" title="Edit Organization">
+                                        <i class='bx bx-edit'></i>
+                                    </button>
+
+                                    {% with status=organization.organization_status %}
+                                        {% if status == 'pending' and organization.all_requirements_submitted %}
+                                            {% if user.user_type != 15 %}
+                                            <button class="btn-icon btn-approve-organization" onclick="openApproveOrganizationModal({{ organization.id }}, '{{ organization.organization_name }}')" title="Approve Organization">
+                                                <i class='bx bx-check'></i>
+                                            </button>
+                                            {% endif %}
+                                        {% endif %}
+
+                                        {% if status == 'cancelled' %}
+                                            {% if user.user_type != 15 %}
+                                            <button class="btn-icon btn-reactivate-organization" onclick="openReactivateOrganizationModal({{ organization.id }}, '{{ organization.organization_name }}')" title="Reactivate Organization">
+                                                <i class='bx bx-reset'></i>
+                                            </button>
+                                            {% endif %}
+                                        {% endif %}
+
+                                        {% if status == 'expired' or organization.organization_needs_renewal %}
+                                            <button class="btn-icon btn-renew-organization" onclick="openRenewOrganizationModal({{ organization.id }}, '{{ organization.organization_name }}')" title="Renew Organization">
+                                                <i class='bx bx-refresh'></i>
+                                            </button>
+                                        {% endif %}
+                                    {% endwith %}
+
+                                    <button class="btn-icon btn-archive-organization" onclick="openArchiveOrganizationModal({{ organization.id }}, '{{ organization.organization_name }}')" title="Archive Organization">
+                                        <i class='bx bxs-archive'></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="empty-table">
+                            <div class="empty-state">
+                                <i class='bx bxs-group'></i>
+                                {% if user.is_superuser or user.user_type == 10 or user.user_type == 1 %}
+                                <p>No organizations found</p>
+                                <button class="primary-btn" onclick="openOrganizationCreateModal()">
+                                    <i class='bx bx-plus'></i> Add Organization
+                                </button>
+                                {% else %}
+                                <p>No information found for your organization</p>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination controls -->
+            {% if organizations %}
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Showing {{ organizations.start_index }} to {{ organizations.end_index }} of {{ organizations.paginator.count }} entries
+                </div>
+                <div class="pagination-controls">
+                    {% if organizations.has_previous %}
+                        <a href="?organization_page=1#organizations" class="pagination-btn first-page" title="First Page">
+                            <i class='bx bx-chevrons-left'></i>
+                        </a>
+                        <a href="?organization_page={{ organizations.previous_page_number }}#organizations" class="pagination-btn prev-page" title="Previous Page">
+                            <i class='bx bx-chevron-left'></i>
+                        </a>
+                    {% else %}
+                        <span class="pagination-btn first-page disabled" title="First Page">
+                            <i class='bx bx-chevrons-left'></i>
+                        </span>
+                        <span class="pagination-btn prev-page disabled" title="Previous Page">
+                            <i class='bx bx-chevron-left'></i>
+                        </span>
+                    {% endif %}
+
+                    <div class="page-numbers">
+                        {% for num in organizations.paginator.page_range %}
+                            {% if organizations.number == num %}
+                                <span class="pagination-btn current-page active">{{ num }}</span>
+                            {% elif num > organizations.number|add:'-3' and num < organizations.number|add:'3' %}
+                                <a href="?organization_page={{ num }}#organizations" class="pagination-btn page-number">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    {% if organizations.has_next %}
+                        <a href="?organization_page={{ organizations.next_page_number }}#organizations" class="pagination-btn next-page" title="Next Page">
+                            <i class='bx bx-chevron-right'></i>
+                        </a>
+                        <a href="?organization_page={{ organizations.paginator.num_pages }}#organizations" class="pagination-btn last-page" title="Last Page">
+                            <i class='bx bx-chevrons-right'></i>
+                        </a>
+                    {% else %}
+                        <span class="pagination-btn next-page disabled" title="Next Page">
+                            <i class='bx bx-chevron-right'></i>
+                        </span>
+                        <span class="pagination-btn last-page disabled" title="Last Page">
+                            <i class='bx bx-chevrons-right'></i>
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

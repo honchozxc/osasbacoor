@@ -1,0 +1,551 @@
+<div id="organizationRenewModal" class="modal">
+    <div class="modal-overlay" onclick="closeOrganizationRenewModal()"></div>
+    <div class="modal-container large-modal">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Renew Organization Registration</h2>
+                <p class="header-description">Submit renewal for organization registration with updated information</p>
+            </div>
+            <button class="modal-close" onclick="closeOrganizationRenewModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="form-body">
+            <div class="form-intro">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <p>Review organization details and update information for renewal. Fields marked with <span class="required-asterisk">*</span> are mandatory.</p>
+            </div>
+
+            <div id="organizationRenewFormResponse" class="form-response"></div>
+
+            <!-- Organization Preview -->
+            <div class="organization-preview-card">
+                <div class="preview-header">
+                    <div class="preview-logo" id="renewOrganizationLogo">
+                        <i class='bx bxs-group'></i>
+                    </div>
+                    <div class="preview-info">
+                        <h4 id="renewOrganizationName">Organization Name</h4>
+                        <p id="renewOrganizationDetails" class="preview-details">
+                            <span id="renewOrganizationAcronym"></span> •
+                            <span id="renewOrganizationType"></span> •
+                            Current Renewals: <span id="currentRenewCount">0</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="preview-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Current Valid Until:</span>
+                        <span class="stat-value" id="currentValidUntil">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Members:</span>
+                        <span class="stat-value" id="renewMemberCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Current Status:</span>
+                        <span class="stat-value">
+                            <span id="currentStatusDisplay" class="status-badge expired">Expired</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <form id="organizationRenewForm" class="modal-form">
+                <input type="hidden" id="renewOrganizationId" name="organization_id">
+
+                <!-- Organization Information Updates -->
+                <div class="form-section">
+                    <h3 class="section-title">Organization Information Updates (Optional)</h3>
+                    <p class="section-description">Update organization information during renewal</p>
+
+                    <div class="form-columns">
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="renew_organization_description" class="form-label">
+                                    Organization Description
+                                </label>
+                                <textarea id="renew_organization_description" name="organization_description"
+                                          class="form-input" rows="3"
+                                          placeholder="Enter organization description..."></textarea>
+                            </div>
+                        </div>
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="renew_organization_mission" class="form-label">
+                                    Organization Mission
+                                </label>
+                                <textarea id="renew_organization_mission" name="organization_mission"
+                                          class="form-input" rows="3"
+                                          placeholder="Enter organization mission..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="renew_organization_vision" class="form-label">
+                            Organization Vision
+                        </label>
+                        <textarea id="renew_organization_vision" name="organization_vision"
+                                  class="form-input" rows="3"
+                                  placeholder="Enter organization vision..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Renewal Period -->
+                <div class="form-section">
+                    <h3 class="section-title">Renewal Period <span class="required-asterisk">*</span></h3>
+
+                    <div class="form-columns">
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="renew_organization_valid_from" class="form-label required">
+                                    Valid From Date
+                                </label>
+                                <input type="date" id="renew_organization_valid_from"
+                                       name="organization_valid_from" class="form-input" required
+                                       onchange="calculateRenewValidUntil()">
+                                <small class="form-text">Start date of the new registration period</small>
+                            </div>
+                        </div>
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="renew_organization_valid_until" class="form-label required">
+                                    Valid Until Date
+                                </label>
+                                <input type="date" id="renew_organization_valid_until"
+                                       name="organization_valid_until" class="form-input" required readonly>
+                                <small class="form-text">Automatically set to 1 year from Valid From date</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document Updates -->
+                <div class="form-section">
+                    <h3 class="section-title">Document Updates (Optional)</h3>
+                    <p class="section-description">Update any documents that need to be renewed. All documents are optional during renewal.</p>
+
+                    <!-- Common Documents for All Organizations -->
+                    <div class="documents-grid" id="commonDocumentsSection">
+                        <!-- Calendar of Activities -->
+                        <div class="form-group file-upload-group">
+                            <label class="form-label">Calendar of Activities</label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="calendarActivitiesUploadBox" onclick="document.getElementById('renew_organization_calendar_activities').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                        <p>Click to upload calendar</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" id="renew_organization_calendar_activities"
+                                           name="organization_calendar_activities"
+                                           accept=".pdf,.doc,.docx"
+                                           style="display: none;"
+                                           onchange="handleRenewFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="renew_organization_calendar_activitiesFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Constitution and By-Laws -->
+                        <div class="form-group file-upload-group">
+                            <label class="form-label">Constitution and By-Laws</label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="cblUploadBox" onclick="document.getElementById('renew_organization_cbl').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        <p>Click to upload document</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" id="renew_organization_cbl"
+                                           name="organization_cbl"
+                                           accept=".pdf,.doc,.docx"
+                                           style="display: none;"
+                                           onchange="handleRenewFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="renew_organization_cblFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accomplishment Report -->
+                        <div class="form-group file-upload-group">
+                            <label class="form-label">Accomplishment Report</label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="arUploadBox" onclick="document.getElementById('renew_organization_ar').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        <p>Click to upload report</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" id="renew_organization_ar"
+                                           name="organization_ar"
+                                           accept=".pdf,.doc,.docx"
+                                           style="display: none;"
+                                           onchange="handleRenewFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="renew_organization_arFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Certificate of Grades -->
+                        <div class="form-group file-upload-group">
+                            <label class="form-label">Certificate of Grades (COG)</label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="cogUploadBox" onclick="document.getElementById('renew_organization_cog').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        <p>Click to upload COG</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" id="renew_organization_cog"
+                                           name="organization_cog"
+                                           accept=".pdf,.doc,.docx"
+                                           style="display: none;"
+                                           onchange="handleRenewFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="renew_organization_cogFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Adviser's CV/Resume -->
+                        <div class="form-group file-upload-group">
+                            <label class="form-label">Adviser's CV/Resume</label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="adviserCvUploadBox" onclick="document.getElementById('renew_organization_adviser_cv').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        <p>Click to upload CV</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" id="renew_organization_adviser_cv"
+                                           name="organization_adviser_cv"
+                                           accept=".pdf,.doc,.docx"
+                                           style="display: none;"
+                                           onchange="handleRenewFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="renew_organization_adviser_cvFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Group Picture -->
+                        <div class="form-group file-upload-group">
+                            <label class="form-label">Group Picture</label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="groupPictureUploadBox" onclick="document.getElementById('renew_organization_group_picture').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21 15 16 10 5 21"></polyline>
+                                        </svg>
+                                        <p>Click to upload picture</p>
+                                        <small>Supports: JPG, PNG (Max 5MB)</small>
+                                    </div>
+                                    <input type="file" id="renew_organization_group_picture"
+                                           name="organization_group_picture"
+                                           accept="image/*"
+                                           style="display: none;"
+                                           onchange="handleRenewFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="renew_organization_group_pictureFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- List of Members -->
+                        <div class="form-group file-upload-group">
+                            <label class="form-label">List of Members</label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="listMembersUploadBox" onclick="document.getElementById('renew_organization_list_members').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="9" cy="7" r="4"></circle>
+                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                        </svg>
+                                        <p>Click to upload list</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" id="renew_organization_list_members"
+                                           name="organization_list_members"
+                                           accept=".pdf,.doc,.docx"
+                                           style="display: none;"
+                                           onchange="handleRenewFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="renew_organization_list_membersFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Acceptance Letter -->
+                        <div class="form-group file-upload-group">
+                            <label class="form-label">Acceptance Letter</label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="acceptanceLetterUploadBox" onclick="document.getElementById('renew_organization_acceptance_letter').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                            <polyline points="22,6 12,13 2,6"></polyline>
+                                        </svg>
+                                        <p>Click to upload letter</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" id="renew_organization_acceptance_letter"
+                                           name="organization_acceptance_letter"
+                                           accept=".pdf,.doc,.docx"
+                                           style="display: none;"
+                                           onchange="handleRenewFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="renew_organization_acceptance_letterFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Previous Calendar of Activities -->
+                        <div class="form-group file-upload-group">
+                            <label class="form-label">Previous Calendar of Activities</label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="previousCalendarUploadBox" onclick="document.getElementById('renew_organization_previous_calendar').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                        <p>Click to upload previous calendar</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" id="renew_organization_previous_calendar"
+                                           name="organization_previous_calendar"
+                                           accept=".pdf,.doc,.docx"
+                                           style="display: none;"
+                                           onchange="handleRenewFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="renew_organization_previous_calendarFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Good Moral Certificate -->
+                        <div class="form-group file-upload-group">
+                            <label class="form-label">Good Moral Certificate</label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="goodMoralUploadBox" onclick="document.getElementById('renew_organization_good_moral').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        <p>Click to upload Good Moral Certificate</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" id="renew_organization_good_moral"
+                                           name="organization_good_moral"
+                                           accept=".pdf,.doc,.docx"
+                                           style="display: none;"
+                                           onchange="handleRenewFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="renew_organization_good_moralFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Biodata/CV of Members -->
+                        <div class="form-group file-upload-group">
+                            <label class="form-label">Biodata/CV of Members</label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="memberBiodataUploadBox" onclick="document.getElementById('renew_organization_member_biodata').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="9" cy="7" r="4"></circle>
+                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                        </svg>
+                                        <p>Click to upload Member Biodata</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" id="renew_organization_member_biodata"
+                                           name="organization_member_biodata"
+                                           accept=".pdf,.doc,.docx"
+                                           style="display: none;"
+                                           onchange="handleRenewFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="renew_organization_member_biodataFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Student Organization Specific Requirements -->
+                    <div id="studentOrgRequirements" class="category-fields" style="display: none;">
+                        <div class="requirements-notice">
+                            <i class='bx bx-info-circle'></i>
+                            <span>Additional documents for Student Organizations</span>
+                        </div>
+
+                        <div class="documents-grid">
+                            <!-- Financial Report -->
+                            <div class="form-group file-upload-group">
+                                <label class="form-label">Financial Report</label>
+                                <div class="file-upload-container">
+                                    <div class="file-upload-box" id="financialReportUploadBox" onclick="document.getElementById('renew_organization_financial_report').click()">
+                                        <div class="file-upload-content">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="12" y1="1" x2="12" y2="23"></line>
+                                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                            </svg>
+                                            <p>Click to upload report</p>
+                                            <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                        </div>
+                                        <input type="file" id="renew_organization_financial_report"
+                                               name="organization_financial_report"
+                                               accept=".pdf,.doc,.docx"
+                                               style="display: none;"
+                                               onchange="handleRenewFileSelection(this)">
+                                    </div>
+                                    <div class="file-info">
+                                        <div class="file-name" id="renew_organization_financial_reportFileName">No file selected</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Certificate of Assessment -->
+                            <div class="form-group file-upload-group">
+                                <label class="form-label">Certificate of Assessment (COA)</label>
+                                <div class="file-upload-container">
+                                    <div class="file-upload-box" id="coaUploadBox" onclick="document.getElementById('renew_organization_coa').click()">
+                                        <div class="file-upload-content">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                <polyline points="10 9 9 9 8 9"></polyline>
+                                            </svg>
+                                            <p>Click to upload certificate</p>
+                                            <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                        </div>
+                                        <input type="file" id="renew_organization_coa"
+                                               name="organization_coa"
+                                               accept=".pdf,.doc,.docx"
+                                               style="display: none;"
+                                               onchange="handleRenewFileSelection(this)">
+                                    </div>
+                                    <div class="file-info">
+                                        <div class="file-name" id="renew_organization_coaFileName">No file selected</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Renewal Summary -->
+                <div class="form-section">
+                    <h3 class="section-title">Renewal Summary</h3>
+
+                    <div class="summary-card">
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <span class="summary-label">Renewal Count:</span>
+                                <span class="summary-value">
+                                    <span id="currentRenewCountDisplay">0</span> →
+                                    <span id="newRenewCount" class="highlight">1</span>
+                                </span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Status:</span>
+                                <span class="summary-value">
+                                    <span id="currentStatusDisplay" class="status-badge expired">Expired</span> →
+                                    <span class="status-badge pending">Pending</span>
+                                </span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Registration Date:</span>
+                                <span class="summary-value" id="renewalDateDisplay">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">New Valid Until:</span>
+                                <span class="summary-value" id="newValidUntilDisplay">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancel" onclick="closeOrganizationRenewModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="submitOrganizationRenewal()">
+                <span class="btn-text">Submit Renewal</span>
+                <span class="btn-loader">
+                    <svg viewBox="0 0 50 50">
+                        <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                    </svg>
+                </span>
+            </button>
+        </div>
+    </div>
+</div>

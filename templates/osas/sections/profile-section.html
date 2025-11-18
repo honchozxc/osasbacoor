@@ -1,0 +1,285 @@
+{% load static %}
+{% block profile-content %}
+<div class="profile-zen-container">
+        <div class="zen-profile-header">
+            <div class="profile-avatar">
+                <div class="zen-avatar-wrapper">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="zen-profile-img" id="profilePicture">
+                    {% else %}
+                        <img src="{% static 'images/default-profile.png' %}" alt="Default Profile" class="zen-profile-img">
+                    {% endif %}
+                    <div class="zen-avatar-overlay" onclick="document.getElementById('id_profile_picture').click()">
+                        <i class="ri-camera-fill"></i>
+                    </div>
+                </div>
+                <div class="zen-profile-name">
+                    <h2>{{ user.get_full_name }}</h2>
+                    <p class="zen-user-badge">{{ user.get_user_type_display }}</p>
+                    {% if user.is_superuser %}
+                        <span class="zen-super-badge">OSAS</span>
+                    {% endif %}
+                </div>
+                <button id="editProfileBtn" class="zen-btn zen-edit-profile-btn" onclick="toggleEditMode()">
+                    <i class="ri-edit-line"></i> Edit Profile
+                </button>
+            </div>
+
+            <div class="zen-tabs-nav">
+                <button class="zen-tab-btn {% if active_tab == 'basic' %}active{% endif %}" onclick="showProfileTab('basic')">
+                    <i class="ri-user-line"></i> Basic Information
+                </button>
+                <button class="zen-tab-btn {% if active_tab == 'account' %}active{% endif %}" onclick="showProfileTab('account')">
+                    <i class="ri-lock-line"></i> Account Information
+                </button>
+                <button class="zen-tab-btn {% if active_tab == 'password' %}active{% endif %}" onclick="showProfileTab('password')">
+                    <i class="ri-key-line"></i> Change Password
+                </button>
+            </div>
+        </div>
+
+        <div class="profile-content">
+            <!-- Basic Information Tab -->
+            <div id="basic-tab" class="zen-tab-content {% if active_tab == 'basic' %}active{% endif %}">
+                <!-- Read-only View -->
+                <div id="basic-info-view" class="read-only-view">
+                    <div class="zen-detail-grid">
+                        <div class="zen-detail-row">
+                            <span class="zen-detail-label">First Name:</span>
+                            <span class="zen-detail-value">{{ user.first_name }}</span>
+                        </div>
+                        <div class="zen-detail-row">
+                            <span class="zen-detail-label">Last Name:</span>
+                            <span class="zen-detail-value">{{ user.last_name }}</span>
+                        </div>
+                        <div class="zen-detail-row">
+                            <span class="zen-detail-label">Gender:</span>
+                            <span class="zen-detail-value">{{ user.get_gender_display|default:"Not specified" }}</span>
+                        </div>
+                        <div class="zen-detail-row">
+                            <span class="zen-detail-label">Birth Date:</span>
+                            <span class="zen-detail-value">
+                                {% if user.birth_date %}{{ user.birth_date|date:"F j, Y" }}{% else %}Not specified{% endif %}
+                            </span>
+                        </div>
+                        <div class="zen-detail-row">
+                            <span class="zen-detail-label">Address:</span>
+                            <span class="zen-detail-value">{{ user.address|default:"Not specified" }}</span>
+                        </div>
+                        <div class="zen-detail-row">
+                            <span class="zen-detail-label">Phone Number:</span>
+                            <span class="zen-detail-value">{{ user.phone_number|default:"Not specified" }}</span>
+                        </div>
+                        <div class="zen-detail-row">
+                            <span class="zen-detail-label">Position:</span>
+                            <span class="zen-detail-value">{{ user.position|default:"Not specified" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editable Form (initially hidden) -->
+                <form method="POST" action="{% url 'update_profile' %}" enctype="multipart/form-data" id="zen-profile-form" class="editable-form" style="display: none;">
+                    {% csrf_token %}
+                    <input type="file" name="profile_picture" id="id_profile_picture" accept="image/*" style="display: none;" onchange="previewProfilePicture(this)">
+
+                    <div class="zen-form-grid">
+                        <!-- Left Column -->
+                        <div class="form-column">
+                            <div class="zen-form-group">
+                                <label for="id_first_name">First Name</label>
+                                <input type="text" name="first_name" id="id_first_name" class="zen-form-input" value="{{ user.first_name }}">
+                            </div>
+
+                            <div class="zen-form-group">
+                                <label for="id_gender">Gender</label>
+                                <select name="gender" id="id_gender" class="zen-form-input">
+                                    <option value="">Select gender</option>
+                                    {% for value, label in user.GENDER_CHOICES %}
+                                        <option value="{{ value }}" {% if user.gender == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="zen-form-group">
+                                <label for="id_address">Address</label>
+                                <input type="text" name="address" id="id_address" class="zen-form-input" value="{{ user.address|default:'' }}">
+                            </div>
+
+                            <div class="zen-form-group">
+                                <label for="id_position">Position</label>
+                                <input type="text" name="position" id="id_position" class="zen-form-input" value="{{ user.position|default:'' }}">
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="form-column">
+                            <div class="zen-form-group">
+                                <label for="id_last_name">Last Name</label>
+                                <input type="text" name="last_name" id="id_last_name" class="zen-form-input" value="{{ user.last_name }}">
+                            </div>
+
+                            <div class="zen-form-group">
+                                <label for="id_birth_date">Birth Date</label>
+                                <input type="date" name="birth_date" id="id_birth_date" class="zen-form-input"
+                                       value="{% if user.birth_date %}{{ user.birth_date|date:'Y-m-d' }}{% endif %}">
+                            </div>
+
+                            <div class="zen-form-group">
+                                <label for="id_phone_number">Phone Number</label>
+                                <input type="text" name="phone_number" id="id_phone_number" class="zen-form-input" value="{{ user.phone_number|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="zen-form-group">
+                        <label for="id_bio">Bio</label>
+                        <textarea name="bio" id="id_bio" class="zen-form-input" rows="4">{{ user.bio|default:'' }}</textarea>
+                    </div>
+
+                    <div class="zen-form-actions">
+                        <button type="button" class="zen-btn zen-btn-secondary" id="cancelProfileEditBtn">
+                            <i class="ri-close-line"></i> Cancel
+                        </button>
+                        <button type="submit" class="zen-btn zen-btn-primary">
+                            <i class="ri-save-line"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Account Information Tab -->
+            <div id="account-tab" class="zen-tab-content {% if active_tab == 'account' %}active{% endif %}">
+                <!-- Read-only View -->
+                <div id="account-info-view" class="read-only-view">
+                    <div class="zen-detail-grid">
+                        <div class="zen-detail-row">
+                            <span class="zen-detail-label">Username:</span>
+                            <span class="zen-detail-value">{{ user.username }}</span>
+                        </div>
+                        <div class="zen-detail-row">
+                            <span class="zen-detail-label">Email:</span>
+                            <span class="zen-detail-value">{{ user.email }}</span>
+                        </div>
+                        <div class="zen-detail-row">
+                            <span class="zen-detail-label">Account Type:</span>
+                            <span class="zen-detail-value">{{ user.get_user_type_display }}</span>
+                        </div>
+                        <div class="zen-detail-row">
+                            <span class="zen-detail-label">Account Status:</span>
+                            <span class="zen-detail-value">
+                                <span class="zen-status-badge {% if user.is_active %}active{% else %}inactive{% endif %}">
+                                    {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="zen-detail-row">
+                            <span class="zen-detail-label">Date Joined:</span>
+                            <span class="zen-detail-value">{{ user.date_joined|date:"F j, Y H:i" }}</span>
+                        </div>
+                        <div class="zen-detail-row">
+                            <span class="zen-detail-label">Last Login:</span>
+                            <span class="zen-detail-value">
+                                {% if user.last_login %}
+                                    {{ user.last_login|date:"F j, Y H:i" }}
+                                {% else %}
+                                    Never logged in
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editable Form (initially hidden) -->
+                <form method="POST" action="{% url 'update_account_info' %}" id="accountForm" class="editable-form" style="display: none;">
+                    {% csrf_token %}
+                    <div class="zen-form-grid">
+                        <!-- Left Column -->
+                        <div class="form-column">
+                            <div class="zen-form-group">
+                                <label for="id_username">Username</label>
+                                <input type="text" name="username" id="id_username" class="zen-form-input" value="{{ user.username }}" {% if not user.is_superuser %}readonly{% endif %}>
+                            </div>
+
+                            <div class="zen-form-group">
+                                <label for="id_email">Email</label>
+                                <input type="email" name="email" id="id_email" class="zen-form-input" value="{{ user.email }}" required>
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="form-column">
+                            {% if user.is_superuser %}
+                            <div class="zen-form-group">
+                                <label for="id_user_type">Account Type</label>
+                                <select name="user_type" id="id_user_type" class="zen-form-input">
+                                    {% for value, label in user.USER_TYPE_CHOICES %}
+                                        <option value="{{ value }}" {% if user.user_type == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="zen-form-group">
+                                <label>Account Status</label>
+                                <label class="zen-toggle-switch">
+                                    <input type="checkbox" name="is_active" class="zen-toggle-checkbox" {% if user.is_active %}checked{% endif %}>
+                                    <span class="zen-toggle-slider"></span>
+                                    <span class="zen-toggle-label-text">{% if user.is_active %}Active{% else %}Inactive{% endif %}</span>
+                                </label>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="zen-form-actions">
+                        <button type="button" class="zen-btn zen-btn-secondary" id="cancelAccountEditBtn">
+                            <i class="ri-close-line"></i> Cancel
+                        </button>
+                        <button type="submit" class="zen-btn zen-btn-primary">
+                            <i class="ri-save-line"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Change Password Tab -->
+            <div id="password-tab" class="zen-tab-content {% if active_tab == 'password' %}active{% endif %}">
+                <form method="POST" action="{% url 'password_change' %}" id="passwordForm" onsubmit="showLoadingSpinner('Updating password...')">
+                    {% csrf_token %}
+
+                    <div class="zen-form-group">
+                        <label for="id_old_password">Current Password</label>
+                        <input type="password" name="old_password" id="id_old_password" class="zen-form-input" required>
+                    </div>
+
+                    <div class="zen-form-group">
+                        <label for="id_new_password1">New Password</label>
+                        <input type="password" name="new_password1" id="id_new_password1" class="zen-form-input">
+                        <div class="error-message"></div>
+                        <div class="password-strength">
+                            <div class="password-strength-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="zen-form-group">
+                        <label for="id_new_password2">Confirm New Password</label>
+                        <input type="password" name="new_password2" id="id_new_password2" class="zen-form-input" required>
+                    </div>
+
+                    <div class="zen-form-actions">
+                        <button type="submit" class="zen-btn zen-btn-primary">
+                            <i class="ri-key-line"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<!-- Form Loading Spinner -->
+<div id="formLoadingOverlay" class="form-loading-overlay">
+    <div class="form-loading-spinner">
+        <div class="spinner"></div>
+        <p>Saving changes...</p>
+    </div>
+</div>
+{% endblock profile-content %}

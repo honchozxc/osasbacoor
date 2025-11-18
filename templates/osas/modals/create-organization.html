@@ -1,0 +1,595 @@
+{% block create-organization %}
+<div id="organizationCreateModal" class="modal">
+    <div class="modal-overlay" onclick="closeOrganizationCreateModal()"></div>
+    <div class="modal-container large-modal">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Create New Organization</h2>
+                <p class="header-description">Register a new organization with all required information</p>
+            </div>
+            <button class="modal-close" onclick="closeOrganizationCreateModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="organizationCreateForm" method="post" action="{% url 'add-organization' %}" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <p>Please provide all required information to register a new organization. Fields marked with <span class="required-asterisk">*</span> are mandatory.</p>
+                </div>
+
+                <div id="organizationFormResponse" class="form-response"></div>
+
+                <!-- Account Information -->
+                <div class="form-section">
+                    <h3 class="section-title">Account Information</h3>
+                    <div class="form-columns">
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="id_username">Username <span class="required-asterisk">*</span></label>
+                                <input type="text" name="username" id="id_username" class="form-input" required placeholder="Enter username">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_email">Email Address <span class="required-asterisk">*</span></label>
+                                <input type="email" name="email" id="id_email" class="form-input" required placeholder="Enter email address">
+                            </div>
+                        </div>
+
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="id_password">Password <span class="required-asterisk">*</span></label>
+                                <input type="password" name="password" id="id_password" class="form-input" required placeholder="Enter password">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_confirm_password">Confirm Password <span class="required-asterisk">*</span></label>
+                                <input type="password" name="confirm_password" id="id_confirm_password" class="form-input" required placeholder="Confirm password">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Organization Information -->
+                <div class="form-section">
+                    <h3 class="section-title">Organization Information</h3>
+                    <div class="form-columns">
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="id_organization_name">Organization Name <span class="required-asterisk">*</span></label>
+                                <input type="text" name="organization_name" id="id_organization_name" class="form-input" required placeholder="Enter organization name">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_organization_acronym">Organization Acronym <span class="required-asterisk">*</span></label>
+                                <input type="text" name="organization_acronym" id="id_organization_acronym" class="form-input" required placeholder="Enter organization acronym">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_organization_type">Organization Type <span class="required-asterisk">*</span></label>
+                                <select name="organization_type" id="id_organization_type" class="form-input" required onchange="toggleOrganizationRequirements(this.value)">
+                                    <option value="">Select organization type</option>
+                                    <option value="student">Student Organization</option>
+                                    <option value="sociocultural">Sociocultural Organization</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_organization_email">Organization Email <span class="required-asterisk">*</span></label>
+                                <input type="email" name="organization_email" id="id_organization_email" class="form-input" required placeholder="Enter organization email">
+                            </div>
+                        </div>
+
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="id_organization_description">Organization Description <span class="required-asterisk">*</span></label>
+                                <textarea name="organization_description" id="id_organization_description" class="form-input" rows="3" required placeholder="Enter organization description"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_organization_mission">Organization Mission <span class="required-asterisk">*</span></label>
+                                <textarea name="organization_mission" id="id_organization_mission" class="form-input" rows="3" required placeholder="Enter organization mission"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_organization_vision">Organization Vision <span class="required-asterisk">*</span></label>
+                                <textarea name="organization_vision" id="id_organization_vision" class="form-input" rows="3" required placeholder="Enter organization vision"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Adviser Information -->
+                <div class="form-section">
+                    <h3 class="section-title">Adviser Information</h3>
+                    <div class="form-columns">
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="id_organization_adviser_name">Adviser Name (Firstname Lastname)<span class="required-asterisk">*</span></label>
+                                <input type="text" name="organization_adviser_name" id="id_organization_adviser_name" class="form-input" required placeholder="Enter adviser name">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_organization_adviser_department">Adviser Department <span class="required-asterisk">*</span></label>
+                                <input type="text" name="organization_adviser_department" id="id_organization_adviser_department" class="form-input" required placeholder="Enter adviser department">
+                            </div>
+                        </div>
+
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="id_organization_adviser_email">Adviser Email <span class="required-asterisk">*</span></label>
+                                <input type="email" name="organization_adviser_email" id="id_organization_adviser_email" class="form-input" required placeholder="Enter adviser email">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_organization_adviser_phone">Adviser Phone <span class="required-asterisk">*</span></label>
+                                <input type="text" name="organization_adviser_phone" id="id_organization_adviser_phone" class="form-input" required placeholder="Enter adviser phone number">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Co-Adviser Information (Optional) -->
+                <div class="form-section">
+                    <h3 class="section-title">Co-Adviser Information <small>(Optional)</small></h3>
+                    <div class="form-columns">
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="id_organization_coadviser_name">Co-Adviser Name (Firstname Lastname)</label>
+                                <input type="text" name="organization_coadviser_name" id="id_organization_coadviser_name" class="form-input" placeholder="Enter co-adviser name (optional)">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_organization_coadviser_department">Co-Adviser Department</label>
+                                <input type="text" name="organization_coadviser_department" id="id_organization_coadviser_department" class="form-input" placeholder="Enter co-adviser department (optional)">
+                            </div>
+                        </div>
+
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="id_organization_coadviser_email">Co-Adviser Email</label>
+                                <input type="email" name="organization_coadviser_email" id="id_organization_coadviser_email" class="form-input" placeholder="Enter co-adviser email (optional)">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_organization_coadviser_phone">Co-Adviser Phone</label>
+                                <input type="text" name="organization_coadviser_phone" id="id_organization_coadviser_phone" class="form-input" placeholder="Enter co-adviser phone number (optional)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Organization Members -->
+                <div class="form-section">
+                    <h3 class="section-title">Organization Members</h3>
+                    <div class="members-header">
+                        <div class="members-info">
+                            <span class="member-count" id="memberCount">0 members added</span>
+                            <small>Minimum 3 members required with President, Vice President, and Secretary positions</small>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="addMemberRow()">
+                            <i class='bx bx-plus'></i> Add Member
+                        </button>
+                    </div>
+
+                    <div class="members-table-container">
+                        <table class="members-table" id="membersTable">
+                            <thead>
+                                <tr>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Position</th>
+                                    <th>Email</th>
+                                    <th>Student ID</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="membersTableBody">
+                                <!-- Member rows will be added here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="members-validation" id="membersValidation">
+                        <div class="validation-message warning">
+                            <i class='bx bx-info-circle'></i>
+                            <span>Minimum 3 members required. Must include President, Vice President, and Secretary.</span>
+                        </div>
+                    </div>
+
+                    <!-- Hidden field to store members JSON -->
+                    <input type="hidden" name="organization_members_json" id="organization_members_json">
+                </div>
+
+                <!-- Validity Period -->
+                <div class="form-section">
+                    <h3 class="section-title">Validity Period</h3>
+                    <div class="form-columns">
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="id_organization_valid_from">Valid From <span class="required-asterisk">*</span></label>
+                                <input type="date" name="organization_valid_from" id="id_organization_valid_from" class="form-input" required onchange="calculateValidUntil()">
+                            </div>
+                        </div>
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="id_organization_valid_until">Valid Until <span class="required-asterisk">*</span></label>
+                                <input type="date" name="organization_valid_until" id="id_organization_valid_until" class="form-input" required readonly>
+                                <small class="form-text">Automatically set to 1 year from Valid From date</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Organization Requirements -->
+                <div class="form-section">
+                    <h3 class="section-title">Organization Requirements</h3>
+
+                    <!-- Common Documents - First Row -->
+                    <div class="documents-grid">
+                        <!-- Organization Logo -->
+                        <div class="form-group file-upload-group">
+                            <label for="id_organization_logo">Organization Logo <span class="required-asterisk">*</span></label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="organizationLogoUploadBox" onclick="document.getElementById('id_organization_logo').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21 15 16 10 5 21"></polyline>
+                                        </svg>
+                                        <p>Click to upload logo</p>
+                                        <small>Supports: JPG, PNG (Max 5MB)</small>
+                                    </div>
+                                    <input type="file" name="organization_logo" id="id_organization_logo" class="file-input" accept="image/*" style="display: none;" onchange="handleFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="id_organization_logoFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calendar of Activities -->
+                        <div class="form-group file-upload-group">
+                            <label for="id_organization_calendar_activities">Calendar of Activities <span class="required-asterisk">*</span></label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="calendarActivitiesUploadBox" onclick="document.getElementById('id_organization_calendar_activities').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                        <p>Click to upload calendar</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" name="organization_calendar_activities" id="id_organization_calendar_activities" class="file-input" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="id_organization_calendar_activitiesFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Adviser CV -->
+                        <div class="form-group file-upload-group">
+                            <label for="id_organization_adviser_cv">Adviser's CV/Resume <span class="required-asterisk">*</span></label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="adviserCvUploadBox" onclick="document.getElementById('id_organization_adviser_cv').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        <p>Click to upload CV</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" name="organization_adviser_cv" id="id_organization_adviser_cv" class="file-input" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="id_organization_adviser_cvFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Group Picture -->
+                        <div class="form-group file-upload-group">
+                            <label for="id_organization_group_picture">Group Picture <span class="required-asterisk">*</span></label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="groupPictureUploadBox" onclick="document.getElementById('id_organization_group_picture').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21 15 16 10 5 21"></polyline>
+                                        </svg>
+                                        <p>Click to upload picture</p>
+                                        <small>Supports: JPG, PNG (Max 5MB)</small>
+                                    </div>
+                                    <input type="file" name="organization_group_picture" id="id_organization_group_picture" class="file-input" accept="image/*" style="display: none;" onchange="handleFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="id_organization_group_pictureFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Documents - Second Row -->
+                    <div class="documents-grid">
+                        <!-- Constitution and By-Laws -->
+                        <div class="form-group file-upload-group">
+                            <label for="id_organization_cbl">Constitution and By-Laws <span class="required-asterisk">*</span></label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="cblUploadBox" onclick="document.getElementById('id_organization_cbl').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        <p>Click to upload document</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" name="organization_cbl" id="id_organization_cbl" class="file-input" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="id_organization_cblFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- List of Members -->
+                        <div class="form-group file-upload-group">
+                            <label for="id_organization_list_members">List of Members <span class="required-asterisk">*</span></label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="listMembersUploadBox" onclick="document.getElementById('id_organization_list_members').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="9" cy="7" r="4"></circle>
+                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                        </svg>
+                                        <p>Click to upload list</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" name="organization_list_members" id="id_organization_list_members" class="file-input" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="id_organization_list_membersFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Acceptance Letter -->
+                        <div class="form-group file-upload-group">
+                            <label for="id_organization_acceptance_letter">Acceptance Letter <span class="required-asterisk">*</span></label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="acceptanceLetterUploadBox" onclick="document.getElementById('id_organization_acceptance_letter').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                            <polyline points="22,6 12,13 2,6"></polyline>
+                                        </svg>
+                                        <p>Click to upload letter</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" name="organization_acceptance_letter" id="id_organization_acceptance_letter" class="file-input" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="id_organization_acceptance_letterFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accomplishment Report -->
+                        <div class="form-group file-upload-group">
+                            <label for="id_organization_ar">Accomplishment Report <span class="required-asterisk">*</span></label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="arUploadBox" onclick="document.getElementById('id_organization_ar').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        <p>Click to upload report</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" name="organization_ar" id="id_organization_ar" class="file-input" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="id_organization_arFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Certificate and Calendar Documents - Third Row -->
+                    <div class="documents-grid">
+                        <!-- Certificate of Grades -->
+                        <div class="form-group file-upload-group">
+                            <label for="id_organization_cog">Certificate of Grades (COG) <span class="required-asterisk">*</span></label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="cogUploadBox" onclick="document.getElementById('id_organization_cog').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        <p>Click to upload COG</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" name="organization_cog" id="id_organization_cog" class="file-input" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="id_organization_cogFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Previous Calendar of Activities -->
+                        <div class="form-group file-upload-group">
+                            <label for="id_organization_previous_calendar">Previous Calendar of Activities <span class="required-asterisk">*</span></label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="previousCalendarUploadBox" onclick="document.getElementById('id_organization_previous_calendar').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                        <p>Click to upload previous calendar</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" name="organization_previous_calendar" id="id_organization_previous_calendar" class="file-input" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="id_organization_previous_calendarFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Good Moral Certificate -->
+                        <div class="form-group file-upload-group">
+                            <label for="id_organization_good_moral">Good Moral Certificate <span class="required-asterisk">*</span></label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="goodMoralUploadBox" onclick="document.getElementById('id_organization_good_moral').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        <p>Click to upload Good Moral Certificate</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" name="organization_good_moral" id="id_organization_good_moral" class="file-input" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="id_organization_good_moralFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Biodata/CV of Members -->
+                        <div class="form-group file-upload-group">
+                            <label for="id_organization_member_biodata">Biodata/CV of Members <span class="required-asterisk">*</span></label>
+                            <div class="file-upload-container">
+                                <div class="file-upload-box" id="memberBiodataUploadBox" onclick="document.getElementById('id_organization_member_biodata').click()">
+                                    <div class="file-upload-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="9" cy="7" r="4"></circle>
+                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                        </svg>
+                                        <p>Click to upload Member Biodata</p>
+                                        <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                    </div>
+                                    <input type="file" name="organization_member_biodata" id="id_organization_member_biodata" class="file-input" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name" id="id_organization_member_biodataFileName">No file selected</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Student Organization Specific Requirements -->
+                    <div id="studentOrgRequirements" class="category-fields" style="display: none;">
+                        <div class="requirements-notice">
+                            <i class='bx bx-info-circle'></i>
+                            <span>Additional documents required for Student Organizations</span>
+                        </div>
+
+                        <div class="documents-grid">
+                            <!-- Financial Report -->
+                            <div class="form-group file-upload-group">
+                                <label for="id_organization_financial_report">Financial Report <span class="required-asterisk">*</span></label>
+                                <div class="file-upload-container">
+                                    <div class="file-upload-box" id="financialReportUploadBox" onclick="document.getElementById('id_organization_financial_report').click()">
+                                        <div class="file-upload-content">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="12" y1="1" x2="12" y2="23"></line>
+                                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                            </svg>
+                                            <p>Click to upload report</p>
+                                            <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                        </div>
+                                        <input type="file" name="organization_financial_report" id="id_organization_financial_report" class="file-input" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
+                                    </div>
+                                    <div class="file-info">
+                                        <div class="file-name" id="id_organization_financial_reportFileName">No file selected</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Certificate of Assessment -->
+                            <div class="form-group file-upload-group">
+                                <label for="id_organization_coa">Certificate of Assessment (COA) <span class="required-asterisk">*</span></label>
+                                <div class="file-upload-container">
+                                    <div class="file-upload-box" id="coaUploadBox" onclick="document.getElementById('id_organization_coa').click()">
+                                        <div class="file-upload-content">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                <polyline points="10 9 9 9 8 9"></polyline>
+                                            </svg>
+                                            <p>Click to upload certificate</p>
+                                            <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                                        </div>
+                                        <input type="file" name="organization_coa" id="id_organization_coa" class="file-input" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
+                                    </div>
+                                    <div class="file-info">
+                                        <div class="file-name" id="id_organization_coaFileName">No file selected</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeOrganizationCreateModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Create Organization</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock create-organization %}

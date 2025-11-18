@@ -1,0 +1,191 @@
+{% block create-announcements %}
+<div id="announcementCreateModal" class="modal">
+    <div class="modal-overlay" onclick="closeAnnouncementCreateModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Create New Announcement</h2>
+                <p class="header-description">Fill in the details to create a new announcement</p>
+            </div>
+            <button class="modal-close" onclick="closeAnnouncementCreateModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="announcementCreateForm" method="post" action="{% url 'add-announcement' %}" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <p>Please provide all required information to create a new announcement. Fields marked with <span class="required-asterisk">*</span> are mandatory.</p>
+                </div>
+                <div class="form-group">
+                    <label for="id_category">Category <span class="required-asterisk">*</span></label>
+                    <select name="category" id="id_category" class="form-input" required onchange="toggleAnnouncementFields(this.value)">
+                        <option value="">Select category</option>
+                        <option value="BASIC">Basic Announcement</option>
+                        <option value="ENROLLMENT">Enrollment</option>
+                        <option value="EVENT">Event</option>
+                        <option value="SUSPENSION">Suspension</option>
+                        <option value="EMERGENCY">Emergency</option>
+                        <option value="SCHOLARSHIP">Scholarship</option>
+                    </select>
+                </div>
+                <div id="announcementFormResponse" class="form-response"></div>
+
+                <div class="form-group" style="display: none;">
+                    <label for="id_titles">Title <span class="required-asterisk">*</span></label>
+                    <input type="text" name="title" id="id_titles" class="form-input" required placeholder="Enter announcement title">
+                </div>
+
+                <div class="form-group" style="display: none;">
+                    <label for="quillEditor">Content <span class="required-asterisk">*</span></label>
+                    <div id="quillEditorContainer">
+                        <div id="quillEditor" style="height: 200px;"></div>
+                    </div>
+                    <!-- Hidden input to hold the HTML content from Quill -->
+                    <input type="hidden" name="content" id="id_content">
+                </div>
+
+                <div class="form-group" style="display: none;">
+                    <label for="id_link">Link (Optional)</label>
+                    <input type="url" name="link" id="id_link" class="form-input" placeholder="https://example.com">
+                </div>
+
+                <div id="enrollmentFields" class="category-fields" style="display: none;">
+                <div class="form-group">
+                    <label>Courses (Select one or more) <span class="required-asterisk">*</span></label>
+                    <button type="button" class="btn btn-sm btn-secondary mb-2" onclick="toggleAllCourses()">Check All</button>
+                    <div class="checkbox-group">
+                        {% for value, label in COURSE_CHOICES %}
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="courses" value="{{ value }}" {% if value in form.courses.value %}checked{% endif %}>
+                            <span class="checkmark"></span>
+                            {{ label }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% if form.courses.errors %}
+                        <div class="error-message">{{ form.courses.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_enrollment_start">Enrollment Start <span class="required-asterisk">*</span></label>
+                            <input type="datetime-local" name="enrollment_start" id="id_enrollment_start" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_enrollment_end">Enrollment End <span class="required-asterisk">*</span></label>
+                            <input type="datetime-local" name="enrollment_end" id="id_enrollment_end" class="form-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="eventFields" class="category-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="id_event_date">Event Date <span class="required-asterisk">*</span></label>
+                        <input type="datetime-local" name="event_date" id="id_event_date" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_location">Location <span class="required-asterisk">*</span></label>
+                        <input type="text" name="location" id="id_location" class="form-input" placeholder="Enter event location">
+                    </div>
+                </div>
+
+                <div id="suspensionFields" class="category-fields" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_suspension_date">Suspension Date <span class="required-asterisk">*</span></label>
+                            <input type="date" name="suspension_date" id="id_suspension_date" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_until_suspension_date">Until Date (Optional)</label>
+                            <input type="date" name="until_suspension_date" id="id_until_suspension_date" class="form-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="emergencyFields" class="category-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="id_contact_info">Contact Information <span class="required-asterisk">*</span></label>
+                        <textarea name="contact_info" id="id_contact_info" class="form-input" rows="3" placeholder="Enter emergency contact information"></textarea>
+                    </div>
+                </div>
+
+                <div id="scholarshipFields" class="category-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="id_scholarship">Scholarship Program</label>
+                        <select name="scholarship" id="id_scholarship" class="form-input">
+                            <option value="">Select Scholarship</option>
+                            {% for scholarship in scholarships %}
+                                <option value="{{ scholarship.id }}">{{ scholarship.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Select an existing scholarship or fill out the details below</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_application_start">Application Start</label>
+                            <input type="datetime-local" name="application_start" id="id_application_start" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_application_end">Application End</label>
+                            <input type="datetime-local" name="application_end" id="id_application_end" class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_requirements">Requirements</label>
+                        <textarea name="requirements" id="id_requirements" class="form-input" rows="3" placeholder="List of requirements (if not selecting a scholarship above)"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_benefits">Benefits</label>
+                        <textarea name="benefits" id="id_benefits" class="form-input" rows="3" placeholder="Description of benefits (if not selecting a scholarship above)"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group" style="display:none;">
+                    <label for="announcementImagesInput">Images (Max 30)</label>
+                    <div class="file-upload-wrapper">
+                        <input type="file" id="announcementImagesInput" name="images" multiple accept="image/*" onchange="updateImageCount(this)">
+                        <label for="announcementImagesInput" class="file-upload-label">
+                            <i class="ri-image-add-line"></i><span>Choose Images</span>
+                        </label>
+                        <div id="announcementImagesNameDisplay">No images selected</div>
+                        <small class="form-text text-muted"> You can upload up to 30 images (2MB max each) </small>
+                    </div>
+                    <div id="imagePreviews" class="image-previews-container"></div>
+                </div>
+
+                <div class="form-group" style="display: none;">
+                    <label>Status</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="is_published" id="id_is_published" class="toggle-checkbox" checked>
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label-text">Published</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeAnnouncementCreateModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Create Announcement</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock create-announcements %}

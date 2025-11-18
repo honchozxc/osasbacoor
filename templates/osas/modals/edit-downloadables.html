@@ -1,0 +1,116 @@
+{% block edit-downloadables %}
+<div id="downloadableEditModal" class="modal">
+    <div class="modal-overlay" onclick="closeDownloadableEditModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Edit Downloadable</h2>
+                <p class="header-description">Update the downloadable file information</p>
+            </div>
+            <button class="modal-close" onclick="closeDownloadableEditModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="downloadableEditForm" method="post" action="" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="current_file" id="currentFileUrl">
+
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p>Update the downloadable information below. Fields marked with <span class="required-asterisk">*</span> are required.</p>
+                </div>
+
+                <div id="downloadableEditFormResponse" class="form-response"></div>
+                <input type="hidden" name="downloadable_id" id="editDownloadableId">
+
+                <div class="form-columns">
+                    <!-- Left Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="editDownloadableTitle">Title <span class="required-asterisk">*</span></label>
+                            <input type="text" name="title" id="editDownloadableTitle" class="form-input" required placeholder="Enter title">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editDownloadableCategory">Category <span class="required-asterisk">*</span></label>
+                            <select name="category" id="editDownloadableCategory" class="form-input" required>
+                                <option value="">Select category</option>
+                                <option value="osas_forms">OSAS Forms</option>
+                                <option value="society_forms">Society Forms</option>
+                                <option value="scholarship_forms">Scholarship Forms</option>
+                                <option value="ojt_forms">OJT Forms</option>
+                                <option value="guidelines">Guidelines</option>
+                                <option value="manuals">Manuals</option>
+                                <option value="others">Others</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="editDownloadableDescription">Description</label>
+                            <textarea name="description" id="editDownloadableDescription" class="form-input" rows="3" placeholder="Enter description (optional)"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Upload Section -->
+                <div class="form-group file-upload-group">
+                    <label>Current File</label>
+                    <div class="file-info">
+                        <div class="file-name" id="editFileNameDisplay"></div>
+                        <div class="file-size" id="editFileSizeDisplay"></div>
+                    </div>
+
+                    <label for="editDownloadableFileInput" class="file-upload-label">Replace File (Optional)</label>
+                    <div class="file-upload-container">
+                        <div class="file-upload-box" onclick="document.getElementById('editDownloadableFileInput').click()">
+                            <div class="file-upload-content">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <p>Click to upload new file</p>
+                                <small>Supports: PDF, DOC, XLS, PPT, ZIP (Max 10MB)</small>
+                            </div>
+                            <input type="file" name="file" id="editDownloadableFileInput" class="file-input" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="is_active" id="editDownloadableIsActive" class="toggle-checkbox">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label-text">Active</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeDownloadableEditModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Update Downloadable</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock edit-downloadables %}

@@ -1,0 +1,232 @@
+{% block announcements-section %}
+<div class="section-header">
+    <div class="header-content">
+        <div class="title-section">
+            <h2 class="section-heading">Announcements Management</h2>
+            <div class="divider"></div>
+        </div>
+
+        <div class="announcement-stats-section">
+            <div class="announcement-stats-container">
+                <div class="announcement-stat-box total">
+                    <div class="stat-icon" style="background-color: #4caf50;">
+                        <i class="ri-megaphone-fill"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ total_announcements }}</div>
+                        <div class="stat-label">Total Announcements</div>
+                    </div>
+                </div>
+
+                <div class="announcement-stat-box published">
+                    <div class="stat-icon" style="background-color: #2196f3;">
+                        <i class='bx bx-check-circle'></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ published_count }}</div>
+                        <div class="stat-label">Published</div>
+                    </div>
+                </div>
+
+                <div class="announcement-stat-box draft">
+                    <div class="stat-icon" style="background-color: #ff9800;">
+                        <i class='bx bx-edit'></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ draft_count }}</div>
+                        <div class="stat-label">Draft</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="announcement-category-stats">
+                <h4>Total Announcement By Category</h4>
+                <div class="category-stats-grid">
+                    <div class="category-stat">
+                        <span class="category-label">Basic</span>
+                        <span class="category-count">{{ basic_count }}</span>
+                    </div>
+                    <div class="category-stat">
+                        <span class="category-label">Enrollment</span>
+                        <span class="category-count">{{ enrollment_count }}</span>
+                    </div>
+                    <div class="category-stat">
+                        <span class="category-label">Event</span>
+                        <span class="category-count">{{ event_count }}</span>
+                    </div>
+                    <div class="category-stat">
+                        <span class="category-label">Class Suspension</span>
+                        <span class="category-count">{{ class_suspension_count }}</span>
+                    </div>
+                    <div class="category-stat">
+                        <span class="category-label">Emergency</span>
+                        <span class="category-count">{{ emergency_count }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="announcements-search" class="search-input" placeholder="Search announcements...">
+            </div>
+
+            <div class="filter-group">
+                <select id="categoryFilter" class="styled-select">
+                    <option value="all">Sort by Category</option>
+                    <option value="Basic Announcements">Basic Announcements</option>
+                    <option value="Enrollment Announcements">Enrollment Announcements</option>
+                    <option value="Event Announcements">Event Announcements</option>
+                    <option value="Class Suspension Announcements">Class Suspension Announcements</option>
+                    <option value="Emergency Announcements">Emergency Announcements</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <select id="statusFilter" class="styled-select">
+                    <option value="all">Sort by Status</option>
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <select id="dateFilter" class="styled-select">
+                    <option value="all">Sort by Dates</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="this_year">This Year</option>
+                    <option value="last_year">Last Year</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                </select>
+            </div>
+            <button class="primary-btn" onclick="openAnnouncementCreateModal()" {% if not perms.osas.add_announcement %}style="display: none;"{% endif %}>
+                <i class='bx bx-plus'></i> Create Announcement
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="announcements-table-container">
+    <div id="announcements-loading" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <table class="data-table" id="announcements-table">
+        <thead>
+            <tr>
+                <th data-sort="id">ID <i class='bx bx-sort'></i></th>
+                <th data-sort="title">Title <i class='bx bx-sort'></i></th>
+                <th data-sort="category">Category <i class='bx bx-sort'></i></th>
+                <th data-sort="author">Author <i class='bx bx-sort'></i></th>
+                <th data-sort="created_at">Date Created <i class='bx bx-sort'></i></th>
+                <th data-sort="is_published">Status <i class='bx bx-sort'></i></th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if announcements %}
+                {% for announcement in announcements %}
+                <tr data-id="{{ announcement.id }}" data-created="{{ announcement.created_at|date:'Y-m-d H:i' }}">
+                    <td>{{ announcement.id }}</td>
+                    <td>{{ announcement.title }}</td>
+                    <td>{{ announcement.get_category_display }}</td>
+                    <td>{{ announcement.author.get_full_name }}</td>
+                    <td>{{ announcement.created_at|date:"Y-m-d H:i" }}</td>
+                    <td>
+                        <span class="status-badge {% if announcement.is_published %}active{% else %}inactive{% endif %}">
+                            {% if announcement.is_published %}Published{% else %}Draft{% endif %}
+                        </span>
+                    </td>
+                    <td class="actions">
+                        {% if perms.osas.view_announcement %}
+                            <button class="btn-view-announcement btn-icon view" onclick="viewAnnouncement({{ announcement.id }})" title="View">
+                                <i class="ri-eye-fill"></i>
+                            </button>
+                        {% endif %}
+                        {% if perms.osas.change_announcement and request.user == announcement.author or request.user.is_superuser %}
+                            <button class="btn-edit-announcement btn-icon edit-announcement" onclick="editAnnouncement({{ announcement.id }})" title="Edit">
+                                <i class='bx bx-edit'></i>
+                            </button>
+                        {% endif %}
+
+                        {% if perms.osas.delete_announcement and request.user == announcement.author or request.user.is_superuser %}
+                            <button class="btn-icon-announcement btn-icon archive" onclick="archiveAnnouncement({{ announcement.id }}, '{{ announcement.title|escapejs }}')" title="Archive">
+                                <i class='bx bxs-archive'></i>
+                            </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="7" class="text-center">
+                        {% if request.user.user_type == 1 %}
+                            No announcements found.
+                        {% else %}
+                            No announcements found for your role.
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <!-- Pagination controls -->
+    {% if announcements %}
+    <div class="pagination-container">
+        <div class="pagination-info">
+            Showing {{ announcements.start_index }} to {{ announcements.end_index }} of {{ announcements.paginator.count }} entries
+        </div>
+        <div class="pagination-controls">
+            {% if announcements.has_previous %}
+                <a href="?announcement_page=1#announcements" class="pagination-btn first-page" title="First Page">
+                    <i class='bx bx-chevrons-left'></i>
+                </a>
+                <a href="?announcement_page={{ announcements.previous_page_number }}#announcements" class="pagination-btn prev-page" title="Previous Page">
+                    <i class='bx bx-chevron-left'></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn first-page disabled" title="First Page">
+                    <i class='bx bx-chevrons-left'></i>
+                </span>
+                <span class="pagination-btn prev-page disabled" title="Previous Page">
+                    <i class='bx bx-chevron-left'></i>
+                </span>
+            {% endif %}
+
+            <div class="page-numbers">
+                {% for num in announcements.paginator.page_range %}
+                    {% if announcements.number == num %}
+                        <span class="pagination-btn current-page active">{{ num }}</span>
+                    {% elif num > announcements.number|add:'-3' and num < announcements.number|add:'3' %}
+                        <a href="?announcement_page={{ num }}#announcements" class="pagination-btn page-number">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if announcements.has_next %}
+                <a href="?announcement_page={{ announcements.next_page_number }}#announcements" class="pagination-btn next-page" title="Next Page">
+                    <i class='bx bx-chevron-right'></i>
+                </a>
+                <a href="?announcement_page={{ announcements.paginator.num_pages }}#announcements" class="pagination-btn last-page" title="Last Page">
+                    <i class='bx bx-chevrons-right'></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn next-page disabled" title="Next Page">
+                    <i class='bx bx-chevron-right'></i>
+                </span>
+                <span class="pagination-btn last-page disabled" title="Last Page">
+                    <i class='bx bx-chevrons-right'></i>
+                </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock announcements-section %}

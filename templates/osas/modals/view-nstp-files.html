@@ -1,0 +1,73 @@
+{% block view-nstp-file %}
+<div id="nstpFileViewModal" class="modal">
+    <div class="modal-overlay" onclick="closeNSTPFileViewModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>NSTP File Details</h2>
+                <p class="header-description">View file information</p>
+            </div>
+            <button class="modal-close" onclick="closeNSTPFileViewModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="form-body">
+            <div class="file-header">
+                <div class="category-tag" id="nstpFileCategoryTag"></div>
+                <h3 id="nstpFileTitle" class="file-title-display"></h3>
+                <div class="file-meta">
+                    <span class="semester-badge" id="nstpFileSemester"></span>
+                    <span id="nstpFileSchoolYear"></span>
+                    <span id="nstpFileCreatedBy"></span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="detail-group">
+                <h4 class="detail-label">Description</h4>
+                <div id="nstpFileDescription" class="detail-content"></div>
+            </div>
+
+            <div class="detail-group">
+                <h4 class="detail-label">File</h4>
+                <div class="file-preview">
+                    <div class="file-icon">
+                        <i id="nstpFileIcon" class='bx'></i>
+                    </div>
+                    <div class="file-info">
+                        <a id="nstpFileLink" class="file-name" target="_blank"></a>
+                        <span id="nstpFileSize" class="file-size"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-grid">
+                <div class="detail-group">
+                    <h4 class="detail-label">Uploaded</h4>
+                    <div class="detail-item">
+                        <i class='bx bx-calendar'></i>
+                        <span id="nstpFileCreatedAt" class="detail-value"></span>
+                    </div>
+                </div>
+
+                <div class="detail-group">
+                    <h4 class="detail-label">Last Updated</h4>
+                    <div class="detail-item">
+                        <i class='bx bx-calendar'></i>
+                        <span id="nstpFileUpdatedAt" class="detail-value"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeNSTPFileViewModal()">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock view-nstp-file %}

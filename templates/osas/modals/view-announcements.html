@@ -1,0 +1,124 @@
+{% block view-announcements %}
+<div id="announcementViewModal" class="modal">
+    <div class="modal-overlay" onclick="closeAnnouncementViewModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Announcement Details</h2>
+                <p class="header-description">View announcement information</p>
+            </div>
+            <button class="modal-close" onclick="closeAnnouncementViewModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="form-body">
+            <div class="announcement-header">
+                <h3 id="viewAnnouncementTitle"></h3>
+                <div class="announcement-meta">
+                    <span class="announcement-category" id="viewAnnouncementCategory"></span>
+                    <span class="announcement-date" id="viewAnnouncementDate"></span>
+                    <span class="announcement-author" id="viewAnnouncementAuthor"></span>
+                    <span class="announcement-status" id="viewAnnouncementStatus"></span>
+                </div>
+            </div>
+
+            <div class="announcement-content">
+                <h4>Content</h4>
+                <div id="viewAnnouncementContent" class="content-text"></div>
+            </div>
+
+            <div id="viewAnnouncementLinkContainer" class="announcement-link" style="display: none;">
+                <h4>Link</h4>
+                <a href="#" id="viewAnnouncementLink" target="_blank" class="link-url"></a>
+            </div>
+
+            <!-- Category-specific fields -->
+            <div id="viewEnrollmentFields" class="category-details" style="display: none;">
+                <h4>Enrollment Details</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Courses</span>
+                        <span class="detail-value" id="viewAnnouncementCourses"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Enrollment Period</span>
+                        <span class="detail-value" id="viewAnnouncementEnrollmentPeriod"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="viewEventFields" class="category-details" style="display: none;">
+                <h4>Event Details</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Event Date</span>
+                        <span class="detail-value" id="viewAnnouncementEventDate"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value" id="viewAnnouncementLocation"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="viewSuspensionFields" class="category-details" style="display: none;">
+                <h4>Suspension Details</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Suspension Date</span>
+                        <span class="detail-value" id="viewAnnouncementSuspensionDate"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Until Date</span>
+                        <span class="detail-value" id="viewAnnouncementUntilDate"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="viewEmergencyFields" class="category-details" style="display: none;">
+                <h4>Emergency Contact</h4>
+                <div class="detail-item full-width">
+                    <span class="detail-value" id="viewAnnouncementContactInfo"></span>
+                </div>
+            </div>
+
+            <!-- Scholarship Fields -->
+            <div id="viewScholarshipFields" class="category-details" style="display: none;">
+                <h4>Scholarship Details</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Scholarship Program</span>
+                        <span class="detail-value" id="viewAnnouncementScholarship"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Application Period</span>
+                        <span class="detail-value" id="viewAnnouncementApplicationPeriod"></span>
+                    </div>
+                    <div class="detail-item full-width">
+                        <span class="detail-label">Requirements</span>
+                        <span class="detail-value" id="viewAnnouncementRequirements"></span>
+                    </div>
+                    <div class="detail-item full-width">
+                        <span class="detail-label">Benefits</span>
+                        <span class="detail-value" id="viewAnnouncementBenefits"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Images Section -->
+            <div id="viewAnnouncementImages" class="announcement-images" style="display: none;">
+                <h4>Images</h4>
+                <div class="image-gallery" id="announcementImageGallery"></div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancel" onclick="closeAnnouncementViewModal()">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock view-announcements %}

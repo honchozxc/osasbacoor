@@ -1,0 +1,199 @@
+<div id="complaintEditModal" class="modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-container">
+    <div class="modal-header">
+      <div class="header-content">
+        <h2>Edit Complaint</h2>
+        <p class="header-description">Update complaint details</p>
+      </div>
+      <button class="modal-close" aria-label="Close modal">
+        <i class='bx bx-x'></i>
+      </button>
+    </div>
+
+    <form id="editComplaintForm" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-body">
+        <div class="form-main-layout">
+          <div class="complaint-details-column">
+            <!-- Status -->
+            {% if request.user.user_type == 1 or request.user.user_type == 11 %}
+            <div class="form-group">
+              <label>Status</label>
+              <div class="status-selector">
+                <div class="status-option">
+                  <input type="radio" id="statusUnderReview" name="status" value="under_review">
+                  <label for="statusUnderReview">Under Review</label>
+                </div>
+                <div class="status-option">
+                  <input type="radio" id="statusResolved" name="status" value="resolved">
+                  <label for="statusResolved">Resolved</label>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Complainant Info -->
+            <div class="form-group">
+              <h3 class="section-title">Complainant Information</h3>
+            </div>
+
+            <div class="form-group">
+              <label for="editComplainantFirstName">First Name</label>
+              <input type="text" id="editComplainantFirstName" name="complainant_first_name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="editComplainantLastName">Last Name</label>
+              <input type="text" id="editComplainantLastName" name="complainant_last_name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="editComplainantEmail">Email</label>
+              <input type="email" id="editComplainantEmail" name="complainant_email" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="editComplainantPhone">Phone</label>
+              <input type="tel" id="editComplainantPhone" name="complainant_phone" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="editComplainantAddress">Address</label>
+              <textarea id="editComplainantAddress" name="complainant_address" class="form-control" rows="2" required></textarea>
+            </div>
+
+            <!-- Respondent Info Section -->
+            <div class="form-group">
+              <h3 class="section-title">Respondent Information</h3>
+            </div>
+
+            <div class="form-group">
+              <label for="editRespondentType">Respondent Type</label>
+              <select id="editRespondentType" name="respondent_type" class="form-control" required>
+                <option value="student">Student</option>
+                <option value="faculty_staff">Faculty/Staff</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="editRespondentFirstName">First Name</label>
+              <input type="text" id="editRespondentFirstName" name="respondent_first_name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="editRespondentLastName">Last Name</label>
+              <input type="text" id="editRespondentLastName" name="respondent_last_name" class="form-control" required>
+            </div>
+
+            <!-- Student-specific fields -->
+            <div id="editStudentFields">
+              <div class="form-group">
+                <label for="editRespondentCourse">Course</label>
+                <select id="editRespondentCourse" name="respondent_course" class="form-control">
+                  <option value="">Select Course</option>
+                  {% for course in courses %}
+                    <option value="{{ course.id }}">{{ course.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="editRespondentYear">Year</label>
+                <input type="text" id="editRespondentYear" name="respondent_year" class="form-control">
+              </div>
+
+              <div class="form-group">
+                <label for="editRespondentSection">Section</label>
+                <input type="text" id="editRespondentSection" name="respondent_section" class="form-control">
+              </div>
+            </div>
+
+            <!-- Faculty/Staff-specific field -->
+            <div id="editStaffFields" style="display: none;">
+              <div class="form-group">
+                <label for="editRespondentDepartment">Department</label>
+                <input type="text" id="editRespondentDepartment" name="respondent_department" class="form-control">
+              </div>
+            </div>
+
+            <!-- Complaint Details -->
+            <div class="form-group">
+              <h3 class="section-title">Complaint Details</h3>
+            </div>
+
+            <div class="form-group">
+              <label for="editTitle">Title</label>
+              <input type="text" id="editTitle" name="title" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="editIncidentDate">Incident Date</label>
+              <input type="date" id="editIncidentDate" name="incident_date" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="editIncidentTime">Incident Time</label>
+              <input type="time" id="editIncidentTime" name="incident_time" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="editIncidentLocation">Location</label>
+              <input type="text" id="editIncidentLocation" name="incident_location" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="editStatement">Statement</label>
+              <textarea id="editStatement" name="statement" class="form-control" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="editWitnesses">Witnesses (if any)</label>
+              <textarea id="editWitnesses" name="witnesses" class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="editNotes">Resolution Notes</label>
+              <textarea id="editNotes" name="notes" class="form-control" rows="3" placeholder="Enter resolution details if complaint is resolved"></textarea>
+            </div>
+          </div>
+
+          <div class="evidence-column">
+            <!-- Documents Section -->
+            <div class="evidence-group">
+              <div class="group-header">Documents</div>
+              <div class="evidence-items" id="editDocumentsList">
+                <div class="no-evidence">No documents uploaded</div>
+              </div>
+              <div class="file-upload-group">
+                <input type="file" id="editDocumentUpload" name="documents" multiple accept=".pdf,.doc,.docx,.txt">
+                <label for="editDocumentUpload" class="file-upload-button">
+                  <i class='bx bx-plus'></i> Add Documents
+                </label>
+              </div>
+            </div>
+
+            <!-- Images Section -->
+            <div class="evidence-group">
+              <div class="group-header">Images</div>
+              <div class="evidence-items" id="editImagesList">
+                <div class="no-evidence">No images uploaded</div>
+              </div>
+              <div class="file-upload-group">
+                <input type="file" id="editImageUpload" name="images" multiple accept="image/*">
+                <label for="editImageUpload" class="file-upload-button">
+                  <i class='bx bx-plus'></i> Add Images
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>

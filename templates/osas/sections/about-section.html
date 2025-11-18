@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Pages</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard/about-section.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sections-container">
+            {% if request.user.is_superuser or request.user.user_type == 1 %}
+            <div class="page-section">
+                <div class="page-header">
+                    <h1>
+                        <i class="fas fa-home"></i>
+                        Home Page Content
+                        <span class="status-indicator">Active</span>
+                    </h1>
+                </div>
+                <div class="page-content">
+                    <p>Manage the home page content including logo, title, tagline, and office hours.</p>
+                        <a href="{% url 'home_edit' %}" class="btn btn-edit">
+                            <span>Edit Content</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 %}
+            <div class="page-section">
+                <div class="page-header">
+                    <h1>
+                        <i class="fas fa-info-circle"></i>
+                        About Page Content
+                        <span class="status-indicator">Active</span>
+                    </h1>
+                </div>
+                <div class="page-content">
+                    <p>Manage the about page content that appears on your website's main about section.</p>
+                        <a href="{% url 'about_edit' %}" class="btn btn-edit">
+                            <span>Edit Content</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 11  %}
+            <div class="page-section">
+                <div class="page-header">
+                    <h1>
+                        <i class="fas fa-gavel"></i>
+                        Student Discipline Unit
+                        <span class="status-indicator">Active</span>
+                    </h1>
+                </div>
+                <div class="page-content">
+                    <p>Update the student discipline policies and information displayed to users.</p>
+                        <a href="{% url 'student_discipline_edit' %}" class="btn btn-edit">
+                            <span>Edit Content</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 %}
+            <div class="page-section">
+                <div class="page-header">
+                    <h1>
+                        <i class="fas fa-shoe-prints"></i>
+                        Footer Page Content
+                        <span class="status-indicator">Active</span>
+                    </h1>
+                </div>
+                <div class="page-content">
+                    <p>Customize the footer content including copyright information, and contact details.</p>
+                        <a href="{% url 'footer_edit' %}" class="btn btn-edit">
+                            <span>Edit Content</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 5 %}
+            <div class="page-section">
+                <div class="page-header">
+                    <h1>
+                        <i class="fas fa-graduation-cap"></i>
+                        Scholarship Page Content
+                        <span class="status-indicator">Active</span>
+                    </h1>
+                </div>
+                <div class="page-content">
+                    <p>Manage the scholarship page content including hero section and FAQs.</p>
+                        <a href="{% url 'scholarship_edit' %}" class="btn btn-edit">
+                            <span>Edit Content</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 12 %}
+            <div class="page-section">
+                <div class="page-header">
+                    <h1>
+                        <i class="fas fa-user-graduate"></i>
+                        Admission Page Content
+                        <span class="status-indicator">Active</span>
+                    </h1>
+                </div>
+                <div class="page-content">
+                    <p>Manage the admission page content including requirements, deadlines, and application information.</p>
+                        <a href="{% url 'admission_edit' %}" class="btn btn-edit">
+                            <span>Edit Content</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 2 %}
+            <div class="page-section">
+                <div class="page-header">
+                    <h1>
+                        <i class="fas fa-shield-alt"></i>
+                        NSTP Page Content
+                        <span class="status-indicator">Active</span>
+                    </h1>
+                </div>
+                <div class="page-content">
+                    <p>Manage the NSTP page content including programs, about section, and FAQs.</p>
+                        <a href="{% url 'nstp_edit' %}" class="btn btn-edit">
+                            <span>Edit Content</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 3 %}
+           <div class="page-section">
+                <div class="page-header">
+                    <h1>
+                        <i class="fas fa-clinic-medical"></i>
+                        Clinic Page Content
+                        <span class="status-indicator">Active</span>
+                    </h1>
+                </div>
+                <div class="page-content">
+                    <p>Manage the clinic page content including services, gallery images, FAQs, and contact information.</p>
+                        <a href="{% url 'clinic_edit' %}" class="btn btn-edit">
+                            <span>Edit Content</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+            <div class="page-section">
+                <div class="page-header">
+                    <h1>
+                        <i class="fas fa-briefcase"></i>
+                        OJT Page Content
+                        <span class="status-indicator">Active</span>
+                    </h1>
+                </div>
+                <div class="page-content">
+                    <p>Manage the OJT page content including hero section, overview, services, and FAQs.</p>
+                        <a href="{% url 'ojt_edit' %}" class="btn btn-edit">
+                            <span>Edit Content</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 10 %}
+            <div class="page-section">
+                <div class="page-header">
+                    <h1>
+                        <i class="fas fa-users"></i>
+                        SDS Organization Page
+                        <span class="status-indicator">Active</span>
+                    </h1>
+                </div>
+                <div class="page-content">
+                    <p>Manage the Student Development Services page content including hero section, features, and FAQs.</p>
+                    <a href="{% url 'sds_edit' %}" class="btn btn-edit">
+                        <span>Edit Content</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</body>
+</html>

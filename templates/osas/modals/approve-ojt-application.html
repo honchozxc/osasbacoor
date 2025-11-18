@@ -1,0 +1,176 @@
+<div id="approveOJTApplicationModal" class="modal">
+  <div class="modal-overlay" onclick="closeApproveOJTApplicationModal()"></div>
+  <div class="modal-container">
+    <div class="modal-header">
+      <div class="header-content">
+        <h2>Review OJT Application</h2>
+        <p class="header-description">Review the application details and requirements before making a decision</p>
+      </div>
+      <button class="modal-close" onclick="closeApproveOJTApplicationModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <form id="approveOJTApplicationForm" class="approval-form">
+      <div class="form-body">
+        <div class="form-intro">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <p>Please review all application details and requirements carefully before making your decision.</p>
+        </div>
+
+        <div id="approveOJTFormResponse" class="form-response"></div>
+
+        <div class="form-main-layout">
+          <!-- Left Column - Application Details -->
+          <div class="application-details-column">
+            <div class="form-section">
+              <h3 class="section-title">Application Details</h3>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Student Name</span>
+                  <span id="approveOJTStudentName" class="detail-value">-</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Student Number</span>
+                  <span id="approveOJTStudentNumber" class="detail-value">-</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Course & Section</span>
+                  <span id="approveOJTCourseSection" class="detail-value">-</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Company</span>
+                  <span id="approveOJTCompany" class="detail-value">-</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Application Date</span>
+                  <span id="approveOJTApplicationDate" class="detail-value">-</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Current Status</span>
+                  <span id="approveOJTCurrentStatus" class="status-badge">-</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3 class="section-title">OJT Period</h3>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Start Date</span>
+                  <span id="approveOJTStartDate" class="detail-value">-</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">End Date</span>
+                  <span id="approveOJTEndDate" class="detail-value">-</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Duration</span>
+                  <span id="approveOJTDuration" class="detail-value">-</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Required Hours</span>
+                  <span id="approveOJTHours" class="detail-value">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column - Company & Requirements -->
+          <div class="documents-column">
+            <div class="form-section">
+              <h3 class="section-title">Company Information</h3>
+              <div class="company-info-card">
+                <div class="company-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Available Slots</span>
+                    <span id="approveOJTAvailableSlots" class="detail-value">-</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Filled Slots</span>
+                    <span id="approveOJTFilledSlots" class="detail-value">-</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Remaining Slots</span>
+                    <span id="approveOJTRemainingSlots" class="detail-value">-</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Company Status</span>
+                    <span id="approveOJTCompanyStatus" class="status-badge">-</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3 class="section-title">Requirements Status</h3>
+              <div class="requirements-list" id="approveOJTRequirementsList">
+                <!-- Requirements will be populated here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cover Letter & Skills -->
+        <div class="form-section">
+          <h3 class="section-title">Application Content</h3>
+          <div class="content-grid">
+            <div class="content-item">
+              <label class="content-label">Cover Letter</label>
+              <div id="approveOJTCoverLetter" class="content-text">-</div>
+            </div>
+            <div class="content-item">
+              <label class="content-label">Skills & Qualifications</label>
+              <div id="approveOJTSkills" class="content-text">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Decision Form -->
+        <div class="decision-form-section">
+          <input type="hidden" id="approveOJTApplicationId" name="application_id">
+
+          <div class="form-group">
+            <label>Decision <span class="required-asterisk">*</span></label>
+            <div class="decision-options">
+              <label class="radio-option approve-option">
+                <input type="radio" name="decision" value="approved" required>
+                <span class="radio-checkmark"></span>
+                <span class="radio-text">Approve Application</span>
+              </label>
+              <label class="radio-option reject-option">
+                <input type="radio" name="decision" value="rejected" required>
+                <span class="radio-checkmark"></span>
+                <span class="radio-text">Reject Application</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="approveOJTNotes">Review Notes (Optional)</label>
+            <textarea id="approveOJTNotes" name="notes" rows="3" class="form-input"
+                      placeholder="Add any notes or comments about this application..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" onclick="closeApproveOJTApplicationModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">
+          <span class="btn-text">Submit Decision</span>
+          <span class="btn-loader">
+            <svg viewBox="0 0 50 50">
+              <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

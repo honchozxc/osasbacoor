@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .email-header {
+            background: linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .email-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><polygon points="50,0 100,50 50,100 0,50" fill="white"/></svg>') repeat;
+            background-size: 80px 80px;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        .email-header h2 {
+            margin: 10px 0 0;
+            font-size: 18px;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+            opacity: 0.9;
+        }
+        .email-content {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .welcome-text {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #2d3748;
+        }
+        .decision {
+            padding: 20px;
+            margin: 20px 0;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 4px;
+            font-size: 18px;
+        }
+        .approved {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        .rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        .application-details {
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .detail-value {
+            color: #6c757d;
+        }
+        .email-footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 14px;
+            color: #718096;
+        }
+        .campus-logo {
+            margin-bottom: 15px;
+        }
+        .campus-logo img {
+            max-width: 150px;
+            height: auto;
+        }
+        @media only screen and (max-width: 600px) {
+            .email-container { padding: 10px; }
+            .email-content { padding: 20px; }
+            .email-header { padding: 20px 15px; }
+            .email-header h1 { font-size: 20px; }
+            .email-header h2 { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <div class="campus-logo">
+                <div style="font-size: 32px; font-weight: bold;">CvSU</div>
+            </div>
+            <h1>Cavite State University - Bacoor City Campus</h1>
+            <h2>Office of Student Affairs and Services</h2>
+        </div>
+
+        <div class="email-content">
+            <p class="welcome-text">Dear <strong>{{ student_name }}</strong>,</p>
+
+            <p>We would like to inform you about the status of your OJT application for <strong>{{ company_name }}</strong>.</p>
+
+            <div class="decision {% if decision == 'approved' %}approved{% else %}rejected{% endif %}">
+                Your application has been <strong>{{ decision|upper }}</strong>
+            </div>
+
+            <div class="application-details">
+                <h3 style="margin-top: 0; color: #495057;">Application Details</h3>
+                <div class="detail-item">
+                    <span class="detail-label">Company:</span>
+                    <span class="detail-value">{{ company_name }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Proposed Start Date:</span>
+                    <span class="detail-value">{{ proposed_start_date }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Proposed End Date:</span>
+                    <span class="detail-value">{{ proposed_end_date }}</span>
+                </div>
+                {% if approved_by %}
+                <div class="detail-item">
+                    <span class="detail-label">Approved By:</span>
+                    <span class="detail-value">{{ approved_by }}</span>
+                </div>
+                {% endif %}
+                {% if approved_at %}
+                <div class="detail-item">
+                    <span class="detail-label">Decision Date:</span>
+                    <span class="detail-value">{{ approved_at }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if notes %}
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0;">
+                <h4 style="margin-top: 0; color: #856404;">Reviewer Notes:</h4>
+                <p style="color: #856404; margin: 0;">{{ notes }}</p>
+            </div>
+            {% endif %}
+
+            <p>For any questions or concerns, please contact the OSAS OJT Coordinator at <a href="mailto:cvsubacoorosas@gmail.com" style="color: #2E7D32; text-decoration: none; font-weight: 500;">cvsubacoorosas@gmail.com</a>.</p>
+
+            <p>Thank you for using our OJT application system.</p>
+        </div>
+
+        <div class="email-footer">
+            <p style="color: #2E7D32; font-weight: 600; margin-bottom: 10px;">Cavite State University - Bacoor Campus</p>
+            <p>Molino Road, Soldiers Hills IV, Bacoor City, Cavite</p>
+            <p>© {% now "Y" %} Cavite State University - Bacoor Campus. All rights reserved.</p>
+            <p style="margin-top: 15px;">
+                <a href="#" style="color: #2E7D32; text-decoration: none; margin: 0 10px;">Privacy Policy</a> |
+                <a href="#" style="color: #2E7D32; text-decoration: none; margin: 0 10px;">Terms of Service</a>
+            </p>
+            <p style="font-size: 12px; color: #a0aec0; margin-top: 20px;">
+                This is an automated message. Please do not reply to this email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

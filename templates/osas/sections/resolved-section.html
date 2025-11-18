@@ -1,0 +1,186 @@
+<div class="section-header">
+    <div class="header-content">
+        <div class="title-section">
+            <h2 class="section-heading">Resolved Complaints</h2>
+            <div class="divider"></div>
+        </div>
+
+        <div class="complaint-stats-section">
+            <div class="complaint-stats-container">
+                <div class="complaint-stat-box total">
+                    <div class="stat-icon" style="background-color: #4caf50;">
+                        <i class='bx bx-file'></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ total_complaints }}</div>
+                        <div class="stat-label">Total Complaints</div>
+                    </div>
+                </div>
+                <div class="complaint-stat-box resolved">
+                    <div class="stat-icon" style="background-color: #4caf50;">
+                        <i class='bx bx-check-circle'></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ resolved_count }}</div>
+                        <div class="stat-label">Resolved</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="resolved-search" placeholder="Search resolved complaints..." class="search-input">
+            </div>
+            <div class="filter-group">
+                <select id="resolvedDateFilter" class="styled-select">
+                    <option value="all">Sort by Dates</option>
+                    <option value="oldest_resolved">Oldest Resolved</option>
+                    <option value="newest_resolved">Newest Resolved</option>
+                    <option value="resolved_day">Resolved This Day</option>
+                    <option value="resolved_week">Resolved This Week</option>
+                    <option value="resolved_month">Resolved This Month</option>
+                    <option value="this_year">This Year</option>
+                    <option value="last_year">Last Year</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                </select>
+            </div>
+            {% if perms.osas.add_complaint %}
+            <a href="{% url 'complaint-create' %}" class="primary-btn">
+                <i class="fas fa-plus"></i> New Complaint
+            </a>
+            {% endif %}
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 11 %}
+            <button id="export-resolved-btn" class="primary-btn" data-section="resolved">
+                <i class='bx bx-export'></i> Export Data
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div id="resolved-table-container">
+    <div id="resolved-loading" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <table class="data-table" id="resolved-table">
+        <thead>
+            <tr>
+                <th data-sort="reference_number">Ref No. <i class='bx bx-sort'></i></th>
+                <th data-sort="title">Title <i class='bx bx-sort'></i></th>
+                <th data-sort="complainant">Complainant <i class='bx bx-sort'></i></th>
+                <th data-sort="incident_date">Incident Date <i class='bx bx-sort'></i></th>
+                <th data-sort="created_at">Date Submitted <i class='bx bx-sort'></i></th>
+                <th data-sort="updated_at">Date Resolved <i class='bx bx-sort'></i></th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for complaint in resolved_complaints %}
+            <tr data-id="{{ complaint.id }}" data-updated="{{ complaint.updated_at|date:'Y-m-d' }}">
+                <td>{{ complaint.reference_number }}</td>
+                <td>{{ complaint.title }}</td>
+                <td>{{ complaint.complainant_first_name }} {{ complaint.complainant_last_name }}</td>
+                <td>{{ complaint.incident_date|date:"M d, Y" }}</td>
+                <td>{{ complaint.created_at|date:"M d, Y" }}</td>
+                <td>{{ complaint.updated_at|date:"M d, Y" }}</td>
+                <td>
+                    <span class="status-badge resolved">
+                        Resolved
+                    </span>
+                </td>
+                <td class="actions">
+                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 11 or complaint.created_by == request.user %}
+                        {% if perms.osas.view_complaint %}
+                        <button class="view-complaint btn-action view btn-icon" data-id="{{ complaint.id }}">
+                            <i class='bx bx-show'></i>
+                        </button>
+                        {% endif %}
+
+                        {% if perms.osas.change_complaint %}
+                            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 11 %}
+                        <button class="btn-action edit btn-icon edit-under-review" title="Edit" data-id="{{ complaint.id }}">
+                            <i class='bx bx-edit'></i>
+                        </button>
+                            {% endif %}
+                        {% endif %}
+                        {% if perms.osas.delete_complaint %}
+                            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 11 %}
+                        <button class="btn-icon archive archive-complaint btn-icon"
+                                title="Archive Complaint"
+                                data-id="{{ complaint.id }}"
+                                data-ref="{{ complaint.reference_number }}"
+                                data-title="{{ complaint.title }}">
+                            <i class='bx bx-archive'></i>
+                        </button>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="no-data">No resolved complaints found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+    {% if resolved_complaints %}
+    <div class="pagination-container">
+        <div class="pagination-info">
+            Showing {{ resolved_complaints.start_index }} to {{ resolved_complaints.end_index }} of {{ resolved_complaints.paginator.count }} entries
+        </div>
+        <div class="pagination-controls">
+            {% if resolved_complaints.has_previous %}
+                <a href="?resolved_page=1#resolved" class="pagination-btn first-page" title="First Page">
+                    <i class='bx bx-chevrons-left'></i>
+                </a>
+                <a href="?resolved_page={{ resolved_complaints.previous_page_number }}#resolved" class="pagination-btn prev-page" title="Previous Page">
+                    <i class='bx bx-chevron-left'></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn first-page disabled" title="First Page">
+                    <i class='bx bx-chevrons-left'></i>
+                </span>
+                <span class="pagination-btn prev-page disabled" title="Previous Page">
+                    <i class='bx bx-chevron-left'></i>
+                </span>
+            {% endif %}
+
+            <div class="page-numbers">
+                {% for num in resolved_complaints.paginator.page_range %}
+                    {% if resolved_complaints.number == num %}
+                        <span class="pagination-btn current-page active">{{ num }}</span>
+                    {% elif num > resolved_complaints.number|add:'-3' and num < resolved_complaints.number|add:'3' %}
+                        <a href="?resolved_page={{ num }}#resolved" class="pagination-btn page-number">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if resolved_complaints.has_next %}
+                <a href="?resolved_page={{ resolved_complaints.next_page_number }}#resolved" class="pagination-btn next-page" title="Next Page">
+                    <i class='bx bx-chevron-right'></i>
+                </a>
+                <a href="?resolved_page={{ resolved_complaints.paginator.num_pages }}#resolved" class="pagination-btn last-page" title="Last Page">
+                    <i class='bx bx-chevrons-right'></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn next-page disabled" title="Next Page">
+                    <i class='bx bx-chevron-right'></i>
+                </span>
+                <span class="pagination-btn last-page disabled" title="Last Page">
+                    <i class='bx bx-chevrons-right'></i>
+                </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

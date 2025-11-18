@@ -1,0 +1,111 @@
+{% block archive-company %}
+<div id="companyArchiveModal" class="modal">
+    <div class="modal-overlay" onclick="closeCompanyArchiveModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Archive Company</h2>
+                <p class="header-description" id="companyArchiveDescription">Are you sure you want to archive this company?</p>
+            </div>
+            <button class="modal-close" onclick="closeCompanyArchiveModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="companyArchiveForm" method="post" action="">
+            {% csrf_token %}
+            <input type="hidden" name="company_id" id="archiveCompanyId">
+
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p>Archiving will hide this company from regular users but keep it in the system. Current OJT records will be preserved.</p>
+                </div>
+
+                <!-- Company Details Preview -->
+                <div class="company-preview">
+                    <div class="preview-header">
+                        <h4 id="archiveCompanyName">-</h4>
+                        <span class="status-badge" id="archiveCompanyStatus">-</span>
+                    </div>
+                    <div class="preview-details">
+                        <div class="preview-item">
+                            <span class="preview-label">Address:</span>
+                            <span class="preview-value" id="archiveCompanyAddress">-</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">Contact:</span>
+                            <span class="preview-value" id="archiveCompanyContact">-</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">Email:</span>
+                            <span class="preview-value" id="archiveCompanyEmail">-</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">Website:</span>
+                            <span class="preview-value" id="archiveCompanyWebsite">-</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">Current Students:</span>
+                            <span class="preview-value" id="archiveCompanyStudents">-</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">Available Slots:</span>
+                            <span class="preview-value" id="archiveCompanySlots">-</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">Description:</span>
+                            <span class="preview-value" id="archiveCompanyDescription">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Archive Impact Warning -->
+                <div class="archive-impact-warning" id="archiveImpactWarning">
+                    <div class="warning-header">
+                        <i class='bx bx-error-circle'></i>
+                        <h4>Archive Impact</h4>
+                    </div>
+                    <div class="warning-content">
+                        <p><strong>This action will:</strong></p>
+                        <ul>
+                            <li>Hide the company from regular users and student applications</li>
+                            <li>Preserve all existing OJT records and student data</li>
+                            <li>Prevent new OJT applications to this company</li>
+                            <li>Keep the company accessible to administrators</li>
+                        </ul>
+                        <div class="active-students-warning" id="activeStudentsWarning" style="display: none;">
+                            <i class='bx bx-info-circle'></i>
+                            <div>
+                                <strong>Note:</strong> This company has <span id="activeStudentsCount">0</span> active OJT student(s).
+                                Their records will be preserved but no new applications will be accepted.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="companyArchiveFormResponse" class="form-response"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeCompanyArchiveModal()">Cancel</button>
+                <button type="submit" class="btn btn-warning" id="archiveSubmitBtn">
+                    <span class="btn-text">Archive Company</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock archive-company %}

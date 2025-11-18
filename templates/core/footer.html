@@ -1,0 +1,112 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/core/footer.css' %}">
+<footer class="site-footer">
+    <div class="footer-container">
+        <!-- University Information -->
+        <div class="footer-section">
+            <div class="footer-logo">
+                <img src="{% if footer_content.logo %}{{ footer_content.logo.url }}{% else %}{% static '' %}{% endif %}" alt="Logo">
+                <div class="logo-text">
+                    <h3>{{ footer_content.campus_name }}</h3>
+                </div>
+            </div>
+            <p class="footer-description">
+                {{ footer_content.description }}
+            </p>
+            <div class="social-links">
+                {% if footer_content.facebook_url %}
+                <a href="{{ footer_content.facebook_url }}" target="_blank" class="social-link" aria-label="Facebook"><i class="ri-facebook-fill"></i></a>
+                {% endif %}
+                {% if footer_content.twitter_url %}
+                <a href="{{ footer_content.twitter_url }}" target="_blank" class="social-link" aria-label="Twitter"><i class="ri-twitter-fill"></i></a>
+                {% endif %}
+                {% if footer_content.instagram_url %}
+                <a href="{{ footer_content.instagram_url }}" target="_blank" class="social-link" aria-label="Instagram"><i class="ri-instagram-fill"></i></a>
+                {% endif %}
+                {% if footer_content.youtube_url %}
+                <a href="{{ footer_content.youtube_url }}" target="_blank" class="social-link" aria-label="YouTube"><i class="ri-youtube-fill"></i></a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="footer-section">
+            <h3 class="footer-heading">Quick Links</h3>
+            <ul class="footer-links">
+                <li><a href="{% url 'home' %}"><i class="ri-home-4-line"></i> Home</a></li>
+                <li><a href="{% url 'about' %}"><i class="ri-information-line"></i> About OSAS</a></li>
+                <li><a href="{% url 'all_announcements' %}"><i class="ri-megaphone-line"></i> Announcements</a></li>
+                <li><a href="{% url 'downloadables' %}"><i class="ri-file-download-line"></i> Downloadable Forms</a></li>
+                <li><a href="/create-complaint"><i class="ri-information-line"></i> Make a Complaint</a></li>
+            </ul>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="footer-section">
+            <h3 class="footer-heading">Contact Us</h3>
+            <ul class="footer-contact">
+                <li>
+                    <i class="ri-map-pin-2-line"></i>
+                    <span>{{ footer_content.address }}</span>
+                </li>
+                <li>
+                    <i class="ri-phone-line"></i>
+                    <span>{{ footer_content.phone }}</span>
+                </li>
+                <li>
+                    <i class="ri-mail-line"></i>
+                    <span>{{ footer_content.email }}</span>
+                </li>
+                <li>
+                    <i class="ri-time-line"></i>
+                    <span>{{ footer_content.working_hours }}</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <div class="scroll-up-btn">
+                <button id="scrollUpBtn" class="scroll-up-button">
+                    <i class="ri-arrow-up-line"></i>
+                    <span>Back to Top</span>
+                </button>
+            </div>
+
+            <div class="emergency-contact">
+                <h4>Emergency Contacts</h4>
+                <ul>
+                    <li>Campus Security: {{ footer_content.campus_security }}</li>
+                    <li>University Clinic: {{ footer_content.university_clinic }}</li>
+                    <li>Local Police: {{ footer_content.local_police }}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copyright Section -->
+    <div class="footer-bottom">
+        <div class="copyright">
+            <p>&copy; {% now "Y" %} {{ footer_content.copyright_text }}</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+// Scroll to top button
+const scrollUpBtn = document.getElementById('scrollUpBtn');
+
+window.addEventListener('scroll', () => {
+    if (window.pageYOffset > 300) {
+        scrollUpBtn.style.display = 'flex';
+    } else {
+        scrollUpBtn.style.display = 'none';
+    }
+});
+
+scrollUpBtn.addEventListener('click', () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+});
+</script>

@@ -1,0 +1,111 @@
+{% block create-downloadables %}
+<div id="downloadableCreateModal" class="modal">
+    <div class="modal-overlay" onclick="closeDownloadableCreateModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Add New Downloadable</h2>
+                <p class="header-description">Upload a new file for users to download</p>
+            </div>
+            <button class="modal-close" onclick="closeDownloadableCreateModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="downloadableCreateForm" method="post" action="{% url 'add-downloadable' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <p>Please provide all required information to add a new downloadable file. Fields marked with <span class="required-asterisk">*</span> are mandatory.</p>
+                </div>
+
+                <div id="downloadableFormResponse" class="form-response"></div>
+
+                <div class="form-columns">
+                    <!-- Left Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="id_title">Title <span class="required-asterisk">*</span></label>
+                            <input type="text" name="title" id="id_title" class="form-input" required placeholder="Enter title">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_category">Category <span class="required-asterisk">*</span></label>
+                            <select name="category" id="id_category" class="form-input" required>
+                                <option value="">Select category</option>
+                                <option value="osas_forms">OSAS Forms</option>
+                                <option value="society_forms">Society Forms</option>
+                                <option value="scholarship_forms">Scholarship Forms</option>
+                                <option value="ojt_forms">OJT Forms</option>
+                                <option value="guidelines">Guidelines</option>
+                                <option value="manuals">Manuals</option>
+                                <option value="others">Others</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="id_description">Description</label>
+                            <textarea name="description" id="id_description" class="form-input" rows="3" placeholder="Enter description (optional)"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Upload Section -->
+                <div class="form-group file-upload-group">
+                    <label for="downloadableFileInput">File <span class="required-asterisk">*</span></label>
+                    <div class="file-upload-container">
+                        <div class="file-upload-box" onclick="document.getElementById('downloadableFileInput').click()">
+                            <div class="file-upload-content">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <p>Click to upload file</p>
+                                <small>Supports: PDF, DOC, XLS, PPT, ZIP (Max 10MB)</small>
+                            </div>
+                            <input type="file" name="file" id="downloadableFileInput" class="file-input" required accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip" style="display: none;">
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name" id="fileNameDisplay">No file selected</div>
+                            <div class="file-size" id="fileSizeDisplay"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="is_active" id="is_active" class="toggle-checkbox" checked>
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label-text">Active</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeDownloadableCreateModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Upload File</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock create-downloadables %}

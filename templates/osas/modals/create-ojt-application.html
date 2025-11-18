@@ -1,0 +1,159 @@
+{% block create-ojt-application %}
+<div id="ojtApplicationCreateModal" class="modal">
+    <div class="modal-overlay" onclick="closeOJTApplicationCreateModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Create New OJT Application</h2>
+                <p class="header-description">Submit a new On-the-Job Training application</p>
+            </div>
+            <button class="modal-close" onclick="closeOJTApplicationCreateModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="ojtApplicationCreateForm" method="post" action="{% url 'add-ojt-application' %}">
+            {% csrf_token %}
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <p>Please provide all required information for your OJT application. Fields marked with <span class="required-asterisk">*</span> are mandatory.</p>
+                </div>
+
+                <div id="ojtApplicationFormResponse" class="form-response"></div>
+
+                <div class="form-columns">
+                    <!-- Left Column -->
+                    <div class="form-column">
+                        <!-- Student Selection (for Admin/Staff only) -->
+                        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                        <div class="form-group">
+                            <label for="id_student_select">Student <span class="required-asterisk">*</span></label>
+                            {{ form.student_select }}
+                            {% if form.student_select.help_text %}
+                            <small class="help-text">{{ form.student_select.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Company Selection -->
+                        <div class="form-group">
+                            <label for="id_company">Company <span class="required-asterisk">*</span></label>
+                            {{ form.company }}
+                            {% if form.company.help_text %}
+                            <small class="help-text">{{ form.company.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Proposed Start Date -->
+                        <div class="form-group">
+                            <label for="id_proposed_start_date">Proposed Start Date <span class="required-asterisk">*</span></label>
+                            {{ form.proposed_start_date }}
+                            {% if form.proposed_start_date.help_text %}
+                            <small class="help-text">{{ form.proposed_start_date.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Proposed End Date -->
+                        <div class="form-group">
+                            <label for="id_proposed_end_date">Proposed End Date <span class="required-asterisk">*</span></label>
+                            {{ form.proposed_end_date }}
+                            {% if form.proposed_end_date.help_text %}
+                            <small class="help-text">{{ form.proposed_end_date.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Proposed Hours -->
+                        <div class="form-group">
+                            <label for="id_proposed_hours">Required Hours <span class="required-asterisk">*</span></label>
+                            {{ form.proposed_hours }}
+                            {% if form.proposed_hours.help_text %}
+                            <small class="help-text">{{ form.proposed_hours.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Status Field (for Admin/Staff only) -->
+                        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                        <div class="form-group">
+                            <label for="id_status">Application Status <span class="required-asterisk">*</span></label>
+                            {{ form.status }}
+                            {% if form.status.help_text %}
+                            <small class="help-text">{{ form.status.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <!-- Cover Letter -->
+                        <div class="form-group">
+                            <label for="id_cover_letter">
+                                {{ form.cover_letter.label }}
+                                {% if request.user.user_type == 14 %}<span class="required-asterisk">*</span>{% endif %}
+                            </label>
+                            {{ form.cover_letter }}
+                            {% if form.cover_letter.help_text %}
+                            <small class="help-text">{{ form.cover_letter.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Skills -->
+                        <div class="form-group">
+                            <label for="id_skills">
+                                {{ form.skills.label }}
+                                {% if request.user.user_type == 14 %}<span class="required-asterisk">*</span>{% endif %}
+                            </label>
+                            {{ form.skills }}
+                            {% if form.skills.help_text %}
+                            <small class="help-text">{{ form.skills.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Requirements Section -->
+                <div class="form-section">
+                    <h3 class="section-title">OJT Requirements</h3>
+                    <p class="section-description">The following documents will be required for this application:</p>
+
+                    <div class="requirements-list">
+                        {% for req_type, req_name in OJTRequirement.REQUIREMENT_TYPES %}
+                        <div class="requirement-item">
+                            <i class='bx bx-file'></i>
+                            <span>{{ req_name }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="form-note">
+                        <i class='bx bx-info-circle'></i>
+                        <p>You can upload these documents after creating the application. All requirements must be submitted before the application can be reviewed.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeOJTApplicationCreateModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Create Application</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock create-ojt-application %}

@@ -1,0 +1,133 @@
+{% block archive-organization %}
+<div id="organizationArchiveModal" class="modal">
+    <div class="modal-overlay" onclick="closeOrganizationArchiveModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Archive Organization</h2>
+                <p class="header-description" id="organizationArchiveDescription">Are you sure you want to cancel this organization?</p>
+            </div>
+            <button class="modal-close" onclick="closeOrganizationArchiveModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="organizationArchiveForm" method="post" action="">
+            {% csrf_token %}
+            <input type="hidden" name="organization_id" id="archiveOrganizationId">
+
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p>Archiving will deactivate this organization and change its status to "Cancelled". All data will be preserved for record-keeping.</p>
+                </div>
+
+                <!-- Organization Details Preview -->
+                <div class="organization-preview">
+                    <div class="preview-header">
+                        <div class="organization-logo-preview">
+                            <div id="archiveOrganizationLogo" class="logo-placeholder">
+                                <i class='bx bxs-group'></i>
+                            </div>
+                        </div>
+                        <div class="organization-info-preview">
+                            <h4 id="archiveOrganizationName">-</h4>
+                            <div class="preview-badges">
+                                <span class="type-badge" id="archiveOrganizationType">-</span>
+                                <span class="status-badge" id="archiveOrganizationStatus">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="preview-details">
+                        <div class="preview-grid">
+                            <div class="preview-item">
+                                <span class="preview-label">Acronym:</span>
+                                <span class="preview-value" id="archiveOrganizationAcronym">-</span>
+                            </div>
+                            <div class="preview-item">
+                                <span class="preview-label">Email:</span>
+                                <span class="preview-value" id="archiveOrganizationEmail">-</span>
+                            </div>
+                            <div class="preview-item">
+                                <span class="preview-label">Adviser:</span>
+                                <span class="preview-value" id="archiveOrganizationAdviser">-</span>
+                            </div>
+                            <div class="preview-item">
+                                <span class="preview-label">Members:</span>
+                                <span class="preview-value" id="archiveOrganizationMembers">-</span>
+                            </div>
+                            <div class="preview-item">
+                                <span class="preview-label">Valid Until:</span>
+                                <span class="preview-value" id="archiveOrganizationValidUntil">-</span>
+                            </div>
+                            <div class="preview-item">
+                                <span class="preview-label">Current Status:</span>
+                                <span class="preview-value" id="archiveCurrentStatus">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Cancellation Reason -->
+                        <div class="form-group">
+                            <label for="archiveReason">Archive Reason <span class="required-asterisk">*</span></label>
+                            <textarea
+                                name="archive_reason"
+                                id="archiveReason"
+                                class="form-input"
+                                rows="3"
+                                placeholder="Please provide a reason for cancelling this organization..."
+                                required></textarea>
+                            <small class="form-text">This reason will be recorded for audit purposes.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cancellation Impact Warning -->
+                <div class="archive-impact-warning">
+                    <div class="warning-header">
+                        <i class='bx bx-error-circle'></i>
+                        <h4>Archive Impact</h4>
+                    </div>
+                    <div class="warning-content">
+                        <p><strong>This action will:</strong></p>
+                        <ul>
+                            <li>Change organization status to <strong>"Cancelled"</strong></li>
+                            <li>Deactivate the organization account</li>
+                            <li>Hide the organization from regular views and searches</li>
+                            <li>Preserve all organization data, members, and documents</li>
+                            <li>Record the cancellation reason and timestamp</li>
+                            <li>Prevent the organization from logging in or performing actions</li>
+                        </ul>
+                        <div class="status-change-notice">
+                            <i class='bx bx-info-circle'></i>
+                            <div>
+                                <strong>Status Change:</strong> Current status "<span id="currentStatusDisplay">-</span>" will be changed to <strong>"Cancelled"</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="organizationArchiveFormResponse" class="form-response"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeOrganizationArchiveModal()">Cancel</button>
+                <button type="submit" class="btn btn-warning" id="archiveOrganizationSubmitBtn">
+                    <span class="btn-text">Archive</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock archive-organization %}

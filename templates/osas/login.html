@@ -1,0 +1,102 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/dashboard/login.css' %}">
+<div class="login-modal" id="loginModal">
+    <div class="login-modal-overlay"></div>
+    <div class="login-modal-container">
+        <button class="login-modal-close" id="loginModalClose">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+
+        <div class="login-content">
+            <!-- Left Side Login Form -->
+            <div class="login-form-side">
+                <div class="login-header">
+                    <h2>Welcome Back</h2>
+                    <p>Please enter your credentials to login</p>
+                </div>
+
+                <form id="loginForm" method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_username">Username</label>
+                        <input type="text" name="username" id="id_username" class="form-control" required>
+                        <div class="error-message" id="username-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password">Password</label>
+                        <input type="password" name="password" id="id_password" class="form-control" required>
+                        <div class="error-message" id="password-error"></div>
+                    </div>
+                    <button type="submit" class="login-button">
+                        <span class="button-text">Login</span>
+                        <span class="loading-indicator">
+                            <svg class="spinner" viewBox="0 0 50 50">
+                                <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="login-footer">
+                        <p>Don't have an account? <a href="/register" class="register-link">Register Here</a></p>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Side - Useful Information -->
+            <div class="login-info-side">
+                <div class="info-content">
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 8V12M12 16H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="info-text">
+                            <h3>Need Help?</h3>
+                            <p>Contact Support team if you're having trouble accessing your account.</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2"/>
+                                <circle cx="12" cy="9" r="3" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <div class="info-text">
+                            <h3>Location</h3>
+                            <p>Soldiers Hills IV, Molino VI, Bacoor City, Cavite</p>
+
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="info-text">
+                            <h3>Contact</h3>
+                            <p>Gmail: cvsubacoorosas@gmail.com</p>
+                            <p>Phone: 63+123456789</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-footer">
+                    <img src="{% static 'images/cvsu-logo.png' %}" alt="CvSU Logo" class="info-logo">
+                    <p>Office of Student Affairs and Services<br>Bacoor City Campus</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification Container -->
+<div id="toastContainer" class="toast-container"></div>

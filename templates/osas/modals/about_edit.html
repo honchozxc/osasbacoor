@@ -1,0 +1,188 @@
+{% extends 'osas/dashboard.html' %}
+{% load static %}
+
+{% block section-content %}
+<div class="about-edit-container">
+    <h2>Edit About Page Content</h2>
+    <form method="post" id="aboutPageForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div class="form-group">
+            <label>Objectives</label>
+            <div id="objectivesContainer">
+                <!-- Objectives will be added here by JavaScript -->
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" id="addObjective">Add Objective</button>
+        </div>
+
+        <div class="form-group">
+            <label>Courses Offered</label>
+            <div id="coursesContainer">
+                {% for course in courses %}
+                <div class="course-item mb-3 p-3 border" data-course-id="{{ course.id }}">
+                    <input type="hidden" name="existing_courses" value="{{ course.id }}">
+                    <div class="form-group">
+                        <label>Course Name</label>
+                        <input type="text" name="course_name_{{ course.id }}" value="{{ course.name }}" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Subtext (optional)</label>
+                        <input type="text" name="course_subtext_{{ course.id }}" value="{{ course.subtext }}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Logo</label>
+                        <div class="custom-file">
+                            <input type="file" name="course_logo_{{ course.id }}" class="custom-file-input" id="logo-{{ course.id }}">
+                            <label class="custom-file-label" for="logo-{{ course.id }}">
+                                {% if course.logo %}
+                                    Currently: {{ course.logo.name|cut:"course_logos/" }}
+                                {% else %}
+                                    Choose file...
+                                {% endif %}
+                            </label>
+                        </div>
+                        {% if course.logo %}
+                        <div class="mt-2">
+                            <img src="{{ course.logo.url }}" alt="{{ course.name }} Logo" style="max-height: 50px;">
+                            <div class="form-check mt-2">
+                                <input type="checkbox" name="course_logo_clear_{{ course.id }}" id="logo-clear-{{ course.id }}" class="form-check-input">
+                                <label for="logo-clear-{{ course.id }}" class="form-check-label">Remove logo</label>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="btn btn-danger remove-course">Remove Course</button>
+                </div>
+                {% endfor %}
+
+                <div id="newCoursesContainer"></div>
+                <button type="button" id="addCourseBtn" class="btn btn-success">Add New Course</button>
+            </div>
+        </div>
+
+        <div id="deletedCoursesContainer"></div>
+
+        <button type="submit" name="save_changes" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize objectives
+    const objectives = JSON.parse('{{ objectives_json|escapejs }}') || [];
+    const objectivesContainer = document.getElementById('objectivesContainer');
+    const objectivesInput = document.getElementById('id_objectives');
+    const newCoursesContainer = document.getElementById('newCoursesContainer');
+    const deletedCoursesContainer = document.getElementById('deletedCoursesContainer');
+    let newCourseCounter = 0;
+
+    // Render objectives
+    function renderObjectives() {
+        objectivesContainer.innerHTML = '';
+        objectives.forEach((obj, index) => {
+            const div = document.createElement('div');
+            div.className = 'input-group mb-2';
+            div.innerHTML = `
+                <input type="text" class="form-control objective-input" value="${obj}" data-index="${index}">
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-danger remove-objective">Remove</button>
+                </div>
+            `;
+            objectivesContainer.appendChild(div);
+        });
+        objectivesInput.value = JSON.stringify(objectives);
+    }
+
+    // Add new objective
+    document.getElementById('addObjective').addEventListener('click', function() {
+        objectives.push("");
+        renderObjectives();
+    });
+
+    // Remove objective
+    objectivesContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-objective')) {
+            const index = e.target.closest('.input-group').querySelector('.objective-input').dataset.index;
+            objectives.splice(index, 1);
+            renderObjectives();
+        }
+    });
+
+    // Update objectives when changed
+    objectivesContainer.addEventListener('input', function(e) {
+        if (e.target.classList.contains('objective-input')) {
+            const index = e.target.dataset.index;
+            objectives[index] = e.target.value;
+            objectivesInput.value = JSON.stringify(objectives);
+        }
+    });
+
+    // Add new course
+    document.getElementById('addCourseBtn').addEventListener('click', function() {
+        newCourseCounter++;
+        const div = document.createElement('div');
+        div.className = 'course-item mb-3 p-3 border';
+        div.innerHTML = `
+            <input type="hidden" name="new_courses" value="${newCourseCounter}">
+            <div class="form-group">
+                <label>Course Name</label>
+                <input type="text" name="new_course_name_${newCourseCounter}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Subtext (optional)</label>
+                <input type="text" name="new_course_subtext_${newCourseCounter}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Logo</label>
+                <div class="custom-file">
+                    <input type="file" name="new_course_logo_${newCourseCounter}" class="custom-file-input" id="new-course-logo-${newCourseCounter}">
+                    <label class="custom-file-label" for="new-course-logo-${newCourseCounter}">Choose file...</label>
+                </div>
+            </div>
+            <button type="button" class="btn btn-danger remove-course">Remove Course</button>
+        `;
+        newCoursesContainer.appendChild(div);
+
+        // Initialize file input for new course
+        const fileInput = div.querySelector('.custom-file-input');
+        fileInput.addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file...';
+            const label = e.target.nextElementSibling;
+            label.textContent = fileName;
+        });
+    });
+
+    // Remove course
+    document.getElementById('coursesContainer').addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-course')) {
+            const courseDiv = e.target.closest('.course-item');
+            const courseId = courseDiv.dataset.courseId;
+
+            if (courseId) {
+                // For existing courses, add a hidden field to mark for deletion
+                const deleteInput = document.createElement('input');
+                deleteInput.type = 'hidden';
+                deleteInput.name = 'deleted_courses';
+                deleteInput.value = courseId;
+                deletedCoursesContainer.appendChild(deleteInput);
+            }
+            courseDiv.remove();
+        }
+    });
+
+    // Add file input change handlers for logo uploads
+    document.querySelectorAll('.custom-file-input').forEach(input => {
+        input.addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file...';
+            const label = e.target.nextElementSibling;
+            label.textContent = fileName;
+        });
+    });
+
+    // Initial render
+    renderObjectives();
+});
+</script>
+{% endblock %}

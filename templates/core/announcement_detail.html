@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ announcement.title }} | Office of Student Affairs and Services</title>
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link rel="stylesheet" href="{% static 'css/core/announcement_detail.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Lightbox CSS for image gallery -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lightgallery-bundle.min.css">
+    <style>
+        /* Enhanced styles for formatted content */
+        .content-text {
+            line-height: 1.8;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .content-text h1 {
+            font-size: 2rem;
+            margin: 1.5em 0 0.8em;
+            color: #2c3e50;
+            font-weight: 600;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.3em;
+        }
+
+        .content-text h2 {
+            font-size: 1.7rem;
+            margin: 1.3em 0 0.7em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .content-text h3 {
+            font-size: 1.4rem;
+            margin: 1.1em 0 0.6em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .content-text h4 {
+            font-size: 1.2rem;
+            margin: 1em 0 0.5em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .content-text p {
+            margin-bottom: 1.2em;
+        }
+
+        .content-text strong,
+        .content-text b {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .content-text em,
+        .content-text i {
+            font-style: italic;
+        }
+
+        .content-text ul,
+        .content-text ol {
+            margin: 1em 0;
+            padding-left: 2em;
+        }
+
+        .content-text ul {
+            list-style-type: disc;
+        }
+
+        .content-text ol {
+            list-style-type: decimal;
+        }
+
+        .content-text li {
+            margin-bottom: 0.5em;
+        }
+
+        .content-text a {
+            color: #3498db;
+            text-decoration: underline;
+        }
+
+        .content-text a:hover {
+            color: #2980b9;
+        }
+
+        .content-text blockquote {
+            border-left: 4px solid #3498db;
+            padding: 0.5em 1em;
+            margin: 1em 0;
+            background-color: #f8f9fa;
+            font-style: italic;
+        }
+
+        .content-text code {
+            font-family: 'Courier New', monospace;
+            background-color: #f8f9fa;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .content-text pre {
+            background-color: #f8f9fa;
+            padding: 1em;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+
+        .content-text pre code {
+            padding: 0;
+            background-color: transparent;
+            border-radius: 0;
+        }
+
+        .content-text table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1em 0;
+        }
+
+        .content-text th,
+        .content-text td {
+            padding: 0.75em;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .content-text th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+
+        .content-text img {
+            max-width: 100%;
+            height: auto;
+            margin: 1em 0;
+            border-radius: 4px;
+        }
+
+        /* Styles for other content sections */
+        .requirements,
+        .benefits {
+            line-height: 1.6;
+            margin: 1em 0;
+        }
+
+        .requirements h3,
+        .benefits h3 {
+            font-size: 1.2rem;
+            margin: 1em 0 0.5em;
+        }
+
+        .related-card p {
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    {% include 'core/navbar.html' %}
+    <div class="announcement-detail-container">
+        <div class="detail-main">
+            <!-- Navigation -->
+            <nav class="breadcrumb">
+                <a href="{% url 'home' %}">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="{% url 'all_announcements' %}#announcements">Announcements</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>{{ announcement.title|truncatechars:30 }}</span>
+            </nav>
+
+            <!-- Main Article Content -->
+            <article class="announcement-article">
+                <header class="article-header">
+                    <span class="category-badge {{ announcement.category|lower }}">
+                        {{ announcement.get_category_display }}
+                    </span>
+                    <h1>{{ announcement.title }}</h1>
+                    <div class="meta-info">
+                        <div class="author-info">
+                            <div class="author-avatar">
+                                {% if announcement.author.profile_picture %}
+                                <img src="{{ announcement.author.profile_picture.url }}" alt="{{ announcement.author.get_full_name }}">
+                                {% else %}
+                                <img src="{% static 'images/default-avatar.png' %}" alt="{{ announcement.author.get_full_name }}">
+                                {% endif %}
+                            </div>
+                            <div class="author-details">
+                                <span class="author-name">{{ announcement.author.get_full_name }}</span>
+                                <span class="author-position">{{ announcement.author.position }}</span>
+                            </div>
+                        </div>
+                        <div class="article-meta">
+                            <span class="date"><i class="far fa-calendar-alt"></i> {{ announcement.created_at|date:"F j, Y" }}</span>
+                            <span class="time"><i class="far fa-clock"></i> {{ announcement.created_at|time }}</span>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Article Content -->
+                <div class="article-content">
+                    <!-- Featured Image with Lightbox -->
+                    {% if announcement.images.exists %}
+                    <div class="featured-gallery">
+                        {% if announcement.images.count == 1 %}
+                            <figure class="featured-image">
+                                <a href="{{ announcement.images.first.image.url }}" data-lg-size="1600-1200">
+                                    <img src="{{ announcement.images.first.image.url }}" alt="{{ announcement.title }}">
+                                </a>
+                                {% if announcement.images.first.caption %}
+                                <figcaption>{{ announcement.images.first.caption }}</figcaption>
+                                {% endif %}
+                            </figure>
+                        {% else %}
+                            <div class="gallery-grid" id="lightgallery">
+                                {% for image in announcement.images.all %}
+                                <figure class="gallery-item" data-src="{{ image.image.url }}" data-sub-html=".caption-{{ forloop.counter }}">
+                                    <img src="{{ image.image.url }}" alt="Announcement image {{ forloop.counter }}">
+                                    {% if image.caption %}
+                                    <div class="caption-{{ forloop.counter }}" style="display:none;">
+                                        <h4>{{ announcement.title }}</h4>
+                                        <p>{{ image.caption }}</p>
+                                    </div>
+                                    {% endif %}
+                                </figure>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Main Content -->
+                    <div class="content-text">
+                        {{ announcement.content|safe }}
+                    </div>
+
+                    <!-- Link if available -->
+                    {% if announcement.link %}
+                    <div class="article-link">
+                        <a href="{{ announcement.link }}" target="_blank" class="external-link">
+                            <i class="fas fa-external-link-alt"></i> {{ announcement.link|truncatechars:50 }}
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Category-Specific Details -->
+                    {% if announcement.category == 'EVENT' and announcement.event_date %}
+                    <div class="article-details event-details">
+                        <h3><i class="fas fa-info-circle"></i> Event Details</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="far fa-calendar"></i> Date:</span>
+                                <span class="detail-value">{{ announcement.event_date|date:"F j, Y" }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="far fa-clock"></i> Time:</span>
+                                <span class="detail-value">{{ announcement.event_date|time }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Location:</span>
+                                <span class="detail-value">{{ announcement.location }}</span>
+                            </div>
+                            {% if announcement.contact_info %}
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-phone-alt"></i> Contact:</span>
+                                <span class="detail-value">{{ announcement.contact_info }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if announcement.category == 'ENROLLMENT' %}
+                    <div class="article-details enrollment-details">
+                        <h3><i class="fas fa-info-circle"></i> Enrollment Details</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-calendar-day"></i> Starts:</span>
+                                <span class="detail-value">{{ announcement.enrollment_start|date:"F j, Y, g:i a" }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-calendar-times"></i> Ends:</span>
+                                <span class="detail-value">{{ announcement.enrollment_end|date:"F j, Y, g:i a" }}</span>
+                            </div>
+                            {% if announcement.courses %}
+                            <div class="detail-item full-width">
+                                <span class="detail-label"><i class="fas fa-graduation-cap"></i> For Courses:</span>
+                                <div class="courses">
+                                    {% for course in announcement.get_unique_courses_display %}
+                                    <span class="course-badge">{{ course }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if announcement.category == 'SUSPENSION' %}
+                    <div class="article-details suspension-details">
+                        <h3><i class="fas fa-info-circle"></i> Suspension Details</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-calendar-day"></i> Date:</span>
+                                <span class="detail-value">{{ announcement.suspension_date|date:"F j, Y" }}</span>
+                            </div>
+                            {% if announcement.until_suspension_date %}
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-calendar-times"></i> Until:</span>
+                                <span class="detail-value">{{ announcement.until_suspension_date|date:"F j, Y" }}</span>
+                            </div>
+                            {% endif %}
+                            {% if announcement.contact_info %}
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-phone-alt"></i> Contact:</span>
+                                <span class="detail-value">{{ announcement.contact_info }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if announcement.category == 'EMERGENCY' and announcement.contact_info %}
+                    <div class="article-details emergency-details">
+                        <h3><i class="fas fa-info-circle"></i> Emergency Contact</h3>
+                        <div class="contact-info">
+                            <i class="fas fa-phone-alt"></i> {{ announcement.contact_info }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Scholarship Details Section -->
+                    {% if announcement.category == 'SCHOLARSHIP' %}
+                    <div class="article-details scholarship-details">
+                        <h3><i class="fas fa-info-circle"></i> Scholarship Details</h3>
+                        <div class="details-grid">
+                            {% if announcement.scholarship %}
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-graduation-cap"></i> Scholarship:</span>
+                                <span class="detail-value">{{ announcement.scholarship.name }}</span>
+                            </div>
+                            {% endif %}
+
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-calendar-day"></i> Application Starts:</span>
+                                <span class="detail-value">{{ announcement.application_start|date:"F j, Y, g:i a" }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-calendar-times"></i> Application Ends:</span>
+                                <span class="detail-value">{{ announcement.application_end|date:"F j, Y, g:i a" }}</span>
+                            </div>
+
+                            {% if announcement.requirements %}
+                            <div class="detail-item full-width">
+                                <span class="detail-label"><i class="fas fa-file-alt"></i> Requirements:</span>
+                                <div class="requirements">
+                                    {{ announcement.requirements|safe }}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if announcement.benefits %}
+                            <div class="detail-item full-width">
+                                <span class="detail-label"><i class="fas fa-gift"></i> Benefits:</span>
+                                <div class="benefits">
+                                    {{ announcement.benefits|safe }}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if announcement.contact_info %}
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-phone-alt"></i> Contact:</span>
+                                <span class="detail-value">{{ announcement.contact_info }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if announcement.link %}
+                            <div class="detail-item full-width">
+                                <span class="detail-label"><i class="fas fa-link"></i> Application Link:</span>
+                                <a href="{{ announcement.link }}" target="_blank" class="detail-value">
+                                    {{ announcement.link|truncatechars:40 }}
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Article Footer -->
+                <footer class="article-footer">
+                    <div class="tags">
+                        <span class="tag-label">Tags:</span>
+                        <span class="tag">{{ announcement.get_category_display }}</span>
+                        {% if announcement.category == 'EVENT' %}
+                        <span class="tag">Event</span>
+                        {% elif announcement.category == 'ENROLLMENT' %}
+                        <span class="tag">Enrollment</span>
+                        {% for course in announcement.get_unique_courses_display %}
+                        <span class="tag">{{ course }}</span>
+                        {% endfor %}
+                        {% elif announcement.category == 'SCHOLARSHIP' %}
+                        <span class="tag">Scholarship</span>
+                        {% if announcement.scholarship %}
+                        <span class="tag">{{ announcement.scholarship.name }}</span>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </footer>
+            </article>
+
+            <!-- Related Announcements -->
+            <section class="related-announcements">
+                <h2>Related Announcements</h2>
+                <div class="related-grid">
+                    {% for related in related_announcements %}
+                    <article class="related-card">
+                        <div class="related-header">
+                            <span class="category-badge {{ related.category|lower }}">{{ related.get_category_display }}</span>
+                            <span class="post-time">{{ related.created_at|timesince }} ago</span>
+                        </div>
+                        <h3><a href="{% url 'home_announcement_detail' related.id %}">{{ related.title }}</a></h3>
+                        <p>{{ related.content|truncatechars:100|safe }}</p>
+                        <a href="{% url 'home_announcement_detail' related.id %}" class="read-more">Read More <i class="fas fa-chevron-right"></i></a>
+                    </article>
+                    {% empty %}
+                    <div class="no-related">
+                        <p>No related announcements found</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="detail-sidebar">
+            <!-- Recent Announcements Section -->
+            <section class="sidebar-section recent-announcements">
+                <h3 class="sidebar-title">
+                    <i class="fas fa-history"></i> Recent Announcements
+                </h3>
+                <div class="recent-list">
+                    {% for recent in recent_announcements %}
+                    <article class="recent-item">
+                        <span class="recent-category {{ recent.category|lower }}">{{ recent.get_category_display }}</span>
+                        <h4><a href="{% url 'home_announcement_detail' recent.id %}">{{ recent.title }}</a></h4>
+                        <span class="recent-date">{{ recent.created_at|date:"M j, Y" }}</span>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Quick Links Section -->
+            <section class="sidebar-section quick-links">
+                <h3 class="sidebar-title">
+                    <i class="fas fa-link"></i> Useful Links
+                </h3>
+                <ul>
+                    <li><a href="/downloadables"><i class="fas fa-file-pdf"></i> Download Forms</a></li>
+                    <li><a href="/scholarships"><i class="fas fa-graduation-cap"></i> Scholarship Info</a></li>
+                    <li><a href="/create-complaint"><i class="fa-solid fa-circle-info"></i> Make a Complain</a></li>
+                    <li><a href="/osas-org-chart"><i class="fa-solid fa-circle-info"></i> Organization Chart</a></li>
+                </ul>
+            </section>
+        </aside>
+    </div>
+
+    <!-- Lightbox Gallery and JS for image gallery function -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/lightgallery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lg-zoom/2.7.1/lg-zoom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/2.7.1/lg-fullscreen.min.js"></script>
+    <script src="{% static 'js/core/announcement_detail.js' %}"></script>
+
+    {% include 'core/footer.html' %}
+</body>
+</html>

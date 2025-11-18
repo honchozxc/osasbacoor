@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Dashboard | OSAS Administrator</title>
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/spaces.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/analytics.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/export-nstp.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/admission-section.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/footer-edit.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/nstp-files.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/complaint.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/calendar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/ojt-applications.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/company-section.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/complaint-section.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/modals.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/toast.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/home-section.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/profile-section.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/scholarship-section.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/organization.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/org-certificate.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/org-accomplishment-report.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/users-section.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/announcement-section.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/downloadables-section.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/ojt-records-section.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/archived.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap">
+    <!-- Quill stylesheet -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <!-- Quill script -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+</head>
+<body>
+    {% include 'osas/sections/navbar.html' %}       <!-- Navbar Contents Here -->
+    <main>
+        <div class="container">
+            {% include 'osas/sections/sidebar.html ' %}         <!-- Sidebar Contents Here -->
+<!------------------------------------------ Main Contents | Sections Here -------------------------------------------->
+            <div class="content">
+                {% block section-content  %}
+                <div id="home" class="content-section active-section">
+                    {% include 'osas/sections/home-section.html' %}             <!-- Home Contents Here -->
+                </div>
+
+                <div id="about" class="content-section active-section">
+                    {% include 'osas/sections/about-section.html' %}            <!-- Home Contents Here -->
+                </div>
+
+                <div id="calendar" class="content-section active-section">
+                    {% include 'osas/sections/calendar.html' %}                 <!-- Calendar Contents Here -->
+                </div>
+
+                <div id="dashboard" class="content-section active-section">
+                    {% include 'osas/sections/analytics-section.html' %}        <!-- Analytics Contents Here -->
+                </div>
+
+                <div id="profile" class="content-section">
+                    {% include 'osas/sections/profile-section.html' %}          <!-- Profile Contents Here -->
+                </div>
+                <div id="user-management" class="content-section">
+                    {% include 'osas/sections/user-section.html' %}             <!-- Users Contents Here -->
+                </div>
+
+                <div id="downloadables" class="content-section">
+                    {% include 'osas/sections/downloadables-section.html' %}    <!-- Downloadables Content Here -->
+                </div>
+
+                <div id="under-review" class="content-section">
+                    {% include 'osas/sections/under-review-section.html' %}        <!-- Complaint Under Review Content Here -->
+                </div>
+
+                <div id="resolved" class="content-section">
+                    {% include 'osas/sections/resolved-section.html' %}        <!-- Complaint Resolved Content Here -->
+                </div>
+
+                <div id="ojt-company" class="content-section">
+                    {% include 'osas/sections/ojt-company-section.html' %}        <!-- OJT Company Content Here -->
+                </div>
+
+                <div id="ojt-records" class="content-section">
+                    {% include 'osas/sections/ojt-applications-section.html' %}        <!-- OJT Applications Content Here -->
+                </div>
+
+                <div id="ojt-reports" class="content-section">
+                    {% include 'osas/sections/ojt-reports-section.html' %}        <!-- OJT Reports Content Here -->
+                </div>
+
+                <div id="scholarships" class="content-section">
+                    {% include 'osas/sections/scholarship-section.html' %}          <!-- Scholarship Content Here-->
+                </div>
+
+                <div id="scholarship-applications" class="content-section">
+                    {% include 'osas/sections/scholarship-applicants-section.html' %}     <!-- Scholarship Applicants Content Here-->
+                </div>
+
+                <div id="announcements" class="content-section">
+                    {% include 'osas/sections/announcements-section.html' %}    <!-- Announcements Content Here -->
+                </div>
+
+                <div id="archived" class="content-section">
+                    {% include 'osas/sections/archived-section.html' %}         <!-- Archived Data Content Here -->
+                </div>
+
+                <div id="admission-applications" class="content-section">
+                    {% include 'osas/sections/admission-section.html' %}        <!-- Admission Data Content Here -->
+                </div>
+
+                <div id="nstp-enlistment" class="content-section">
+                    {% include 'osas/sections/nstp-enlistment-section.html' %}        <!-- NSTP Enlistment Data Content Here -->
+                </div>
+
+                <div id="nstp-files" class="content-section">
+                    {% include 'osas/sections/nstp-files-section.html' %}        <!-- NSTP Files Data Content Here -->
+                </div>
+
+                <div id="organization-management" class="content-section">
+                    {% include 'osas/sections/org-section.html' %}                  <!-- Organization Management Content Here -->
+                </div>
+
+                <div id="organization-certificates" class="content-section">
+                    {% include 'osas/sections/org-certificates-section.html' %}     <!-- Organization Certificates Content Here -->
+                </div>
+
+                <div id="organization-accomplishment-reports" class="content-section">
+                    {% include 'osas/sections/org-reports-section.html' %}           <!-- Organization Accomplishment Reports Content Here -->
+                </div>
+                {% endblock section-content  %}
+            </div>
+        </div>
+    </main>
+<!------------------------------------------ Popup Forms | Modals Content Here ---------------------------------------->
+<!-- User Management Modals -->
+    {% include 'osas/modals/approve-user.html' %}               <!-- Approve Modal -->
+    {% include 'osas/modals/create-user.html' %}                <!-- Create Modal -->
+    {% include 'osas/modals/view-user.html' %}                  <!-- View Modal -->
+    {% include 'osas/modals/edit-user.html' %}                  <!-- Edit Modal -->
+    {% include 'osas/modals/archive-user.html' %}               <!-- Archive Modal -->
+    {% include 'osas/modals/export-user.html' %}                <!-- Export Modal -->
+
+<!-- Downlaodable Management Modals -->
+    {% include 'osas/modals/create-downloadables.html' %}       <!-- Create Modal -->
+    {% include 'osas/modals/view-downloadables.html' %}         <!-- View Modal -->
+    {% include 'osas/modals/edit-downloadables.html' %}         <!-- Edit Modal -->
+    {% include 'osas/modals/archive-downloadables.html' %}      <!-- Archive Modal -->
+
+<!-- Complaint Management Modal -->
+    {% include 'osas/modals/resolved-complaint.html' %}         <!-- Resolved Complaint Modal -->
+    {% include 'osas/modals/view-complaint.html' %}             <!-- View Modal -->
+    {% include 'osas/modals/edit-complaint.html' %}             <!-- Edit Modal -->
+    {% include 'osas/modals/archive-complaint.html' %}          <!-- Archive Modal -->
+    {% include 'osas/modals/export-complaint.html' %}           <!-- Export Modal -->
+
+<!-- Announcement Management Modals -->
+    {% include 'osas/modals/create-announcements.html' %}       <!-- Create Modal -->
+    {% include 'osas/modals/view-announcements.html' %}         <!-- View Modal -->
+    {% include 'osas/modals/edit-announcements.html' %}         <!-- Edit Modal -->
+    {% include 'osas/modals/archive-announcements.html' %}      <!-- Archive Modal -->
+
+<!-- Scholarship Management Modals -->
+    {% include 'osas/modals/create-scholarship.html' %}         <!-- Create Modal -->
+    {% include 'osas/modals/view-scholarship.html' %}           <!-- View Modal -->
+    {% include 'osas/modals/edit-scholarship.html' %}           <!-- Edit Modal -->
+    {% include 'osas/modals/archive-scholarship.html' %}        <!-- Archive Modal -->
+
+<!-- Scholarship Application Management Modals -->
+    {% include 'osas/modals/approve-scholarship-application.html' %}         <!-- Approve Modal -->
+    {% include 'osas/modals/edit-scholarship-application.html' %}            <!-- Edit Modal -->
+    {% include 'osas/modals/archive-scholarship-application.html' %}         <!-- Archive Modal -->
+    {% include 'osas/modals/export-scholarship-applicants.html' %}           <!-- Export Modal -->
+
+<!-- Admission Management Modal -->
+    {% include 'osas/modals/approve-admission.html' %}          <!-- Approve Modal -->
+    {% include 'osas/modals/view-admission.html' %}             <!-- View Modal -->
+    {% include 'osas/modals/edit-admission.html' %}             <!-- Edit Modal -->
+    {% include 'osas/modals/archive-admission.html ' %}         <!-- Archive Modal -->
+    {% include 'osas/modals/export-admission.html' %}           <!-- Export Modal -->
+
+<!-- NSTP Management Modal -->
+    {% include 'osas/modals/approve-nstp-enlistment.html' %}        <!-- Approve Modal -->
+    {% include 'osas/modals/view-nstp-enlistment.html' %}           <!-- View Modal -->
+    {% include 'osas/modals/edit-nstp-enlistment.html' %}           <!-- Edit Modal -->
+    {% include 'osas/modals/archive-nstp-enlistment.html' %}        <!-- Edit Modal -->
+    {% include 'osas/modals/export-nstp.html' %}                    <!-- Export Modal -->
+
+<!-- NSTP Files Management Modal -->
+    {% include 'osas/modals/create-nstp-files.html' %}          <!-- Create Modal -->
+    {% include 'osas/modals/view-nstp-files.html' %}            <!-- View Modal -->
+    {% include 'osas/modals/edit-nstp-files.html' %}            <!-- Edit Modal -->
+    {% include 'osas/modals/archive-nstp-files.html' %}         <!-- Archive Modal -->
+
+<!-- OJT Company Management Modal -->
+    {% include 'osas/modals/create-company.html' %}             <!-- Create Modal -->
+    {% include 'osas/modals/view-company.html' %}               <!-- View Modal -->
+    {% include 'osas/modals/edit-company.html' %}               <!-- Edit Modal -->
+    {% include 'osas/modals/archive-company.html' %}            <!-- Archive Modal -->
+    {% include 'osas/modals/export-company.html' %}             <!-- Export Modal -->
+
+<!-- OJT Application Management Modal -->
+    {% include 'osas/modals/approve-ojt-application.html' %}    <!-- Approve Modal -->
+    {% include 'osas/modals/view-ojt-application.html' %}       <!-- View Modal -->
+    {% include 'osas/modals/edit-ojt-application.html' %}       <!-- Edit Modal -->
+    {% include 'osas/modals/archive-ojt-application.html' %}    <!-- Archive Modal -->
+    {% include 'osas/modals/export-ojt-application.html' %}     <!-- Export Modal -->
+
+<!-- OJT Reports Management Modal -->
+    {% include 'osas/modals/create-ojt-report.html' %}          <!-- Create Modal -->
+    {% include 'osas/modals/view-ojt-report.html' %}            <!-- View Modal -->
+    {% include 'osas/modals/edit-ojt-report.html' %}            <!-- Edit Modal -->
+    {% include 'osas/modals/archive-ojt-report.html' %}         <!-- Archive Modal -->
+    {% include 'osas/modals/review-ojt-report.html' %}          <!-- Review Modal -->
+    {% include 'osas/modals/export-ojt-report.html' %}          <!-- Export Modal -->
+
+<!-- Organization Management Modal -->
+    {% include 'osas/modals/approve-organization.html' %}         <!-- Approve Modal -->
+    {% include 'osas/modals/create-organization.html' %}          <!-- Create Modal -->
+    {% include 'osas/modals/view-organization.html' %}            <!-- View Modal -->
+    {% include 'osas/modals/edit-organization.html' %}            <!-- Edit Modal -->
+    {% include 'osas/modals/archive-organization.html' %}         <!-- Archive Modal -->
+    {% include 'osas/modals/reactivate-organization.html' %}      <!-- Reactivate Modal -->
+    {% include 'osas/modals/renew-organization.html' %}           <!-- Renew Modal -->
+
+<!-- Organization(AR) Management Modal -->
+    {% include 'osas/modals/create-ar-organization.html' %}          <!-- Create/Submit Modal -->
+    {% include 'osas/modals/view-ar-organization.html' %}            <!-- View Modal -->
+    {% include 'osas/modals/edit-ar-organization.html' %}            <!-- Edit Modal -->
+    {% include 'osas/modals/archive-ar-organization.html' %}         <!-- Archive Modal -->
+
+<!-- Archived Management Modals -->
+    {% include 'osas/modals/view-archived.html' %}              <!-- View Modal -->
+    {% include 'osas/modals/retrieve-archived.html' %}          <!-- Retrieve Modal -->
+
+<!-- Additionals -->
+    {% include 'osas/modals/logout.html ' %}                    <!-- Logout Modal -->
+    <div id="toastContainer" class="toast-container"></div>     <!-- Toast Success/Error Notification-->
+
+
+<!-- JS Functions -->
+    <script src="{% static 'js/dashboard/home-section.js' %}"></script>
+    <script src="{% static 'js/dashboard/analytics-section.js' %}"></script>
+    <script src="{% static 'js/dashboard/profile.js' %}"></script>
+    <script src="{% static 'js/dashboard/complaint-section.js' %}"></script>
+    <script src="{% static 'js/dashboard/ojt-companies-crud.js' %}"></script>
+    <script src="{% static 'js/dashboard/ojt-applications-crud.js' %}"></script>
+    <script src="{% static 'js/dashboard/ojt-reports-crud.js' %}"></script>
+    <script src="{% static 'js/dashboard/users-crud.js' %}"></script>
+    <script src="{% static 'js/dashboard/admission-crud.js' %}"></script>
+    <script src="{% static 'js/dashboard/nstp-crud.js' %}"></script>
+    <script src="{% static 'js/dashboard/nstp-files-crud.js' %}"></script>
+    <script src="{% static 'js/dashboard/downloadables-crud.js' %}"></script>
+    <script src="{% static 'js/dashboard/announcements-crud.js' %}"></script>
+    <script src="{% static 'js/dashboard/scholarship-crud.js' %}"></script>
+    <script src="{% static 'js/dashboard/scholarship-application-crud.js' %}"></script>
+    <script src="{% static 'js/dashboard/organizations-crud.js' %}"></script>
+    <script src="{% static 'js/dashboard/org-certificate.js' %}"></script>
+    <script src="{% static 'js/dashboard/org-accomplishment-report.js' %}"></script>
+    <script src="{% static 'js/dashboard/archived.js' %}"></script>
+    <script src="{% static 'js/dashboard/calendar.js' %}"></script>
+    <script src="{% static 'js/dashboard/sidebar.js' %}"></script>
+    <script src="{% static 'js/dashboard/logout.js' %}"></script>
+</body>
+</html>

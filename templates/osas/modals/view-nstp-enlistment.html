@@ -1,0 +1,157 @@
+{% block nstp-student-view %}
+<div id="nstpStudentViewModal" class="modal">
+    <div class="modal-overlay" onclick="closeNSTPStudentViewModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>NSTP Student Details</h2>
+                <p class="header-description">View student enlistment information</p>
+            </div>
+            <button class="modal-close" onclick="closeNSTPStudentViewModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="form-body">
+            <div class="nstp-header">
+                <h3 id="nstpStudentNumber" class="nstp-student-no"></h3>
+                <div class="student-name-section">
+                    <h4 id="studentFullName"></h4>
+                    <div class="student-name-details">
+                        <span id="studentFirstName"></span>
+                        <span id="studentMiddleName"></span>
+                        <span id="studentLastName"></span>
+                    </div>
+                </div>
+                <div class="nstp-meta">
+                    <span id="nstpSemester" class="semester-tag"></span>
+                    <span id="nstpAcademicYear" class="academic-year"></span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Personal Information Section -->
+            <div class="detail-group">
+                <h4 class="detail-label">Personal Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Student Number</span>
+                        <span id="nstpStudentNumberDetail" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Program/Course</span>
+                        <span id="nstpProgram" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Gender</span>
+                        <span id="nstpGender" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Birth Date</span>
+                        <span id="nstpBirthDate" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Contact Number</span>
+                        <span id="nstpContactNumber" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Email Address</span>
+                        <span id="nstpEmail" class="detail-value"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Information -->
+            <div class="detail-group">
+                <h4 class="detail-label">Address Information</h4>
+                <div class="detail-item full-width">
+                    <span class="detail-sub-label">Full Address</span>
+                    <div id="nstpFullAddress" class="detail-content"></div>
+                </div>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Street/Barangay</span>
+                        <span id="nstpStreet" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Municipality/City</span>
+                        <span id="nstpCity" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Province</span>
+                        <span id="nstpProvince" class="detail-value"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NSTP Information -->
+            <div class="detail-group">
+                <h4 class="detail-label">NSTP Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Semester</span>
+                        <span id="nstpSemesterDetail" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Academic Year</span>
+                        <span id="nstpAcademicYearDetail" class="detail-value"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Information -->
+            <div class="detail-group">
+                <h4 class="detail-label">System Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Date Created</span>
+                        <span id="nstpCreatedAt" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Last Updated</span>
+                        <span id="nstpUpdatedAt" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">User Account</span>
+                        <span id="nstpUsername" class="detail-value"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-group">
+                <h4 class="detail-label">Approval Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Status</span>
+                        <span id="nstpApprovalStatus" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Archived Status</span>
+                        <span id="nstpIsArchived" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Archived At</span>
+                        <span id="nstpArchivedAt" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Archived By</span>
+                        <span id="nstpArchivedBy" class="detail-value"></span>
+                    </div>
+                </div>
+                <div class="detail-item full-width">
+                    <span class="detail-sub-label">Remarks</span>
+                    <div id="nstpRemarks" class="detail-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeNSTPStudentViewModal()">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock nstp-student-view %}

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Downloadable Documents</title>
+    <link rel="stylesheet" href="{% static 'css/core/downloadables.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+</head>
+<body>
+    {% include 'core/navbar.html' %}
+
+    <div class="downloadables-container glass-card">
+        <div class="header">
+            <div class="section-title">
+                <i class="fas fa-file-download"></i>
+                Downloadable Documents
+                <span class="stat-number">{{ total_count }}</span>
+            </div>
+
+            <!-- Category Counters -->
+            <div class="category-counters">
+                <div class="counter-item osas_forms">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-signature"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ osas_forms_count }}</div>
+                        <div class="stat-label">OSAS Forms</div>
+                    </div>
+                </div>
+                <div class="counter-item society_forms">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ society_forms_count }}</div>
+                        <div class="stat-label">Society Forms</div>
+                    </div>
+                </div>
+                <div class="counter-item ojt_forms">
+                    <div class="stat-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ ojt_forms_count }}</div>
+                        <div class="stat-label">OJT Forms</div>
+                    </div>
+                </div>
+                <div class="counter-item guidelines">
+                    <div class="stat-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ guidelines_count }}</div>
+                        <div class="stat-label">Guidelines</div>
+                    </div>
+                </div>
+                <div class="counter-item manuals">
+                    <div class="stat-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ manuals_count }}</div>
+                        <div class="stat-label">Manuals</div>
+                    </div>
+                </div>
+                <div class="counter-item others">
+                    <div class="stat-icon">
+                        <i class="fas fa-file"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ others_count }}</div>
+                        <div class="stat-label">Others</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-filter">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Search documents..." value="{{ current_search|default:'' }}">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="filter-group">
+                    <select id="category-filter" class="filter-select">
+                        <option value="all" {% if current_category == 'all' %}selected{% endif %}>All Categories</option>
+                        <option value="osas_forms" {% if current_category == 'osas_forms' %}selected{% endif %}>OSAS Forms</option>
+                        <option value="society_forms" {% if current_category == 'society_forms' %}selected{% endif %}>Society Forms</option>
+                        <option value="scholarship_forms" {% if current_category == 'scholarship_forms' %}selected{% endif %}>Scholarship Forms</option>
+                        <option value="ojt_forms" {% if current_category == 'ojt_forms' %}selected{% endif %}>OJT Forms</option>
+                        <option value="guidelines" {% if current_category == 'guidelines' %}selected{% endif %}>Guidelines</option>
+                        <option value="manuals" {% if current_category == 'manuals' %}selected{% endif %}>Manuals</option>
+                        <option value="others" {% if current_category == 'others' %}selected{% endif %}>Others</option>
+                    </select>
+                    <select id="date-filter" class="filter-select">
+                        <option value="latest" {% if current_date_filter == 'latest' %}selected{% endif %}>Latest First</option>
+                        <option value="oldest" {% if current_date_filter == 'oldest' %}selected{% endif %}>Oldest First</option>
+                        <option value="this_week" {% if current_date_filter == 'this_week' %}selected{% endif %}>This Week</option>
+                        <option value="this_month" {% if current_date_filter == 'this_month' %}selected{% endif %}>This Month</option>
+                        <option value="this_year" {% if current_date_filter == 'this_year' %}selected{% endif %}>This Year</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="downloadables-list">
+            {% for downloadable in downloadables %}
+            <div class="downloadable-item glass-card"
+                 data-category="{{ downloadable.category|default:'others' }}"
+                 data-date="{{ downloadable.created_at|date:'c'|default:'' }}"
+                 data-title="{{ downloadable.title|lower }}"
+                 data-description="{{ downloadable.description|lower }}">
+                <div class="file-icon">
+                    {% if downloadable.file.url %}
+                        {% with ext=downloadable.file.url|slice:'-4:'|cut:'.' %}
+                            {% if ext == 'pdf' %}
+                                <i class="fas fa-file-pdf"></i>
+                            {% elif ext == 'doc' or ext == 'docx' %}
+                                <i class="fas fa-file-word"></i>
+                            {% elif ext == 'xls' or ext == 'xlsx' %}
+                                <i class="fas fa-file-excel"></i>
+                            {% elif ext == 'ppt' or ext == 'pptx' %}
+                                <i class="fas fa-file-powerpoint"></i>
+                            {% elif ext == 'zip' or ext == 'rar' %}
+                                <i class="fas fa-file-archive"></i>
+                            {% elif ext == 'jpg' or ext == 'jpeg' or ext == 'png' or ext == 'gif' %}
+                                <i class="fas fa-file-image"></i>
+                            {% else %}
+                                <i class="fas fa-file"></i>
+                            {% endif %}
+                        {% endwith %}
+                    {% else %}
+                        <i class="fas fa-file"></i>
+                    {% endif %}
+                </div>
+                <div class="file-info">
+                    <h3>{{ downloadable.title|default:"Untitled Document" }}</h3>
+                    <p class="description">{{ downloadable.description|default:"No description provided." }}</p>
+                    <div class="file-meta">
+                        <span class="category-badge {{ downloadable.category|default:'others' }}">
+                            {{ downloadable.get_category_display|default:"Others" }}
+                        </span>
+                        <span class="size"><i class="fas fa-database"></i> {{ downloadable.get_file_size|default:"Size unknown" }}</span>
+                        <span class="date">
+                            <i class="far fa-calendar-alt"></i>
+                            {% if downloadable.created_at %}
+                                {{ downloadable.created_at|date:"M d, Y" }}
+                            {% else %}
+                                Date unknown
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="file-actions">
+                    {% if downloadable.file.url %}
+                        <a href="{{ downloadable.file.url }}" class="download-btn" download>
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    {% else %}
+                        <span class="no-file">File not available</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-results glass-card">
+                <i class="fas fa-folder-open"></i>
+                <p>No documents available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-container glass-card">
+            <div class="pagination-info">
+                Showing <span id="showing-start">{{ page_obj.start_index }}</span> - <span id="showing-end">{{ page_obj.end_index }}</span> of <span id="total-items">{{ paginator.count }}</span> items
+            </div>
+
+            <div class="pagination-controls">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1{% if current_search %}&search={{ current_search|urlencode }}{% endif %}{% if current_category != 'all' %}&category={{ current_category }}{% endif %}{% if current_date_filter != 'latest' %}&date={{ current_date_filter }}{% endif %}"
+                       class="pagination-btn first-page" title="First Page">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search|urlencode }}{% endif %}{% if current_category != 'all' %}&category={{ current_category }}{% endif %}{% if current_date_filter != 'latest' %}&date={{ current_date_filter }}{% endif %}"
+                       class="pagination-btn prev-page" title="Previous Page">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                {% else %}
+                    <span class="pagination-btn disabled first-page" title="First Page">
+                        <i class="fas fa-angle-double-left"></i>
+                    </span>
+                    <span class="pagination-btn disabled prev-page" title="Previous Page">
+                        <i class="fas fa-angle-left"></i>
+                    </span>
+                {% endif %}
+
+                <div class="page-numbers">
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="pagination-btn active">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}{% if current_search %}&search={{ current_search|urlencode }}{% endif %}{% if current_category != 'all' %}&category={{ current_category }}{% endif %}{% if current_date_filter != 'latest' %}&date={{ current_date_filter }}{% endif %}"
+                               class="pagination-btn">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search|urlencode }}{% endif %}{% if current_category != 'all' %}&category={{ current_category }}{% endif %}{% if current_date_filter != 'latest' %}&date={{ current_date_filter }}{% endif %}"
+                       class="pagination-btn next-page" title="Next Page">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="?page={{ paginator.num_pages }}{% if current_search %}&search={{ current_search|urlencode }}{% endif %}{% if current_category != 'all' %}&category={{ current_category }}{% endif %}{% if current_date_filter != 'latest' %}&date={{ current_date_filter }}{% endif %}"
+                       class="pagination-btn last-page" title="Last Page">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                {% else %}
+                    <span class="pagination-btn disabled next-page" title="Next Page">
+                        <i class="fas fa-angle-right"></i>
+                    </span>
+                    <span class="pagination-btn disabled last-page" title="Last Page">
+                        <i class="fas fa-angle-double-right"></i>
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="loading-indicator">
+        <div class="spinner"></div>
+        <p>Filtering documents...</p>
+    </div>
+
+{% include 'core/footer.html' %}
+    <script src="{% static 'js/core/downloadables.js' %}"></script>
+</body>
+</html>

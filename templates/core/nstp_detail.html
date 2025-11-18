@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/core/nstp_detail.css' %}">
+</head>
+<body>
+    <div class="success-container">
+        <div class="header-glow"></div>
+
+        <div class="success-header">
+            <h2>Registration Successful</h2>
+        </div>
+
+        <div class="success-body">
+            <div class="success-alert">
+                <h3>NSTP Registration Confirmed</h3>
+                <p>Your registration details have been successfully recorded in our system.</p>
+            </div>
+
+            <div class="info-section">
+                <h4 class="section-title">Personal Information</h4>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>Student Number</strong>
+                        <span>{{ enlistment.student_number }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Program</strong>
+                        <span>{{ enlistment.program }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Full Name</strong>
+                        <span>{{ enlistment.last_name }}, {{ enlistment.first_name }} {{ enlistment.middle_name|default:'' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Gender</strong>
+                        <span>{{ enlistment.get_gender_display }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Birth Date</strong>
+                        <span>{{ enlistment.birth_date|date:"F d, Y" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h4 class="section-title">Contact Information</h4>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>Contact Number</strong>
+                        <span>{{ enlistment.contact_number }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Email Address</strong>
+                        <span>{{ enlistment.email_address }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h4 class="section-title">Address Information</h4>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>Street/Barangay</strong>
+                        <span>{{ enlistment.street_or_barangay }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Municipality/City</strong>
+                        <span>{{ enlistment.municipality_or_city }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Province</strong>
+                        <span>{{ enlistment.province }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h4 class="section-title">Academic Information</h4>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>Semester</strong>
+                        <span>{{ enlistment.get_semester_display }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Academic Year</strong>
+                        <span>{{ enlistment.academic_year }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                    Return to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

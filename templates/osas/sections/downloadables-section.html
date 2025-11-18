@@ -1,0 +1,259 @@
+{% block downloadables-content %}
+<div class="section-header">
+    <div class="header-content">
+        <div class="title-section">
+            <h2 class="section-heading">Templates Management</h2>
+            <div class="divider"></div>
+        </div>
+
+        <div class="horizontal-stats-section">
+            <div class="horizontal-stats-container">
+                <div class="horizontal-stat-box">
+                    <div class="stat-icon" style="background-color: #4caf50;">
+                        <i class='bx bx-file'></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number">{{ society_forms_count }}</span>
+                        <span class="stat-label">Society Forms</span>
+                    </div>
+                </div>
+                <div class="horizontal-stat-box">
+                    <div class="stat-icon" style="background-color: #2196f3;">
+                        <i class='bx bx-file'></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number">{{ osas_forms_count }}</span>
+                        <span class="stat-label">OSAS Forms</span>
+                    </div>
+                </div>
+                <div class="horizontal-stat-box">
+                    <div class="stat-icon" style="background-color: #ff9800;">
+                        <i class='bx bx-file'></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number">{{ ojt_forms_count }}</span>
+                        <span class="stat-label">OJT Forms</span>
+                    </div>
+                </div>
+                <div class="horizontal-stat-box">
+                    <div class="stat-icon" style="background-color: #9c27b0;">
+                        <i class='bx bx-file'></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number">{{ scholarship_forms_count }}</span>
+                        <span class="stat-label">Scholarship Forms</span>
+                    </div>
+                </div>
+                <div class="horizontal-stat-box">
+                    <div class="stat-icon" style="background-color: #607d8b;">
+                        <i class='bx bx-file'></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number">{{ guidelines_count }}</span>
+                        <span class="stat-label">Guidelines</span>
+                    </div>
+                </div>
+                <div class="horizontal-stat-box">
+                    <div class="stat-icon" style="background-color: #795548;">
+                        <i class='bx bx-file'></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number">{{ manuals_count }}</span>
+                        <span class="stat-label">Manuals</span>
+                    </div>
+                </div>
+                <div class="horizontal-stat-box">
+                    <div class="stat-icon" style="background-color: #f44336;">
+                        <i class='bx bx-file'></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number">{{ others_count }}</span>
+                        <span class="stat-label">Others</span>
+                    </div>
+                </div>
+                <div class="horizontal-stat-box total">
+                    <div class="stat-icon" style="background-color: #333;">
+                        <i class='bx bx-stats'></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number">{{ total_downloadables }}</span>
+                        <span class="stat-label">Total Templates</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="downloadables-search" placeholder="Search templates..." class="search-input">
+            </div>
+            <div class="category-filter">
+                <select id="downloadableCategoryFilter" class="styled-select">
+                    <option value="all">Sort by Categories</option>
+                    <option value="osas_forms">OSAS Forms</option>
+                    <option value="society_forms">Society Forms</option>
+                    <option value="scholarship_forms">Scholarship Forms</option>
+                    <option value="ojt_forms">OJT Forms</option>
+                    <option value="guidelines">Guidelines</option>
+                    <option value="manuals">Manuals</option>
+                    <option value="others">Others</option>
+                </select>
+            </div>
+            <div class="status-filter">
+                <select id="downloadableStatusFilter" class="styled-select">
+                    <option value="all">Sort by Status</option>
+                    <option value="active">All Users</option>
+                    <option value="inactive">OSAS Unit</option>
+                </select>
+            </div>
+            <div class="date-filter">
+                <select id="downloadableDateFilter" class="styled-select">
+                    <option value="all">Sort by Dates</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="this_year">This Year</option>
+                    <option value="last_year">Last Year</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                </select>
+            </div>
+            <button class="btn-add-downloadable" {% if not perms.osas.add_downloadable %}style="display: none;"{% endif %}>
+                <i class='bx bx-plus'></i> Add New Template
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="cards-container" id="downloadables-cards-container">
+    <!-- Loading overlay -->
+    <div id="downloadables-loading" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Loading templates...</p>
+        </div>
+    </div>
+
+    <div class="cards-grid">
+        {% for downloadable in downloadables %}
+        <div class="downloadable-card" data-id="{{ downloadable.id }}"
+             data-created="{{ downloadable.created_at|date:'Y-m-d H:i' }}"
+             data-category="{{ downloadable.category }}"
+             data-status="{{ downloadable.is_active|yesno:'active,inactive' }}">
+            <div class="card-header">
+                <div class="category-tag category-{{ downloadable.category }}">
+                    {{ downloadable.get_category_display }}
+                </div>
+                <span class="status-badge {% if downloadable.is_active %}active{% else %}inactive{% endif %}">
+                    {% if downloadable.is_active %}All Users{% else %}OSAS Units{% endif %}
+                </span>
+            </div>
+
+            <div class="card-body">
+                <h3 class="card-title">{{ downloadable.title }}</h3>
+                <p class="card-description">{{ downloadable.description|default:"No description provided" }}</p>
+
+                <div class="file-preview">
+                    <div class="file-icon">
+                        <i class='bx bxs-file-{{ downloadable.file_icon }}'></i>
+                    </div>
+                    <div class="file-info">
+                        <span class="file-name">{{ downloadable.filename }}</span>
+                        <span class="file-size">{{ downloadable.file.size|filesizeformat }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="meta-item">
+                    <i class='bx bx-calendar'></i>
+                    <span>{{ downloadable.created_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="card-actions">
+                    <a href="{{ downloadable.file.url }}" class="btn-download-downloadable" title="Download" download>
+                        <i class='bx bx-download'></i>
+                    </a>
+                    {% if perms.osas.view_downloadable %}
+                    <button class="btn-view-download btn-icon view btn-view-downloadable" title="View">
+                        <i class="ri-eye-fill"></i>
+                    </button>
+                    {% endif %}
+                    {% if downloadable.created_by == request.user or request.user.is_superuser %}
+                        {% if perms.osas.change_downloadable %}
+                        <button class="btn-edit-download btn-icon edit-downloadable btn-edit-downloadable" title="Edit">
+                            <i class='bx bx-edit'></i>
+                        </button>
+                        {% endif %}
+                        {% if perms.osas.delete_downloadable %}
+                        <button class="btn-icon-download btn-icon archive btn-archive-downloadable" title="Archive">
+                            <i class='bx bxs-archive'></i>
+                        </button>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="no-data-found" style="display: none;">
+        <div class="no-data-content">
+            <i class='bx bx-folder-open'></i>
+            <h4>No downloadables found</h4>
+            <p>Try adjusting your search or filter criteria</p>
+        </div>
+    </div>
+</div>
+
+<!-- Only show pagination when no filters are active -->
+{% if downloadables.has_other_pages and not request.GET.search and not request.GET.category and not request.GET.status and not request.GET.date %}
+<div class="pagination-container">
+    <div class="pagination-info">
+        Showing {{ downloadables.start_index }} to {{ downloadables.end_index }} of {{ downloadables.paginator.count }} entries
+    </div>
+    <div class="pagination-controls">
+        {% if downloadables.has_previous %}
+            <a href="?template_page=1#downloadables" class="pagination-btn first-page" title="First Page">
+                <i class='bx bx-chevrons-left'></i>
+            </a>
+            <a href="?template_page={{ downloadables.previous_page_number }}#downloadables" class="pagination-btn prev-page" title="Previous Page">
+                <i class='bx bx-chevron-left'></i>
+            </a>
+        {% else %}
+            <span class="pagination-btn first-page disabled" title="First Page">
+                <i class='bx bx-chevrons-left'></i>
+            </span>
+            <span class="pagination-btn prev-page disabled" title="Previous Page">
+                <i class='bx bx-chevron-left'></i>
+            </span>
+        {% endif %}
+
+        <div class="page-numbers">
+            {% for num in downloadables.paginator.page_range %}
+                {% if downloadables.number == num %}
+                    <span class="pagination-btn current-page active">{{ num }}</span>
+                {% elif num > downloadables.number|add:'-3' and num < downloadables.number|add:'3' %}
+                    <a href="?template_page={{ num }}#downloadables" class="pagination-btn page-number">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if downloadables.has_next %}
+            <a href="?template_page={{ downloadables.next_page_number }}#downloadables" class="pagination-btn next-page" title="Next Page">
+                <i class='bx bx-chevron-right'></i>
+            </a>
+            <a href="?template_page={{ downloadables.paginator.num_pages }}#downloadables" class="pagination-btn last-page" title="Last Page">
+                <i class='bx bx-chevrons-right'></i>
+            </a>
+        {% else %}
+            <span class="pagination-btn next-page disabled" title="Next Page">
+                <i class='bx bx-chevron-right'></i>
+            </span>
+            <span class="pagination-btn last-page disabled" title="Last Page">
+                <i class='bx bx-chevrons-right'></i>
+            </span>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock downloadables-content %}

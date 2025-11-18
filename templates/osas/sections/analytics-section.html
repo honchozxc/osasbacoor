@@ -1,0 +1,78 @@
+{% block analytics-content %}
+<div class="activity-log-container">
+    <!-- Header Section -->
+    <div class="activity-log-header">
+        <div class="header-left">
+            <h1 class="activity-log-title">
+                <i class="ri-history-line"></i>
+                Activity Log
+            </h1>
+            <div class="activity-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="total-activities">0</span>
+                    <span class="stat-label">Total Activities</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="today-activities">0</span>
+                    <span class="stat-label">Today</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="activity-log-actions">
+                <div class="filter-dropdown">
+                    <select id="activity-filter" class="filter-select">
+                        <option value="all">All Activities</option>
+                        <option value="create">Created</option>
+                        <option value="update">Updated</option>
+                        <option value="archive">Archived</option>
+                    </select>
+                </div>
+                <div class="user-filter">
+                    <select id="user-filter" class="filter-select">
+                        <option value="all">All Users</option>
+                    </select>
+                </div>
+                <button class="refresh-btn" id="refresh-activities" title="Refresh">
+                    <i class="ri-refresh-line"></i>
+                </button>
+                <button class="export-btn" id="export-activities" title="Export Logs">
+                    <i class="ri-download-line"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Date Filter -->
+    <div class="activity-filters">
+        <div class="search-box">
+            <i class="ri-search-line"></i>
+            <input type="text" id="activity-search" placeholder="Search activities...">
+        </div>
+        <div class="date-filters">
+            <input type="date" id="date-from" class="date-input">
+            <span class="date-separator">to</span>
+            <input type="date" id="date-to" class="date-input">
+            <button class="date-apply-btn" id="apply-date-filter">Apply</button>
+            <button class="date-clear-btn" id="clear-date-filter">Clear</button>
+        </div>
+    </div>
+
+    <!-- Activity List -->
+    <div class="activity-log-content">
+        <div class="activity-log-list" id="recent-activities">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load More Section -->
+    <div class="load-more-section">
+        <button class="load-more-btn" id="load-more-activities" disabled>
+            <i class="ri-arrow-down-line"></i>
+            Load More Activities
+        </button>
+    </div>
+</div>
+{% endblock analytics-content %}

@@ -1,0 +1,70 @@
+<div id="organizationReactivateModal" class="modal">
+    <div class="modal-container simple-modal">
+        <!-- Simple Header -->
+        <div class="modal-header simple-header">
+            <div class="header-title">
+                <i class='bx bx-reset'></i>
+                <h3>Reactivate Organization</h3>
+            </div>
+            <button type="button" class="modal-close" onclick="closeOrganizationReactivateModal()">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+
+        <!-- Simple Body -->
+        <div class="modal-body simple-body">
+            <div id="organizationReactivateFormResponse" class="form-response"></div>
+
+            <!-- Organization Info -->
+            <div class="org-preview">
+                <div class="org-logo" id="reactivateOrganizationLogo">
+                    <i class='bx bxs-group'></i>
+                </div>
+                <div class="org-info">
+                    <h4 id="reactivateOrganizationName">Organization Name</h4>
+                    <p id="reactivateOrganizationAcronym">-</p>
+                </div>
+            </div>
+
+            <!-- Simple Confirmation -->
+            <div class="confirmation-box">
+                <div class="warning-icon">
+                    <i class='bx bx-info-circle'></i>
+                </div>
+                <div class="confirmation-text">
+                    <p id="reactivateConfirmationText">
+                        Are you sure you want to reactivate <strong>"Organization Name"</strong>?
+                    </p>
+                    <div class="status-change">
+                        <span class="current-status">Cancelled</span>
+                        <i class='bx bx-right-arrow-alt'></i>
+                        <span class="new-status">Pending</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simple Notes -->
+            <div class="simple-notes">
+                <p><i class='bx bx-check'></i> All organization data will be preserved</p>
+                <p><i class='bx bx-check'></i> Organization will require approval</p>
+                <p><i class='bx bx-check'></i> Previous records will be cleared</p>
+            </div>
+        </div>
+
+        <!-- Simple Footer -->
+        <div class="modal-footer simple-footer">
+            <form id="organizationReactivateForm" method="post">
+                {% csrf_token %}
+                <input type="hidden" id="reactivateOrganizationId" name="organization_id">
+                <div class="footer-actions">
+                    <button type="button" class="btn-cancel" onclick="closeOrganizationReactivateModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-confirm">
+                        Reactivate Organization
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

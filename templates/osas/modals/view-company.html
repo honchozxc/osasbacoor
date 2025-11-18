@@ -1,0 +1,146 @@
+{% block company-view-modal %}
+<div id="companyViewModal" class="modal">
+    <div class="modal-overlay" onclick="closeCompanyViewModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Company Profile</h2>
+                <p class="header-description">Comprehensive overview of company details and OJT placements</p>
+            </div>
+            <button class="modal-close" onclick="closeCompanyViewModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="form-body">
+            <div class="company-layout-container">
+                <!-- TOP SECTION - Company Information - Clean Unified Design -->
+                <div class="company-info-section">
+                    <div class="company-main-card">
+                        <!-- Company Header -->
+                        <div class="company-header">
+                            <div class="company-title-section">
+                                <h3 class="company-name" id="viewCompanyName">-</h3>
+                                <p class="company-address" id="viewCompanyAddress">-</p>
+                                <p class="company-contact" id="viewCompanyContact">-</p>
+                                <div class="company-contact-links" id="viewCompanyContactLinks">
+                                    <!-- Email and website links will be populated here -->
+                                </div>
+                            </div>
+                            <div class="company-status-section">
+                                <span class="status-badge" id="viewCompanyStatus">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Company Description -->
+                        <div class="company-description-section" id="viewCompanyDescriptionSection">
+                            <h4 class="section-title">
+                                <i class='bx bx-notepad'></i>
+                                Company Description
+                            </h4>
+                            <div class="description-content" id="viewCompanyDescription">
+                                <!-- Description will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Company Details Grid -->
+                        <div class="company-details-grid">
+                            <!-- Left Column -->
+                            <div class="details-column">
+                                <!-- Capacity Stats -->
+                                <div class="details-group">
+                                    <h4 class="details-group-title">
+                                        <i class='bx bx-user-check'></i>
+                                        OJT Capacity
+                                    </h4>
+                                    <div class="capacity-stats">
+                                        <div class="stat-item">
+                                            <span class="stat-value" id="viewCompanyTotalSlots">-</span>
+                                            <span class="stat-label">Total Slots</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-value" id="viewCompanyFilledSlots">-</span>
+                                            <span class="stat-label">Filled Slots</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-value" id="viewCompanyAvailableSlots">-</span>
+                                            <span class="stat-label">Available</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-value" id="viewCompanyUtilization">-</span>
+                                            <span class="stat-label">Utilization</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="details-column">
+                                <!-- Timeline Information -->
+                                <div class="details-group">
+                                    <h4 class="details-group-title">
+                                        <i class='bx bx-time'></i>
+                                        Timeline
+                                    </h4>
+                                    <div class="timeline-item">
+                                        <div class="timeline-icon">
+                                            <i class='bx bx-calendar'></i>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <div class="timeline-label">Date Created</div>
+                                            <div class="timeline-value" id="viewCompanyCreatedAt">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-icon">
+                                            <i class='bx bx-refresh'></i>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <div class="timeline-label">Last Updated</div>
+                                            <div class="timeline-value" id="viewCompanyUpdatedAt">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM SECTION - Students Section -->
+                <div class="students-section">
+                    <div class="students-header">
+                        <h3 class="students-title">
+                            <i class='bx bx-group'></i>
+                            Current OJT Students
+                        </h3>
+                        <span class="students-count" id="viewStudentsCount">0 students</span>
+                    </div>
+
+                    <div class="students-container">
+                        <div class="students-table-header">
+                            <div>Student Name</div>
+                            <div>Student ID</div>
+                            <div>Course</div>
+                            <div>Year & Section</div>
+                            <div>Duration</div>
+                            <div>Status</div>
+                        </div>
+                        <div class="students-list" id="viewCompanyStudentsList">
+                            <!-- Students will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-close-modal" onclick="closeCompanyViewModal()">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock company-view-modal %}

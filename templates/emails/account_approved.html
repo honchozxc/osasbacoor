@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Container */
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .email-header {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        /* Content */
+        .email-content {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .welcome-text {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #2d3748;
+        }
+
+        .message-box {
+            background: #f8f9fa;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #4CAF50;
+            color: white !important;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: 600;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        /* Footer */
+        .email-footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .social-links {
+            margin: 20px 0;
+        }
+
+        .social-links a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                padding: 10px;
+            }
+
+            .email-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>Account Approved</h1>
+        </div>
+
+        <!-- Main content -->
+        <div class="email-content">
+            <p class="welcome-text">Hello <strong>{{ user.last_name }}</strong>,</p>
+
+            <p>We're pleased to inform you that your account has been successfully approved by our administration team.</p>
+
+            <div class="message-box">
+                <p>You now have full access to all features of the {{ site_name }} system.</p>
+            </div>
+
+            <p>To get started, you can log in to your account using the button below:</p>
+
+            <p style="text-align: center;">
+                <a href="#" class="cta-button">Login to Your Account</a>
+            </p>
+
+            <p>If you have any questions or need assistance, please don't hesitate to contact our support team at <a href="mailto:cvsubacoorosas@gmail.com">cvsubacoorosas@gmail.com</a>.</p>
+
+            <p>Welcome aboard!</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="email-footer">
+            <div class="social-links">
+                <a href="https://web.facebook.com/">Facebook</a> |
+                <a href="https://x.com/">Twitter</a> |
+                <a href="https://www.instagram.com/">Instagram</a>
+            </div>
+
+            <p>© {% now "Y" %} {{ site_name }}. All rights reserved.</p>
+            <p>
+                <a href="#">Privacy Policy</a> |
+                <a href="#">Terms of Service</a>
+            </p>
+
+            <p style="font-size: 12px; color: #a0aec0;">
+                This email was sent to {{ user.email }} because you registered an account with {{ site_name }}.
+                <br>If you didn't request this, please ignore this email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

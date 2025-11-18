@@ -1,0 +1,73 @@
+{% block archive-nstp-enlistment %}
+<div id="nstpEnlistmentArchiveModal" class="modal">
+  <div class="modal-overlay" onclick="closeNSTPEnlistmentArchiveModal()"></div>
+  <div class="modal-container">
+    <div class="modal-header">
+      <div class="header-content">
+        <h2>Archive NSTP Enlistment</h2>
+        <p class="header-description">Review enlistment details before archiving</p>
+      </div>
+      <button class="modal-close" onclick="closeNSTPEnlistmentArchiveModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <form id="nstpEnlistmentArchiveForm" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="enlistment_id" id="archiveEnlistmentId">
+
+      <div class="form-body">
+        <!-- Enlistment Details Card -->
+        <div class="detail-card">
+          <div class="detail-card-header">
+            <h3>Enlistment Summary</h3>
+          </div>
+          <div class="detail-card-body">
+            <div class="detail-row">
+              <span class="detail-label">Student Number:</span>
+              <span class="detail-value" id="archiveStudentNumber">-</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Program:</span>
+              <span class="detail-value" id="archiveProgram">-</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Semester:</span>
+              <span class="detail-value" id="archiveSemester">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-intro warning-box">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <div>
+            <p><strong>Warning:</strong> Archiving will remove this enlistment from active lists but preserve all data.</p>
+            <p class="small-text">Archived records can be restored if needed.</p>
+          </div>
+        </div>
+
+        <div id="archiveNSTPEnlistmentFormResponse" class="form-response"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" onclick="closeNSTPEnlistmentArchiveModal()">Cancel</button>
+        <button type="submit" class="btn btn-warning">
+          <span class="btn-text">Confirm Archive</span>
+          <span class="btn-loader">
+            <svg viewBox="0 0 50 50">
+              <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock archive-nstp-enlistment %}

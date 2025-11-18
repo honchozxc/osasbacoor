@@ -1,0 +1,653 @@
+{% block content %}
+<div class="section-header">
+    <div class="header-content">
+        <div class="title-section">
+            <h2 class="section-heading">Scholarship Applications</h2>
+            <div class="divider"></div>
+        </div>
+        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 5 or request.user.user_type == 14 %}
+        <div class="controls">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="application-search" placeholder="Search applications..." class="search-input">
+            </div>
+
+            <!-- Scholarship Filter -->
+            <div class="filter-group">
+                <select id="scholarshipFilter" class="styled-select">
+                    <option value="all">All Scholarships</option>
+                    {% for scholarship in all_scholarships %}
+                    <option value="{{ scholarship.id }}">{{ scholarship.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <a href="{% url 'scholarship-apply' %}" class="primary-btn"><i class='bx bx-plus'></i> Add New Application</a>
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 5 %}
+            <button id="exportApplicationsBtn" class="primary-btn">
+                <i class='bx bx-export'></i> Export Data
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="stats-container">
+    <div class="stat-card">
+        <div class="stat-icon total">
+            <i class='bx bx-group'></i>
+        </div>
+        <div class="stat-content">
+            <h3 class="stat-number" id="total-applicants">{{ total_applications }}</h3>
+            <p class="stat-label">Total Applicants</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon approved">
+            <i class='bx bx-check-circle'></i>
+        </div>
+        <div class="stat-content">
+            <h3 class="stat-number" id="approved-applicants">{{ approved_applications }}</h3>
+            <p class="stat-label">Approved</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon pending">
+            <i class='bx bx-time'></i>
+        </div>
+        <div class="stat-content">
+            <h3 class="stat-number" id="pending-applicants">{{ pending_applications }}</h3>
+            <p class="stat-label">Pending</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon rejected">
+            <i class='bx bx-x-circle'></i>
+        </div>
+        <div class="stat-content">
+            <h3 class="stat-number" id="rejected-applicants">{{ rejected_applications }}</h3>
+            <p class="stat-label">Rejected</p>
+        </div>
+    </div>
+</div>
+
+{% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 5 or request.user.user_type == 14 %}
+<div id="applications-table-container">
+    <div id="applications-loading" class="table-loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <table class="data-table" id="applications-table">
+        <thead>
+            <tr>
+                {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 5 %}
+                <th data-sort="student">Student <i class='bx bx-sort'></i></th>
+                {% endif %}
+                <th data-sort="scholarship">Scholarship <i class='bx bx-sort'></i></th>
+                <th data-sort="date">Application Date <i class='bx bx-sort'></i></th>
+                <th data-sort="status">Status <i class='bx bx-sort'></i></th>
+                <th>Documents</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="applications-tbody">
+            {% if applications %}
+                {% for application in applications %}
+                <tr>
+                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 5 %}
+                    <td>{{ application.student.get_full_name }}</td>
+                    {% endif %}
+                    <td>{{ application.scholarship.name }}</td>
+                    <td>{{ application.application_date|date:"M d, Y" }}</td>
+                    <td>
+                        <span class="status-badge status-{{ application.status }}">
+                            {{ application.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="documents-preview">
+                            {% if application.application_form %}
+                            <a href="{{ application.application_form.url }}" target="_blank" class="doc-icon" title="Application Form">
+                                <i class='bx bxs-file-pdf'></i>
+                            </a>
+                            {% endif %}
+                            {% if application.cog %}
+                            <a href="{{ application.cog.url }}" target="_blank" class="doc-icon" title="Certificate of Grades">
+                                <i class='bx bxs-file-pdf'></i>
+                            </a>
+                            {% endif %}
+                            {% if application.cor %}
+                            <a href="{{ application.cor.url }}" target="_blank" class="doc-icon" title="Certificate of Registration">
+                                <i class='bx bxs-file-pdf'></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="actions">
+                        {% if application.status == 'pending' %}
+                            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 5 %}
+                            <button class="btn-icon btn-approve-scholarship" onclick="openApproveScholarshipApplicationModal({{ application.id }})" title="Approve">
+                                <i class='bx bx-check'></i>
+                            </button>
+                            {% endif %}
+                        {% endif %}
+                        <a href="{% url 'application-status' application.id %}" class="btn-icon btn-view-scholarship" title="View">
+                            <i class="ri-eye-fill"></i>
+                        </a>
+                        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 5 %}
+                        <button class="btn-icon btn-edit-scholarship sch-application" onclick="openScholarshipApplicationEditModal({{ application.id }})" title="Edit">
+                            <i class='bx bx-edit'></i>
+                        </button>
+                        <button class="btn-icon btn-archive-scholarship sch-application" onclick="openArchiveApplicationModal({{ application.id }})" title="Archive">
+                            <i class='bx bxs-archive'></i>
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr id="applications-no-data-row">
+                    <td colspan="{% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 5 %}6{% else %}5{% endif %}" class="empty-table">
+                        <div class="empty-state">
+                            <i class='bx bx-file'></i>
+                            <p>No applications found</p>
+                        </div>
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <!-- Pagination controls -->
+    {% if applications %}
+    <div class="pagination-container" id="applications-pagination">
+        <div class="pagination-info">
+            Showing {{ applications.start_index }} to {{ applications.end_index }} of {{ applications.paginator.count }} entries
+        </div>
+        <div class="pagination-controls">
+            {% if applications.has_previous %}
+                <a href="?scholarship_app_page=1#scholarship-applications" class="pagination-btn first-page" title="First Page">
+                    <i class='bx bx-chevrons-left'></i>
+                </a>
+                <a href="?scholarship_app_page={{ applications.previous_page_number }}#scholarship-applications" class="pagination-btn prev-page" title="Previous Page">
+                    <i class='bx bx-chevron-left'></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn first-page disabled" title="First Page">
+                    <i class='bx bx-chevrons-left'></i>
+                </span>
+                <span class="pagination-btn prev-page disabled" title="Previous Page">
+                    <i class='bx bx-chevron-left'></i>
+                </span>
+            {% endif %}
+
+            <div class="page-numbers">
+                {% for num in applications.paginator.page_range %}
+                    {% if applications.number == num %}
+                        <span class="pagination-btn current-page active">{{ num }}</span>
+                    {% elif num > applications.number|add:'-3' and num < applications.number|add:'3' %}
+                        <a href="?scholarship_app_page={{ num }}#scholarship-applications" class="pagination-btn page-number">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if applications.has_next %}
+                <a href="?scholarship_app_page={{ applications.next_page_number }}#scholarship-applications" class="pagination-btn next-page" title="Next Page">
+                    <i class='bx bx-chevron-right'></i>
+                </a>
+                <a href="?scholarship_app_page={{ applications.paginator.num_pages }}#scholarship-applications" class="pagination-btn last-page" title="Last Page">
+                    <i class='bx bx-chevrons-right'></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn next-page disabled" title="Next Page">
+                    <i class='bx bx-chevron-right'></i>
+                </span>
+                <span class="pagination-btn last-page disabled" title="Last Page">
+                    <i class='bx bx-chevrons-right'></i>
+                </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% else %}
+<div class="access-denied">
+    <i class='bx bx-lock-alt'></i>
+    <h3>Access Denied</h3>
+    <p>You don't have permission to view scholarship applications.</p>
+</div>
+{% endif %}
+
+<script>
+// Scholarship Applications Search and Filter Functions
+document.addEventListener("DOMContentLoaded", function () {
+    initApplicationsTable();
+});
+
+let fetchAndDisplayApplications;
+
+function initApplicationsTable() {
+    const table = document.getElementById('applications-table');
+    const tbody = document.getElementById('applications-tbody');
+    const searchInput = document.getElementById('application-search');
+    const scholarshipFilter = document.getElementById('scholarshipFilter');
+    const statusFilter = document.getElementById('status-filter');
+    const dateFilter = document.getElementById('dateFilter');
+    const sortableHeaders = table.querySelectorAll('th[data-sort]');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Create a no data row element
+    const noDataRow = document.createElement('tr');
+    noDataRow.id = 'applications-no-data-row';
+    const noDataCell = document.createElement('td');
+    noDataCell.colSpan = table.querySelectorAll('th').length;
+    noDataCell.innerHTML = `
+        <div class="empty-state">
+            <i class='bx bx-file'></i>
+            <p>No applications found matching your criteria</p>
+        </div>
+    `;
+    noDataRow.appendChild(noDataCell);
+    noDataRow.style.display = 'none';
+    tbody.appendChild(noDataRow);
+
+    let currentSortColumn = 'date';
+    let currentSortDirection = 'desc';
+
+    // Initialize sorting for headers
+    sortableHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const column = header.getAttribute('data-sort');
+
+            // If clicking the same column, reverse the direction
+            if (currentSortColumn === column) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = column;
+                currentSortDirection = 'asc';
+            }
+
+            // Update sort indicators
+            sortableHeaders.forEach(h => {
+                const icon = h.querySelector('i');
+                if (h === header) {
+                    icon.className = currentSortDirection === 'asc' ? 'bx bx-sort-up' : 'bx bx-sort-down';
+                } else {
+                    icon.className = 'bx bx-sort';
+                }
+            });
+
+            fetchAndDisplayApplications();
+        });
+    });
+
+    // Initialize search and filter events
+    searchInput.addEventListener('input', debounce(function() {
+        fetchAndDisplayApplications();
+    }, 300));
+
+    scholarshipFilter.addEventListener('change', function() {
+        fetchAndDisplayApplications();
+    });
+
+    statusFilter.addEventListener('change', function() {
+        fetchAndDisplayApplications();
+    });
+
+    dateFilter.addEventListener('change', function() {
+        fetchAndDisplayApplications();
+    });
+
+    // Define the function that will be called
+    fetchAndDisplayApplications = function() {
+        const searchTerm = searchInput.value;
+        const scholarshipFilterValue = scholarshipFilter.value;
+        const statusFilterValue = statusFilter.value;
+        const dateFilterValue = dateFilter.value;
+        const currentPage = new URLSearchParams(window.location.search).get('scholarship_app_page') || 1;
+
+        // Show loading indicator for table only
+        const loadingElement = document.getElementById('applications-loading');
+        if (loadingElement) {
+            loadingElement.style.display = 'flex';
+        }
+
+        // Make AJAX request with pagination
+        fetch(`?get_filtered_applications=1&search=${encodeURIComponent(searchTerm)}&scholarship=${encodeURIComponent(scholarshipFilterValue)}&status=${encodeURIComponent(statusFilterValue)}&date=${encodeURIComponent(dateFilterValue)}&sort=${currentSortColumn}&direction=${currentSortDirection}&scholarship_app_page=${currentPage}&per_page=10`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            updateApplicationsTableWithData(data.applications);
+            updateApplicationsPaginationControls(data);
+
+            // Hide loading indicator
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching application data:', error);
+            // Hide loading indicator even on error
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
+        });
+    }
+
+    function updateApplicationsPaginationControls(data) {
+        let paginationContainer = document.getElementById('applications-pagination');
+
+        // If pagination container doesn't exist, create it
+        if (!paginationContainer) {
+            const tableContainer = document.getElementById('applications-table-container');
+            paginationContainer = document.createElement('div');
+            paginationContainer.className = 'pagination-container';
+            paginationContainer.id = 'applications-pagination';
+            tableContainer.appendChild(paginationContainer);
+        }
+
+        // Clear existing content
+        paginationContainer.innerHTML = '';
+
+        // Only show pagination if there are multiple pages
+        if (data.pagination.num_pages > 1) {
+            const paginationInfo = document.createElement('div');
+            paginationInfo.className = 'pagination-info';
+            paginationInfo.textContent = `Showing ${data.pagination.start_index} to ${data.pagination.end_index} of ${data.pagination.total_count} entries`;
+            paginationContainer.appendChild(paginationInfo);
+
+            const paginationControls = document.createElement('div');
+            paginationControls.className = 'pagination-controls';
+
+            // First page button
+            if (data.pagination.has_previous) {
+                const firstPageBtn = document.createElement('a');
+                firstPageBtn.href = 'javascript:void(0);';
+                firstPageBtn.className = 'pagination-btn first-page';
+                firstPageBtn.title = 'First Page';
+                firstPageBtn.setAttribute('data-page', 1);
+                firstPageBtn.innerHTML = '<i class="bx bx-chevrons-left"></i>';
+                firstPageBtn.addEventListener('click', function() {
+                    goToPage(1);
+                });
+                paginationControls.appendChild(firstPageBtn);
+            } else {
+                const firstPageBtn = document.createElement('span');
+                firstPageBtn.className = 'pagination-btn first-page disabled';
+                firstPageBtn.title = 'First Page';
+                firstPageBtn.innerHTML = '<i class="bx bx-chevrons-left"></i>';
+                paginationControls.appendChild(firstPageBtn);
+            }
+
+            // Previous page button
+            if (data.pagination.has_previous) {
+                const prevPageBtn = document.createElement('a');
+                prevPageBtn.href = 'javascript:void(0);';
+                prevPageBtn.className = 'pagination-btn prev-page';
+                prevPageBtn.title = 'Previous Page';
+                prevPageBtn.setAttribute('data-page', data.pagination.current_page - 1);
+                prevPageBtn.innerHTML = '<i class="bx bx-chevron-left"></i>';
+                prevPageBtn.addEventListener('click', function() {
+                    goToPage(data.pagination.current_page - 1);
+                });
+                paginationControls.appendChild(prevPageBtn);
+            } else {
+                const prevPageBtn = document.createElement('span');
+                prevPageBtn.className = 'pagination-btn prev-page disabled';
+                prevPageBtn.title = 'Previous Page';
+                prevPageBtn.innerHTML = '<i class="bx bx-chevron-left"></i>';
+                paginationControls.appendChild(prevPageBtn);
+            }
+
+            // Page numbers
+            const pageNumbers = document.createElement('div');
+            pageNumbers.className = 'page-numbers';
+
+            // Show limited page numbers around current page
+            const startPage = Math.max(1, data.pagination.current_page - 2);
+            const endPage = Math.min(data.pagination.num_pages, data.pagination.current_page + 2);
+
+            for (let i = startPage; i <= endPage; i++) {
+                if (i === data.pagination.current_page) {
+                    const currentPageBtn = document.createElement('span');
+                    currentPageBtn.className = 'pagination-btn current-page active';
+                    currentPageBtn.textContent = i;
+                    pageNumbers.appendChild(currentPageBtn);
+                } else {
+                    const pageBtn = document.createElement('a');
+                    pageBtn.href = 'javascript:void(0);';
+                    pageBtn.className = 'pagination-btn page-number';
+                    pageBtn.setAttribute('data-page', i);
+                    pageBtn.textContent = i;
+                    pageBtn.addEventListener('click', function() {
+                        goToPage(i);
+                    });
+                    pageNumbers.appendChild(pageBtn);
+                }
+            }
+
+            paginationControls.appendChild(pageNumbers);
+
+            // Next page button
+            if (data.pagination.has_next) {
+                const nextPageBtn = document.createElement('a');
+                nextPageBtn.href = 'javascript:void(0);';
+                nextPageBtn.className = 'pagination-btn next-page';
+                nextPageBtn.title = 'Next Page';
+                nextPageBtn.setAttribute('data-page', data.pagination.current_page + 1);
+                nextPageBtn.innerHTML = '<i class="bx bx-chevron-right"></i>';
+                nextPageBtn.addEventListener('click', function() {
+                    goToPage(data.pagination.current_page + 1);
+                });
+                paginationControls.appendChild(nextPageBtn);
+            } else {
+                const nextPageBtn = document.createElement('span');
+                nextPageBtn.className = 'pagination-btn next-page disabled';
+                nextPageBtn.title = 'Next Page';
+                nextPageBtn.innerHTML = '<i class="bx bx-chevron-right"></i>';
+                paginationControls.appendChild(nextPageBtn);
+            }
+
+            // Last page button
+            if (data.pagination.has_next) {
+                const lastPageBtn = document.createElement('a');
+                lastPageBtn.href = 'javascript:void(0);';
+                lastPageBtn.className = 'pagination-btn last-page';
+                lastPageBtn.title = 'Last Page';
+                lastPageBtn.setAttribute('data-page', data.pagination.num_pages);
+                lastPageBtn.innerHTML = '<i class="bx bx-chevrons-right"></i>';
+                lastPageBtn.addEventListener('click', function() {
+                    goToPage(data.pagination.num_pages);
+                });
+                paginationControls.appendChild(lastPageBtn);
+            } else {
+                const lastPageBtn = document.createElement('span');
+                lastPageBtn.className = 'pagination-btn last-page disabled';
+                lastPageBtn.title = 'Last Page';
+                lastPageBtn.innerHTML = '<i class="bx bx-chevrons-right"></i>';
+                paginationControls.appendChild(lastPageBtn);
+            }
+
+            paginationContainer.appendChild(paginationControls);
+        }
+
+        function goToPage(page) {
+            // Update URL without reloading
+            const url = new URL(window.location);
+            url.searchParams.set('scholarship_app_page', page);
+            window.history.pushState({}, '', url);
+
+            // Fetch data for the new page
+            fetchAndDisplayApplications();
+        }
+    }
+
+    function updateApplicationsTableWithData(applications) {
+        const tbody = document.getElementById('applications-tbody');
+        // Clear existing rows (except no data row)
+        const existingRows = tbody.querySelectorAll('tr:not(#applications-no-data-row)');
+        existingRows.forEach(row => row.remove());
+
+        if (applications.length === 0) {
+            document.getElementById('applications-no-data-row').style.display = '';
+            return;
+        }
+
+        document.getElementById('applications-no-data-row').style.display = 'none';
+
+        // Add new rows
+        applications.forEach(application => {
+            const row = document.createElement('tr');
+
+            // Student column (if applicable)
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 5 %}
+            const studentCell = document.createElement('td');
+            studentCell.textContent = application.student_name;
+            row.appendChild(studentCell);
+            {% endif %}
+
+            // Scholarship column
+            const scholarshipCell = document.createElement('td');
+            scholarshipCell.textContent = application.scholarship_name;
+            row.appendChild(scholarshipCell);
+
+            // Date column
+            const dateCell = document.createElement('td');
+            const appDate = new Date(application.application_date);
+            dateCell.textContent = appDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            row.appendChild(dateCell);
+
+            // Status column
+            const statusCell = document.createElement('td');
+            const statusBadge = document.createElement('span');
+            statusBadge.className = `status-badge status-${application.status}`;
+            statusBadge.textContent = application.status_display;
+            statusCell.appendChild(statusBadge);
+            row.appendChild(statusCell);
+
+            // Documents column
+            const docsCell = document.createElement('td');
+            docsCell.className = 'documents-preview';
+
+            if (application.application_form_url) {
+                const appFormLink = document.createElement('a');
+                appFormLink.href = application.application_form_url;
+                appFormLink.target = '_blank';
+                appFormLink.className = 'doc-icon';
+                appFormLink.title = 'Application Form';
+                appFormLink.innerHTML = '<i class="bx bxs-file-pdf"></i>';
+                docsCell.appendChild(appFormLink);
+            }
+
+            if (application.cog_url) {
+                const cogLink = document.createElement('a');
+                cogLink.href = application.cog_url;
+                cogLink.target = '_blank';
+                cogLink.className = 'doc-icon';
+                cogLink.title = 'Certificate of Grades';
+                cogLink.innerHTML = '<i class="bx bxs-file-pdf"></i>';
+                docsCell.appendChild(cogLink);
+            }
+
+            if (application.cor_url) {
+                const corLink = document.createElement('a');
+                corLink.href = application.cor_url;
+                corLink.target = '_blank';
+                corLink.className = 'doc-icon';
+                corLink.title = 'Certificate of Registration';
+                corLink.innerHTML = '<i class="bx bxs-file-pdf"></i>';
+                docsCell.appendChild(corLink);
+            }
+
+            row.appendChild(docsCell);
+
+            // Actions column
+            const actionsCell = document.createElement('td');
+            actionsCell.className = 'actions';
+
+            // Approve button (if applicable)
+            if (application.status === 'pending' && application.can_approve) {
+                const approveBtn = document.createElement('button');
+                approveBtn.className = 'btn-icon btn-approve-scholarship';
+                approveBtn.title = 'Approve';
+                approveBtn.onclick = function() {
+                    openApproveScholarshipApplicationModal(application.id);
+                };
+                approveBtn.innerHTML = '<i class="bx bx-check"></i>';
+                actionsCell.appendChild(approveBtn);
+            }
+
+            // View button
+            const viewBtn = document.createElement('a');
+            viewBtn.href = `/application-status/${application.id}/`;
+            viewBtn.className = 'btn-icon btn-view-scholarship';
+            viewBtn.title = 'View';
+            viewBtn.innerHTML = '<i class="ri-eye-fill"></i>';
+            actionsCell.appendChild(viewBtn);
+
+            // Edit button (only for admin users)
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 5 %}
+            if (application.can_edit) {
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn-icon btn-edit-scholarship sch-application';
+                editBtn.title = 'Edit';
+                editBtn.onclick = function() {
+                    openScholarshipApplicationEditModal(application.id);
+                };
+                editBtn.innerHTML = '<i class="bx bx-edit"></i>';
+                actionsCell.appendChild(editBtn);
+            }
+            {% endif %}
+
+            if (application.can_archive) {
+                const archiveBtn = document.createElement('button');
+                archiveBtn.className = 'btn-icon btn-archive-scholarship sch-application';
+                archiveBtn.title = 'Archive';
+                archiveBtn.onclick = function() {
+                    openArchiveApplicationModal(application.id);
+                };
+                archiveBtn.innerHTML = '<i class="bx bxs-archive"></i>';
+                actionsCell.appendChild(archiveBtn);
+            }
+
+            row.appendChild(actionsCell);
+            tbody.appendChild(row);
+        });
+    }
+
+    // Initial load
+    fetchAndDisplayApplications();
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function() {
+        const context = this, args = arguments;
+        clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
+
+// Handle browser back/forward buttons
+window.addEventListener('popstate', function() {
+    if (typeof fetchAndDisplayApplications === 'function') {
+        fetchAndDisplayApplications();
+    }
+});
+</script>
+
+{% endblock %}

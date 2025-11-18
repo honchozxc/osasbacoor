@@ -1,0 +1,43 @@
+{% block retrieve-archived %}
+<div id="retrieveModal" class="retrieve-modal">
+    <div class="retrieve-modal-content">
+        <div class="retrieve-modal-header">
+            <div class="retrieve-modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.5 12c0-1.077-.345-2.074-.927-2.889L18 8.585V5a1 1 0 0 0-1-1h-3.586l-.573-.573A4.98 4.98 0 0 0 12 2.5c-1.077 0-2.074.345-2.889.927L8.585 4H5a1 1 0 0 0-1 1v3.586l-.573.573A4.98 4.98 0 0 0 2.5 12c0 1.077.345 2.074.927 2.889L4 15.415V19a1 1 0 0 0 1 1h3.586l.573.573c.815.582 1.812.927 2.889.927 1.077 0 2.074-.345 2.889-.927L15.415 20H19a1 1 0 0 0 1-1v-3.586l.573-.573A4.98 4.98 0 0 0 19.5 12zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
+                </svg>
+            </div>
+            <h3>Retrieve Archived Item</h3>
+            <span class="retrieve-modal-close">&times;</span>
+        </div>
+        <div class="retrieve-modal-body">
+            <p class="retrieve-modal-message">You are about to retrieve this item from the archive. This will make it visible and active again.</p>
+            <div class="retrieve-modal-details">
+                <div class="detail-row">
+                    <span class="detail-label">Item Type:</span>
+                    <span class="detail-value" id="retrieveItemType">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Item ID:</span>
+                    <span class="detail-value" id="retrieveItemId">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Action:</span>
+                    <span class="detail-value">Restore to active items</span>
+                </div>
+            </div>
+        </div>
+        <div class="retrieve-modal-footer">
+            <button class="retrieve-modal-btn retrieve-modal-btn-secondary cancel-retrieve">Cancel</button>
+            <button class="retrieve-modal-btn retrieve-modal-btn-primary confirm-retrieve">
+                <span class="btn-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+                Confirm Retrieval
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock retrieve-archived %}

@@ -1,0 +1,333 @@
+{% extends 'osas/dashboard.html' %}
+{% load static %}
+
+{% block section-content %}
+<div class="sds-edit-container">
+    <h2>Edit SDS Organization Page Content</h2>
+    <form method="post" id="sdsPageForm">
+        {% csrf_token %}
+
+        <!-- Hero Section -->
+        <div class="form-section">
+            <h3>Hero Section</h3>
+            <div class="form-group">
+                <label>Hero Title</label>
+                {{ form.hero_title }}
+            </div>
+            <div class="form-group">
+                <label>Hero Subtitle</label>
+                {{ form.hero_subtitle }}
+            </div>
+            <div class="form-group">
+                <label>Hero Badge Text</label>
+                {{ form.hero_badge_text }}
+            </div>
+            <div class="form-group">
+                <label>Overview Section Subtitle</label>
+                {{ form.section_subtitle }}
+            </div>
+        </div>
+
+        <!-- Mission Section -->
+        <div class="form-section">
+            <h3>Mission Section</h3>
+            <div class="form-group">
+                <label>Mission Title</label>
+                {{ form.mission_title }}
+            </div>
+            <div class="form-group">
+                <label>Mission Content</label>
+                {{ form.mission_content }}
+            </div>
+        </div>
+
+        <!-- What We Do Section -->
+        <div class="form-section">
+            <h3>What We Do Section</h3>
+            <div class="form-group">
+                <label>What We Do Title</label>
+                {{ form.what_we_do_title }}
+            </div>
+            <div class="form-group">
+                <label>What We Do Content</label>
+                {{ form.what_we_do_content }}
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="form-section">
+            <h3>Features List</h3>
+            <div id="featuresContainer">
+                {% for feature in sds_content.features %}
+                <div class="feature-item mb-3 p-3 border">
+                    <input type="hidden" name="feature_counters[]" value="{{ forloop.counter0 }}">
+                    <div class="form-group">
+                        <label>Feature Text *</label>
+                        <input type="text" name="feature_text_{{ forloop.counter0 }}"
+                               value="{{ feature.text }}" class="form-control" required>
+                    </div>
+                    <button type="button" class="btn btn-danger remove-feature">Remove Feature</button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="addFeatureBtn" class="btn btn-success">Add New Feature</button>
+        </div>
+
+        <!-- FAQs Section -->
+        <div class="form-section">
+            <h3>Frequently Asked Questions</h3>
+            <div id="faqsContainer">
+                {% for faq in sds_content.faqs %}
+                <div class="faq-item mb-3 p-3 border">
+                    <input type="hidden" name="faq_counters[]" value="{{ forloop.counter0 }}">
+                    
+                    <div class="form-group">
+                        <label>Question *</label>
+                        <input type="text" name="faq_question_{{ forloop.counter0 }}"
+                               value="{{ faq.question }}" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Subtitle</label>
+                        <input type="text" name="faq_subtitle_{{ forloop.counter0 }}"
+                               value="{{ faq.subtitle }}" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Answer *</label>
+                        <textarea name="faq_answer_{{ forloop.counter0 }}"
+                                  class="form-control" rows="4" required>{{ faq.answer }}</textarea>
+                    </div>
+
+                    <!-- Tips Section -->
+                    <div class="tips-section">
+                        <h5>Quick Tips</h5>
+                        <div id="tipsContainer_{{ forloop.counter0 }}">
+                            {% for tip in faq.tips %}
+                            <div class="tip-item mb-2">
+                                <input type="hidden" name="faq_{{ forloop.parentloop.counter0 }}_tip_counters[]" value="{{ forloop.counter0 }}">
+                                <div class="input-group">
+                                    <input type="text" name="faq_{{ forloop.parentloop.counter0 }}_tip_{{ forloop.counter0 }}"
+                                           value="{{ tip }}" class="form-control" placeholder="Enter tip">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-outline-danger remove-tip">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary add-tip" data-faq-index="{{ forloop.counter0 }}">Add Tip</button>
+                    </div>
+
+                    <!-- Benefits Section -->
+                    <div class="benefits-section">
+                        <h5>Benefits Grid</h5>
+                        <div id="benefitsContainer_{{ forloop.counter0 }}">
+                            {% for benefit in faq.benefits %}
+                            <div class="benefit-item mb-2 p-2 border">
+                                <input type="hidden" name="faq_{{ forloop.parentloop.counter0 }}_benefit_counters[]" value="{{ forloop.counter0 }}">
+                                <div class="form-group">
+                                    <label>Icon Class (Font Awesome)</label>
+                                    <input type="text" name="faq_{{ forloop.parentloop.counter0 }}_benefit_icon_{{ forloop.counter0 }}"
+                                           value="{{ benefit.icon }}" class="form-control" placeholder="fas fa-icon">
+                                    <small class="form-text text-muted">e.g., fas fa-brain, fas fa-users</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Benefit Text</label>
+                                    <input type="text" name="faq_{{ forloop.parentloop.counter0 }}_benefit_text_{{ forloop.counter0 }}"
+                                           value="{{ benefit.text }}" class="form-control" placeholder="Enter benefit text">
+                                </div>
+                                <button type="button" class="btn btn-sm btn-danger remove-benefit">Remove Benefit</button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary add-benefit" data-faq-index="{{ forloop.counter0 }}">Add Benefit</button>
+                    </div>
+
+                    <button type="button" class="btn btn-danger remove-faq">Remove FAQ</button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="addFaqBtn" class="btn btn-success">Add New FAQ</button>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="form-section">
+            <h3>Call to Action Section</h3>
+            <div class="form-group">
+                <label>CTA Title</label>
+                {{ form.cta_title }}
+            </div>
+            <div class="form-group">
+                <label>CTA Content</label>
+                {{ form.cta_content }}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let featureCounter = {{ sds_content.features|length|default:0 }};
+    let faqCounter = {{ sds_content.faqs|length|default:0 }};
+
+    // Add Feature
+    document.getElementById('addFeatureBtn').addEventListener('click', function() {
+        const container = document.getElementById('featuresContainer');
+        const div = document.createElement('div');
+        div.className = 'feature-item mb-3 p-3 border';
+        div.innerHTML = `
+            <input type="hidden" name="feature_counters[]" value="${featureCounter}">
+            <div class="form-group">
+                <label>Feature Text *</label>
+                <input type="text" name="feature_text_${featureCounter}" class="form-control" required>
+            </div>
+            <button type="button" class="btn btn-danger remove-feature">Remove Feature</button>
+        `;
+        container.appendChild(div);
+        featureCounter++;
+    });
+
+    // Add FAQ
+    document.getElementById('addFaqBtn').addEventListener('click', function() {
+        const container = document.getElementById('faqsContainer');
+        const div = document.createElement('div');
+        div.className = 'faq-item mb-3 p-3 border';
+        div.innerHTML = `
+            <input type="hidden" name="faq_counters[]" value="${faqCounter}">
+            <div class="form-group">
+                <label>Question *</label>
+                <input type="text" name="faq_question_${faqCounter}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Subtitle</label>
+                <input type="text" name="faq_subtitle_${faqCounter}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Answer *</label>
+                <textarea name="faq_answer_${faqCounter}" class="form-control" rows="4" required></textarea>
+            </div>
+            <div class="tips-section">
+                <h5>Quick Tips</h5>
+                <div id="tipsContainer_${faqCounter}"></div>
+                <button type="button" class="btn btn-sm btn-outline-primary add-tip" data-faq-index="${faqCounter}">Add Tip</button>
+            </div>
+            <div class="benefits-section">
+                <h5>Benefits Grid</h5>
+                <div id="benefitsContainer_${faqCounter}"></div>
+                <button type="button" class="btn btn-sm btn-outline-primary add-benefit" data-faq-index="${faqCounter}">Add Benefit</button>
+            </div>
+            <button type="button" class="btn btn-danger remove-faq">Remove FAQ</button>
+        `;
+        container.appendChild(div);
+        faqCounter++;
+    });
+
+    // Add Tip
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('add-tip')) {
+            const faqIndex = e.target.getAttribute('data-faq-index');
+            const container = document.getElementById(`tipsContainer_${faqIndex}`);
+            const tipCounter = container.children.length;
+            
+            const div = document.createElement('div');
+            div.className = 'tip-item mb-2';
+            div.innerHTML = `
+                <input type="hidden" name="faq_${faqIndex}_tip_counters[]" value="${tipCounter}">
+                <div class="input-group">
+                    <input type="text" name="faq_${faqIndex}_tip_${tipCounter}" class="form-control" placeholder="Enter tip">
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-outline-danger remove-tip">Remove</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+    });
+
+    // Add Benefit
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('add-benefit')) {
+            const faqIndex = e.target.getAttribute('data-faq-index');
+            const container = document.getElementById(`benefitsContainer_${faqIndex}`);
+            const benefitCounter = container.children.length;
+            
+            const div = document.createElement('div');
+            div.className = 'benefit-item mb-2 p-2 border';
+            div.innerHTML = `
+                <input type="hidden" name="faq_${faqIndex}_benefit_counters[]" value="${benefitCounter}">
+                <div class="form-group">
+                    <label>Icon Class (Font Awesome)</label>
+                    <input type="text" name="faq_${faqIndex}_benefit_icon_${benefitCounter}" class="form-control" placeholder="fas fa-icon">
+                    <small class="form-text text-muted">e.g., fas fa-brain, fas fa-users</small>
+                </div>
+                <div class="form-group">
+                    <label>Benefit Text</label>
+                    <input type="text" name="faq_${faqIndex}_benefit_text_${benefitCounter}" class="form-control" placeholder="Enter benefit text">
+                </div>
+                <button type="button" class="btn btn-sm btn-danger remove-benefit">Remove Benefit</button>
+            `;
+            container.appendChild(div);
+        }
+    });
+
+    // Remove handlers
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-feature')) {
+            e.target.closest('.feature-item').remove();
+        }
+        if (e.target.classList.contains('remove-faq')) {
+            e.target.closest('.faq-item').remove();
+        }
+        if (e.target.classList.contains('remove-tip')) {
+            e.target.closest('.tip-item').remove();
+        }
+        if (e.target.classList.contains('remove-benefit')) {
+            e.target.closest('.benefit-item').remove();
+        }
+    });
+});
+</script>
+
+<style>
+.sds-edit-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.form-section {
+    background: #f8f9fa;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+.form-section h3 {
+    color: #007bff;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 10px;
+}
+.feature-item, .faq-item {
+    background: white;
+    border-radius: 5px;
+}
+.tips-section, .benefits-section {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+}
+.tips-section h5, .benefits-section h5 {
+    color: #495057;
+    margin-bottom: 15px;
+}
+.btn {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+</style>
+{% endblock %}

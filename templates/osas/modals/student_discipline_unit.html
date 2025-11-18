@@ -1,0 +1,371 @@
+<!-- student_discipline_edit.html -->
+{% extends 'osas/dashboard.html' %}
+{% load static %}
+
+{% block section-content %}
+<div class="discipline-edit-container">
+    <h2>Edit Student Discipline Content</h2>
+    <form method="post" id="disciplineForm">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <!-- Principles Items -->
+        <div class="form-group">
+            <label>Principles Items</label>
+            <div id="principlesContainer">
+                <!-- Principles will be added here by JavaScript -->
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" id="addPrinciple">Add Principle</button>
+        </div>
+
+        <!-- Approach Items -->
+        <div class="form-group">
+            <label>Approach Items</label>
+            <div id="approachContainer">
+                <!-- Approach items will be added here by JavaScript -->
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" id="addApproachItem">Add Approach Item</button>
+        </div>
+
+        <!-- Complaint Types -->
+        <div class="form-group">
+            <label>Complaint Types</label>
+            <div id="complaintTypesContainer">
+                <!-- Complaint types will be added here by JavaScript -->
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" id="addComplaintType">Add Complaint Type</button>
+        </div>
+
+        <!-- How to File Steps -->
+        <div class="form-group">
+            <label>How to File Steps</label>
+            <div id="howToFileContainer">
+                <!-- Steps will be added here by JavaScript -->
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" id="addHowToFileStep">Add Step</button>
+        </div>
+
+        <!-- Process Notes -->
+        <div class="form-group">
+            <label>Process Notes</label>
+            <div id="processNotesContainer">
+                <!-- Notes will be added here by JavaScript -->
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" id="addProcessNote">Add Note</button>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'dashboard' %}">Cancel</a>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all data arrays
+    const principles = JSON.parse('{{ principles_items_json|escapejs }}') || [];
+    const approachItems = JSON.parse('{{ approach_items_json|escapejs }}') || [];
+    const complaintTypes = JSON.parse('{{ complaint_types_json|escapejs }}') || [];
+    const howToFileSteps = JSON.parse('{{ how_to_file_steps_json|escapejs }}') || [];
+    const processNotes = JSON.parse('{{ process_notes_json|escapejs }}') || [];
+
+    // Get containers
+    const principlesContainer = document.getElementById('principlesContainer');
+    const approachContainer = document.getElementById('approachContainer');
+    const complaintTypesContainer = document.getElementById('complaintTypesContainer');
+    const howToFileContainer = document.getElementById('howToFileContainer');
+    const processNotesContainer = document.getElementById('processNotesContainer');
+
+    // Get hidden inputs
+    const principlesInput = document.getElementById('id_principles_items');
+    const approachInput = document.getElementById('id_approach_items');
+    const complaintTypesInput = document.getElementById('id_complaint_types');
+    const howToFileInput = document.getElementById('id_how_to_file_steps');
+    const processNotesInput = document.getElementById('id_process_notes');
+
+    // Render functions for each section
+    function renderPrinciples() {
+        principlesContainer.innerHTML = '';
+        principles.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'input-group mb-2';
+            div.innerHTML = `
+                <input type="text" class="form-control principle-input" value="${item}" data-index="${index}">
+                <button type="button" class="btn btn-danger remove-principle">Remove</button>
+            `;
+            principlesContainer.appendChild(div);
+        });
+        principlesInput.value = JSON.stringify(principles);
+    }
+
+    function renderApproachItems() {
+        approachContainer.innerHTML = '';
+        approachItems.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'input-group mb-2';
+            div.innerHTML = `
+                <input type="text" class="form-control approach-input" value="${item}" data-index="${index}">
+                <button type="button" class="btn btn-danger remove-approach">Remove</button>
+            `;
+            approachContainer.appendChild(div);
+        });
+        approachInput.value = JSON.stringify(approachItems);
+    }
+
+    function renderComplaintTypes() {
+        complaintTypesContainer.innerHTML = '';
+        complaintTypes.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'complaint-type-item mb-3 p-3 border';
+            div.innerHTML = `
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control complaint-title" value="${item.title || ''}" data-index="${index}">
+                </div>
+                <div class="form-group">
+                    <label>Icon (FontAwesome class)</label>
+                    <input type="text" class="form-control complaint-icon" value="${item.icon || ''}" data-index="${index}">
+                </div>
+                <div class="form-group">
+                    <label>Items</label>
+                    <div class="complaint-items-container" data-index="${index}">
+                        ${(item.items || []).map((subitem, subindex) => `
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control complaint-item"
+                                       value="${subitem}" data-index="${index}" data-subindex="${subindex}">
+                                <button type="button" class="btn btn-sm btn-danger remove-complaint-item">Remove</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary add-complaint-item" data-index="${index}">Add Item</button>
+                </div>
+                <button type="button" class="btn btn-danger remove-complaint-type">Remove Complaint Type</button>
+            `;
+            complaintTypesContainer.appendChild(div);
+        });
+        complaintTypesInput.value = JSON.stringify(complaintTypes);
+    }
+
+    function renderHowToFileSteps() {
+        howToFileContainer.innerHTML = '';
+        howToFileSteps.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'step-item mb-3 p-3 border';
+            div.innerHTML = `
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control step-title" value="${item.title || ''}" data-index="${index}">
+                </div>
+                <div class="form-group">
+                    <label>Icon (FontAwesome class)</label>
+                    <input type="text" class="form-control step-icon" value="${item.icon || ''}" data-index="${index}">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control step-description" data-index="${index}">${item.description || ''}</textarea>
+                </div>
+                <button type="button" class="btn btn-danger remove-step">Remove Step</button>
+            `;
+            howToFileContainer.appendChild(div);
+        });
+        howToFileInput.value = JSON.stringify(howToFileSteps);
+    }
+
+    function renderProcessNotes() {
+        processNotesContainer.innerHTML = '';
+        processNotes.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'note-item mb-3 p-3 border';
+            div.innerHTML = `
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control note-title" value="${item.title || ''}" data-index="${index}">
+                </div>
+                <div class="form-group">
+                    <label>Icon (FontAwesome class)</label>
+                    <input type="text" class="form-control note-icon" value="${item.icon || ''}" data-index="${index}">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control note-description" data-index="${index}">${item.description || ''}</textarea>
+                </div>
+                <button type="button" class="btn btn-danger remove-note">Remove Note</button>
+            `;
+            processNotesContainer.appendChild(div);
+        });
+        processNotesInput.value = JSON.stringify(processNotes);
+    }
+
+    // Add item functions
+    document.getElementById('addPrinciple').addEventListener('click', function() {
+        principles.push("");
+        renderPrinciples();
+    });
+
+    document.getElementById('addApproachItem').addEventListener('click', function() {
+        approachItems.push("");
+        renderApproachItems();
+    });
+
+    document.getElementById('addComplaintType').addEventListener('click', function() {
+        complaintTypes.push({
+            title: "",
+            icon: "",
+            items: []
+        });
+        renderComplaintTypes();
+    });
+
+    document.getElementById('addHowToFileStep').addEventListener('click', function() {
+        howToFileSteps.push({
+            title: "",
+            icon: "",
+            description: ""
+        });
+        renderHowToFileSteps();
+    });
+
+    document.getElementById('addProcessNote').addEventListener('click', function() {
+        processNotes.push({
+            title: "",
+            icon: "",
+            description: ""
+        });
+        renderProcessNotes();
+    });
+
+    // Event delegation for all remove buttons
+    principlesContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-principle')) {
+            const index = e.target.previousElementSibling.dataset.index;
+            principles.splice(index, 1);
+            renderPrinciples();
+        }
+    });
+
+    approachContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-approach')) {
+            const index = e.target.previousElementSibling.dataset.index;
+            approachItems.splice(index, 1);
+            renderApproachItems();
+        }
+    });
+
+    complaintTypesContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-complaint-type')) {
+            const index = e.target.closest('.complaint-type-item').querySelector('.complaint-title').dataset.index;
+            complaintTypes.splice(index, 1);
+            renderComplaintTypes();
+        }
+        if (e.target.classList.contains('add-complaint-item')) {
+            const index = e.target.dataset.index;
+            if (!complaintTypes[index].items) {
+                complaintTypes[index].items = [];
+            }
+            complaintTypes[index].items.push("");
+            renderComplaintTypes();
+        }
+        if (e.target.classList.contains('remove-complaint-item')) {
+            const index = e.target.closest('.complaint-items-container').dataset.index;
+            const subindex = e.target.previousElementSibling.dataset.subindex;
+            complaintTypes[index].items.splice(subindex, 1);
+            renderComplaintTypes();
+        }
+    });
+
+    howToFileContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-step')) {
+            const index = e.target.closest('.step-item').querySelector('.step-title').dataset.index;
+            howToFileSteps.splice(index, 1);
+            renderHowToFileSteps();
+        }
+    });
+
+    processNotesContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-note')) {
+            const index = e.target.closest('.note-item').querySelector('.note-title').dataset.index;
+            processNotes.splice(index, 1);
+            renderProcessNotes();
+        }
+    });
+
+    // Input handlers for all fields
+    principlesContainer.addEventListener('input', function(e) {
+        if (e.target.classList.contains('principle-input')) {
+            const index = e.target.dataset.index;
+            principles[index] = e.target.value;
+            principlesInput.value = JSON.stringify(principles);
+        }
+    });
+
+    approachContainer.addEventListener('input', function(e) {
+        if (e.target.classList.contains('approach-input')) {
+            const index = e.target.dataset.index;
+            approachItems[index] = e.target.value;
+            approachInput.value = JSON.stringify(approachItems);
+        }
+    });
+
+    complaintTypesContainer.addEventListener('input', function(e) {
+        if (e.target.classList.contains('complaint-title')) {
+            const index = e.target.dataset.index;
+            complaintTypes[index].title = e.target.value;
+            complaintTypesInput.value = JSON.stringify(complaintTypes);
+        }
+        if (e.target.classList.contains('complaint-icon')) {
+            const index = e.target.dataset.index;
+            complaintTypes[index].icon = e.target.value;
+            complaintTypesInput.value = JSON.stringify(complaintTypes);
+        }
+        if (e.target.classList.contains('complaint-item')) {
+            const index = e.target.dataset.index;
+            const subindex = e.target.dataset.subindex;
+            complaintTypes[index].items[subindex] = e.target.value;
+            complaintTypesInput.value = JSON.stringify(complaintTypes);
+        }
+    });
+
+    howToFileContainer.addEventListener('input', function(e) {
+        if (e.target.classList.contains('step-title')) {
+            const index = e.target.dataset.index;
+            howToFileSteps[index].title = e.target.value;
+            howToFileInput.value = JSON.stringify(howToFileSteps);
+        }
+        if (e.target.classList.contains('step-icon')) {
+            const index = e.target.dataset.index;
+            howToFileSteps[index].icon = e.target.value;
+            howToFileInput.value = JSON.stringify(howToFileSteps);
+        }
+        if (e.target.classList.contains('step-description')) {
+            const index = e.target.dataset.index;
+            howToFileSteps[index].description = e.target.value;
+            howToFileInput.value = JSON.stringify(howToFileSteps);
+        }
+    });
+
+    processNotesContainer.addEventListener('input', function(e) {
+        if (e.target.classList.contains('note-title')) {
+            const index = e.target.dataset.index;
+            processNotes[index].title = e.target.value;
+            processNotesInput.value = JSON.stringify(processNotes);
+        }
+        if (e.target.classList.contains('note-icon')) {
+            const index = e.target.dataset.index;
+            processNotes[index].icon = e.target.value;
+            processNotesInput.value = JSON.stringify(processNotes);
+        }
+        if (e.target.classList.contains('note-description')) {
+            const index = e.target.dataset.index;
+            processNotes[index].description = e.target.value;
+            processNotesInput.value = JSON.stringify(processNotes);
+        }
+    });
+
+    // Initial render
+    renderPrinciples();
+    renderApproachItems();
+    renderComplaintTypes();
+    renderHowToFileSteps();
+    renderProcessNotes();
+});
+</script>
+{% endblock %}

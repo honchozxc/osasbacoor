@@ -1,0 +1,58 @@
+{% block view-downloadables %}
+<div id="downloadableViewModal" class="modal">
+    <div class="modal-overlay" onclick="closeDownloadableViewModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Downloadable Details</h2>
+                <p class="header-description">View downloadable file information</p>
+            </div>
+            <button class="modal-close" onclick="closeDownloadableViewModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="form-body">
+            <div class="downloadable-details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Title</span>
+                    <span class="detail-value" id="viewDownloadableTitle"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Description</span>
+                    <span class="detail-value" id="viewDownloadableDescription"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Category</span>
+                    <span class="detail-value" id="viewDownloadableCategory"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">File</span>
+                    <span class="detail-value">
+                        <a href="#" id="viewDownloadableFile" target="_blank" class="file-link"></a>
+                        <span id="viewDownloadableFileSize" class="file-size"></span>
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Date Added</span>
+                    <span class="detail-value" id="viewDownloadableCreatedAt"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Added By</span>
+                    <span class="detail-value" id="viewDownloadableCreatedBy"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value" id="viewDownloadableStatus"></span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancel" onclick="closeDownloadableViewModal()">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock view-downloadables %}

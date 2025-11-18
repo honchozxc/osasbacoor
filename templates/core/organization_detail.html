@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ organization.organization_name }} - Organization</title>
+    <link rel="stylesheet" href="{% static 'css/core/organization_details.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== PAGINATION STYLES ===== */
+        .org-detail-pagination-info {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .org-detail-pagination-text {
+            font-size: 0.9rem;
+            color: #718096;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .org-detail-pagination {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid #F7FAFC;
+            width: 100%;
+        }
+
+        .org-detail-pagination-controls {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 15px !important;
+            flex-wrap: wrap !important;
+            width: 100% !important;
+        }
+
+        /* Pagination Buttons - Beautiful Design */
+        .org-detail-pagination-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            padding: 12px 24px !important;
+            background: linear-gradient(135deg, #003366 0%, #004080 100%) !important;
+            color: white !important;
+            text-decoration: none !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            border: none !important;
+            cursor: pointer !important;
+            min-width: 110px !important;
+            justify-content: center !important;
+            box-shadow: 0 4px 15px rgba(0, 51, 102, 0.2) !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        .org-detail-pagination-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .org-detail-pagination-btn:hover::before {
+            left: 100%;
+        }
+
+        .org-detail-pagination-btn:hover {
+            background: linear-gradient(135deg, #002244 0%, #003366 100%) !important;
+            transform: translateY(-3px) scale(1.02) !important;
+            box-shadow: 0 8px 25px rgba(0, 51, 102, 0.3) !important;
+        }
+
+        .org-detail-pagination-btn:active {
+            transform: translateY(-1px) scale(1.01) !important;
+        }
+
+        .org-detail-pagination-disabled {
+            background: linear-gradient(135deg, #CBD5E0 0%, #A0AEC0 100%) !important;
+            color: #718096 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .org-detail-pagination-disabled:hover {
+            background: linear-gradient(135deg, #CBD5E0 0%, #A0AEC0 100%) !important;
+            transform: none !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        /* Page Numbers - Beautiful Circular Design */
+        .org-detail-pagination-numbers {
+            display: flex !important;
+            gap: 6px !important;
+            align-items: center !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+        }
+
+        .org-detail-pagination-number {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 44px !important;
+            height: 44px !important;
+            border: 2px solid #004080 !important;
+            border-radius: 50% !important;
+            text-decoration: none !important;
+            color: #003366 !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            background: white !important;
+            position: relative !important;
+            overflow: hidden !important;
+            box-shadow: 0 2px 8px rgba(0, 51, 102, 0.1) !important;
+        }
+
+        .org-detail-pagination-number::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #003366 0%, #004080 100%);
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+            z-index: 1;
+        }
+
+        .org-detail-pagination-number span {
+            position: relative;
+            z-index: 2;
+        }
+
+        .org-detail-pagination-number:hover {
+            border-color: #003366 !important;
+            transform: translateY(-2px) scale(1.1) !important;
+            box-shadow: 0 6px 20px rgba(0, 51, 102, 0.2) !important;
+            color: #003366 !important;
+        }
+
+        .org-detail-pagination-number:hover::before {
+            transform: scale(1);
+        }
+
+        .org-detail-pagination-number:hover span {
+            color: white !important;
+        }
+
+        .org-detail-pagination-active {
+            border-color: #003366 !important;
+            background: linear-gradient(135deg, #003366 0%, #004080 100%) !important;
+            color: white !important;
+            transform: translateY(-2px) scale(1.1) !important;
+            box-shadow: 0 6px 20px rgba(0, 51, 102, 0.3) !important;
+        }
+
+        .org-detail-pagination-active::before {
+            transform: scale(1) !important;
+        }
+
+        .org-detail-pagination-active span {
+            color: white !important;
+        }
+
+        .org-detail-pagination-ellipsis {
+            color: #718096 !important;
+            padding: 0 8px !important;
+            font-weight: 600 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 44px !important;
+            font-size: 1.1rem !important;
+        }
+
+        /* No Members State */
+        .org-detail-no-members {
+            grid-column: 1 / -1 !important;
+            text-align: center !important;
+            padding: 60px 40px !important;
+            color: #718096 !important;
+            background: linear-gradient(135deg, #F7FAFC 0%, #EDF2F7 100%) !important;
+            border-radius: 12px !important;
+            margin: 20px 0 !important;
+            border: 2px dashed #E2E8F0 !important;
+        }
+
+        .org-detail-no-members i {
+            margin-bottom: 20px !important;
+            color: #E2E8F0 !important;
+            opacity: 0.7 !important;
+            font-size: 3.5rem !important;
+        }
+
+        .org-detail-no-members h3 {
+            margin-bottom: 10px !important;
+            color: #718096 !important;
+            font-weight: 600 !important;
+            font-size: 1.3rem !important;
+        }
+
+        .org-detail-no-members p {
+            margin: 0 !important;
+            font-size: 0.95rem !important;
+            opacity: 0.8 !important;
+        }
+
+        /* ===== RESPONSIVE PAGINATION ===== */
+        @media (max-width: 768px) {
+            .org-detail-section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .org-detail-pagination-info {
+                margin-left: 0;
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .org-detail-pagination-controls {
+                flex-direction: column !important;
+                gap: 20px !important;
+            }
+
+            .org-detail-pagination-numbers {
+                order: -1 !important;
+            }
+
+            .org-detail-pagination-text {
+                font-size: 0.85rem;
+                text-align: right;
+            }
+
+            .org-detail-pagination-btn {
+                min-width: 130px !important;
+                padding: 14px 20px !important;
+                font-size: 0.95rem !important;
+            }
+
+            .org-detail-pagination-number {
+                width: 42px !important;
+                height: 42px !important;
+                font-size: 0.9rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .org-detail-pagination-numbers {
+                gap: 4px !important;
+            }
+
+            .org-detail-pagination-number {
+                width: 38px !important;
+                height: 38px !important;
+                font-size: 0.85rem !important;
+            }
+
+            .org-detail-pagination-ellipsis {
+                padding: 0 6px !important;
+                height: 38px !important;
+                font-size: 1rem !important;
+            }
+
+            .org-detail-pagination-btn {
+                min-width: 120px !important;
+                padding: 12px 18px !important;
+                font-size: 0.9rem !important;
+            }
+
+            .org-detail-pagination-text {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Ensure proper spacing in members section */
+        .org-detail-members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 0;
+        }
+
+        /* Update the section header to ensure proper alignment */
+        .org-detail-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #F7FAFC;
+            flex-wrap: wrap;
+        }
+
+        .org-detail-section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2D3748;
+            margin: 0;
+            flex: 1;
+        }
+
+        /* Make sure the pagination info aligns properly */
+        .org-detail-pagination-info {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="org-detail-body">
+
+    {% include 'core/navbar.html' %}
+
+    <!-- Organization Header -->
+    <section class="org-detail-header">
+        <div class="org-detail-container">
+            <div class="org-detail-hero">
+                <div class="org-detail-logo-section">
+                    <div class="org-detail-logo-container" id="orgLogoModalTrigger">
+                        {% if organization.organization_logo %}
+                            <img src="{{ organization.organization_logo.url }}" alt="{{ organization.organization_name }} Logo" class="org-detail-logo">
+                        {% else %}
+                            <img src="https://via.placeholder.com/200x200/003366/ffffff?text={{ organization.organization_acronym|slice:':2'|upper }}" alt="{{ organization.organization_name }} Logo" class="org-detail-logo">
+                        {% endif %}
+                        <div class="org-detail-logo-overlay">
+                            <i class="fas fa-expand"></i>
+                            <span>View Logo</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="org-detail-info-section">
+                    <nav class="org-detail-breadcrumb">
+                        <a href="{% url 'sdsorganization' %}" class="org-detail-breadcrumb-link">
+                            <i class="fas fa-home"></i>
+                            Student Organizations
+                        </a>
+                        <i class="fas fa-chevron-right org-detail-breadcrumb-separator"></i>
+                        <span class="org-detail-breadcrumb-current">{{ organization.organization_name }}</span>
+                    </nav>
+
+                    <h1 class="org-detail-title">{{ organization.organization_name }}</h1>
+                    <p class="org-detail-acronym">{{ organization.organization_acronym }}</p>
+
+                    <div class="org-detail-stats">
+                        <div class="org-detail-stat-card">
+                            <div class="org-detail-stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="org-detail-stat-content">
+                                <span class="org-detail-stat-value">{{ organization.organization_member_count }}</span>
+                                <span class="org-detail-stat-label">Active Members</span>
+                            </div>
+                        </div>
+                        <div class="org-detail-stat-card">
+                            <div class="org-detail-stat-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="org-detail-stat-content">
+                                <span class="org-detail-stat-value">{{ organization.organization_valid_from.year }}</span>
+                                <span class="org-detail-stat-label">Established</span>
+                            </div>
+                        </div>
+                        <div class="org-detail-stat-card">
+                            <div class="org-detail-stat-icon">
+                                <i class="fas fa-tag"></i>
+                            </div>
+                            <div class="org-detail-stat-content">
+                                <span class="org-detail-stat-value">{{ organization.get_organization_type_display }}</span>
+                                <span class="org-detail-stat-label">Type</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="org-detail-actions">
+                        {% if organization.organization_email %}
+                        <a href="mailto:{{ organization.organization_email }}" class="org-detail-btn org-detail-btn-primary">
+                            <i class="fas fa-envelope"></i>
+                            Contact Organization
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'sdsorganization' %}" class="org-detail-btn org-detail-btn-secondary">
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Organizations
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Organization Content -->
+    <section class="org-detail-content">
+        <div class="org-detail-container">
+            <div class="org-detail-layout">
+                <!-- Main Content -->
+                <div class="org-detail-main">
+                    <!-- About Section -->
+                    <div class="org-detail-section">
+                        <div class="org-detail-section-header">
+                            <i class="fas fa-info-circle org-detail-section-icon"></i>
+                            <h2 class="org-detail-section-title">About Us</h2>
+                        </div>
+                        <div class="org-detail-section-content">
+                            <p class="org-detail-description">{{ organization.organization_description }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Mission & Vision -->
+                    <div class="org-detail-section">
+                        <div class="org-detail-section-header">
+                            <i class="fas fa-bullseye org-detail-section-icon"></i>
+                            <h2 class="org-detail-section-title">Mission & Vision</h2>
+                        </div>
+                        <div class="org-detail-mission-vision">
+                            <div class="org-detail-mv-card org-detail-mission-card">
+                                <div class="org-detail-mv-icon">
+                                    <i class="fas fa-bullseye"></i>
+                                </div>
+                                <h3 class="org-detail-mv-title">Our Mission</h3>
+                                <p class="org-detail-mv-text">{{ organization.organization_mission }}</p>
+                            </div>
+                            <div class="org-detail-mv-card org-detail-vision-card">
+                                <div class="org-detail-mv-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <h3 class="org-detail-mv-title">Our Vision</h3>
+                                <p class="org-detail-mv-text">{{ organization.organization_vision }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Organization Members -->
+                    {% if organization.organization_members %}
+                    <div class="org-detail-section">
+                        <div class="org-detail-section-header">
+                            <i class="fas fa-users org-detail-section-icon"></i>
+                            <h2 class="org-detail-section-title">Organization Members</h2>
+                            <div class="org-detail-pagination-info">
+                                <span class="org-detail-pagination-text">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} •
+                                    Showing {{ members|length }} of {{ paginator.count }} members
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Members Grid -->
+                        <div class="org-detail-members-grid">
+                            {% for member in members %}
+                            <div class="org-detail-member-card">
+                                <div class="org-detail-member-avatar">
+                                    {% if organization.organization_logo %}
+                                        <img src="{{ organization.organization_logo.url }}" alt="{{ member.first_name }} {{ member.last_name }}" class="org-detail-member-img" data-member-initials="{{ member.first_name|slice:':1' }}{{ member.last_name|slice:':1' }}">
+                                    {% else %}
+                                        <img src="{% static 'images/cvsu_logo.png' %}" alt="{{ member.first_name }} {{ member.last_name }}" class="org-detail-member-img" data-member-initials="{{ member.first_name|slice:':1' }}{{ member.last_name|slice:':1' }}">
+                                    {% endif %}
+                                    <div class="org-detail-member-status"></div>
+                                </div>
+                                <div class="org-detail-member-info">
+                                    <h4 class="org-detail-member-name">{{ member.first_name }} {{ member.last_name }}</h4>
+                                    <span class="org-detail-member-role" data-position="{{ member.position }}">
+                                        {{ member.position }}
+                                    </span>
+                                    {% if member.course %}
+                                    <p class="org-detail-member-course">{{ member.course }}</p>
+                                    {% endif %}
+                                    {% if member.year_level %}
+                                    <p class="org-detail-member-year">{{ member.year_level }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="org-detail-no-members">
+                                <i class="fas fa-users fa-3x"></i>
+                                <h3>No Members Found</h3>
+                                <p>This organization doesn't have any members on this page.</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Pagination Controls -->
+                        {% if page_obj.paginator.num_pages > 1 %}
+                        <div class="org-detail-pagination">
+                            <div class="org-detail-pagination-controls">
+                                <!-- Previous Button -->
+                                {% if page_obj.has_previous %}
+                                <a href="?page={{ page_obj.previous_page_number }}" class="org-detail-pagination-btn org-detail-pagination-prev">
+                                    <i class="fas fa-chevron-left"></i>
+                                    Previous
+                                </a>
+                                {% else %}
+                                <span class="org-detail-pagination-btn org-detail-pagination-disabled">
+                                    <i class="fas fa-chevron-left"></i>
+                                    Previous
+                                </span>
+                                {% endif %}
+
+                                <!-- Page Numbers -->
+                                <div class="org-detail-pagination-numbers">
+                                    {% if page_obj.number > 3 %}
+                                    <a href="?page=1" class="org-detail-pagination-number">1</a>
+                                    <span class="org-detail-pagination-ellipsis">...</span>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                                            {% if page_obj.number == num %}
+                                            <span class="org-detail-pagination-number org-detail-pagination-active">{{ num }}</span>
+                                            {% else %}
+                                            <a href="?page={{ num }}" class="org-detail-pagination-number">{{ num }}</a>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if page_obj.number < page_obj.paginator.num_pages|add:"-2" %}
+                                    <span class="org-detail-pagination-ellipsis">...</span>
+                                    <a href="?page={{ page_obj.paginator.num_pages }}" class="org-detail-pagination-number">{{ page_obj.paginator.num_pages }}</a>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Next Button -->
+                                {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}" class="org-detail-pagination-btn org-detail-pagination-next">
+                                    Next
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                                {% else %}
+                                <span class="org-detail-pagination-btn org-detail-pagination-disabled">
+                                    Next
+                                    <i class="fas fa-chevron-right"></i>
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Sidebar -->
+                <div class="org-detail-sidebar">
+                    <!-- Quick Info -->
+                    <div class="org-detail-sidebar-card">
+                        <div class="org-detail-sidebar-card-header">
+                            <i class="fas fa-info-circle"></i>
+                            <h3>Quick Information</h3>
+                        </div>
+                        <div class="org-detail-info-list">
+                            <div class="org-detail-info-item">
+                                <div class="org-detail-info-icon">
+                                    <i class="fas fa-tag"></i>
+                                </div>
+                                <div class="org-detail-info-content">
+                                    <span class="org-detail-info-label">Category</span>
+                                    <span class="org-detail-info-value">{{ organization.get_organization_type_display }}</span>
+                                </div>
+                            </div>
+                            <div class="org-detail-info-item">
+                                <div class="org-detail-info-icon">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
+                                <div class="org-detail-info-content">
+                                    <span class="org-detail-info-label">Adviser</span>
+                                    <span class="org-detail-info-value">{{ organization.organization_adviser_name }}</span>
+                                </div>
+                            </div>
+                            <div class="org-detail-info-item">
+                                <div class="org-detail-info-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="org-detail-info-content">
+                                    <span class="org-detail-info-label">Email</span>
+                                    <span class="org-detail-info-value">{{ organization.organization_email }}</span>
+                                </div>
+                            </div>
+                            <div class="org-detail-info-item">
+                                <div class="org-detail-info-icon">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                                <div class="org-detail-info-content">
+                                    <span class="org-detail-info-label">Adviser Phone</span>
+                                    <span class="org-detail-info-value">{{ organization.organization_adviser_phone }}</span>
+                                </div>
+                            </div>
+                            <div class="org-detail-info-item">
+                                <div class="org-detail-info-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="org-detail-info-content">
+                                    <span class="org-detail-info-label">Valid Until</span>
+                                    <span class="org-detail-info-value">{{ organization.organization_valid_until|date:"M d, Y" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div class="org-detail-sidebar-card">
+                        <div class="org-detail-sidebar-card-header">
+                            <i class="fas fa-address-book"></i>
+                            <h3>Contact Information</h3>
+                        </div>
+                        <div class="org-detail-contact-list">
+                            {% if organization.organization_email %}
+                            <div class="org-detail-contact-item">
+                                <div class="org-detail-contact-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <a href="mailto:{{ organization.organization_email }}" class="org-detail-contact-link">
+                                    {{ organization.organization_email }}
+                                </a>
+                            </div>
+                            {% endif %}
+                            {% if organization.organization_adviser_email %}
+                            <div class="org-detail-contact-item">
+                                <div class="org-detail-contact-icon">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
+                                <a href="mailto:{{ organization.organization_adviser_email }}" class="org-detail-contact-link">
+                                    Adviser: {{ organization.organization_adviser_name }}
+                                </a>
+                            </div>
+                            {% endif %}
+                            {% if organization.organization_adviser_department %}
+                            <div class="org-detail-contact-item">
+                                <div class="org-detail-contact-icon">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <span class="org-detail-contact-text">{{ organization.organization_adviser_department }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Status Information -->
+                    <div class="org-detail-sidebar-card">
+                        <div class="org-detail-sidebar-card-header">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Organization Status</h3>
+                        </div>
+                        <div class="org-detail-status-content">
+                            <div class="org-detail-status-indicator {% if organization.organization_status == 'active' %}org-detail-status-active{% elif organization.organization_status == 'pending' %}org-detail-status-pending{% else %}org-detail-status-inactive{% endif %}">
+                                <div class="org-detail-status-dot"></div>
+                                <span class="org-detail-status-text">{{ organization.get_organization_status_display }}</span>
+                            </div>
+                            <div class="org-detail-status-details">
+                                <div class="org-detail-status-item">
+                                    <i class="fas fa-calendar-plus"></i>
+                                    <div>
+                                        <span class="org-detail-status-label">Valid From</span>
+                                        <span class="org-detail-status-value">{{ organization.organization_valid_from|date:"M d, Y" }}</span>
+                                    </div>
+                                </div>
+                                <div class="org-detail-status-item">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <div>
+                                        <span class="org-detail-status-label">Valid Until</span>
+                                        <span class="org-detail-status-value">{{ organization.organization_valid_until|date:"M d, Y" }}</span>
+                                    </div>
+                                </div>
+                                {% if organization.organization_approved_by %}
+                                <div class="org-detail-status-item">
+                                    <i class="fas fa-user-check"></i>
+                                    <div>
+                                        <span class="org-detail-status-label">Approved By</span>
+                                        <span class="org-detail-status-value">{{ organization.organization_approved_by.get_full_name }}</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Certificates Gallery -->
+    <section class="org-detail-certificates-section">
+        <div class="org-detail-container">
+            <div class="org-detail-section-header">
+                <i class="fas fa-certificate org-detail-section-icon"></i>
+                <h2 class="org-detail-section-title">Organization Certificates</h2>
+                <div class="org-detail-certificates-controls">
+                    <button class="org-detail-scroll-btn org-detail-scroll-left" aria-label="Scroll left">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="org-detail-scroll-btn org-detail-scroll-right" aria-label="Scroll right">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="org-detail-certificates-wrapper">
+                <div class="org-detail-certificates-track">
+                    {% for certificate in organization.certificates.all %}
+                    {% if certificate.is_active %}
+                    <div class="org-detail-certificate-card">
+                        <div class="org-detail-certificate-image">
+                            {% if certificate.certificate_file %}
+                            <img src="{{ certificate.certificate_file.url }}" alt="Certificate {{ forloop.counter }}" class="org-detail-certificate-img">
+                            {% else %}
+                            <div class="org-detail-certificate-placeholder">
+                                <i class="fas fa-certificate"></i>
+                                <span>Certificate Preview</span>
+                            </div>
+                            {% endif %}
+                            <div class="org-detail-certificate-overlay">
+                                <div class="org-detail-certificate-actions">
+                                    {% if certificate.certificate_file %}
+                                    <button class="org-detail-certificate-action-btn" title="View Full Size" data-certificate-src="{{ certificate.certificate_file.url }}">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <a href="{{ certificate.certificate_file.url }}" download class="org-detail-certificate-action-btn" title="Download Certificate">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="org-detail-certificate-info">
+                            <h4 class="org-detail-certificate-title">Certificate #{{ forloop.counter }}</h4>
+                            <div class="org-detail-certificate-meta">
+                                <span class="org-detail-certificate-date">
+                                    <i class="fas fa-calendar"></i>
+                                    {{ certificate.issue_date|date:"M d, Y" }}
+                                </span>
+                                <span class="org-detail-certificate-venue">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    {{ certificate.venue }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% empty %}
+                    <div class="org-detail-no-certificates">
+                        <i class="fas fa-certificate fa-3x"></i>
+                        <h3>No Certificates Available</h3>
+                        <p>This organization doesn't have any certificates yet.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Organization Logo Modal -->
+    <div class="org-detail-modal" id="orgLogoModal">
+        <div class="org-detail-modal-content">
+            <span class="org-detail-modal-close">&times;</span>
+            <img class="org-detail-modal-image" id="orgLogoImage" src="" alt="Organization Logo">
+        </div>
+    </div>
+
+    <!-- Certificate Modal -->
+    <div class="org-detail-modal" id="certificateModal">
+        <div class="org-detail-modal-content">
+            <span class="org-detail-modal-close">&times;</span>
+            <img class="org-detail-modal-image" id="certificateImage" src="" alt="Certificate">
+        </div>
+    </div>
+
+    {% include 'core/footer.html' %}
+    <script src="{% static 'js/core/organization_detail.js' %}"></script>
+
+</body>
+</html>

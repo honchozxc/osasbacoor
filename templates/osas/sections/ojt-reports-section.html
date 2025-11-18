@@ -1,0 +1,345 @@
+{% block ojt-reports-content %}
+<div class="section-header">
+    <div class="header-content">
+        <div class="title-section">
+            <h2 class="section-heading">OJT Reports Management</h2>
+            <div class="divider"></div>
+        </div>
+
+        <!-- OJT Reports Statistics Section -->
+        <div class="ojt-reports-stats">
+            <div class="ojt-reports-stat-card">
+                <div class="ojt-reports-stat-icon ojt-reports-stat-total">
+                    <i class='bx bx-file'></i>
+                </div>
+                <div class="ojt-reports-stat-info">
+                    <h3>
+                        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                            {{ total_ojt_reports }}
+                        {% elif request.user.user_type == 14 %}
+                            {{ user_total_reports }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </h3>
+                    <p>Total Reports</p>
+                </div>
+            </div>
+
+            <div class="ojt-reports-stat-card">
+                <div class="ojt-reports-stat-icon ojt-reports-stat-reviewed">
+                    <i class='bx bx-check-circle'></i>
+                </div>
+                <div class="ojt-reports-stat-info">
+                    <h3>
+                        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                            {{ reviewed_reports }}
+                        {% elif request.user.user_type == 14 %}
+                            {{ user_reviewed_reports }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </h3>
+                    <p>Reviewed Reports</p>
+                </div>
+            </div>
+
+            <div class="ojt-reports-stat-card">
+                <div class="ojt-reports-stat-icon ojt-reports-stat-pending">
+                    <i class='bx bx-time'></i>
+                </div>
+                <div class="ojt-reports-stat-info">
+                    <h3>
+                        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                            {{ submitted_reports }}
+                        {% elif request.user.user_type == 14 %}
+                            {{ user_submitted_reports }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </h3>
+                    <p>Pending Review</p>
+                </div>
+            </div>
+
+            <div class="ojt-reports-stat-card">
+                <div class="ojt-reports-stat-icon ojt-reports-stat-weekly">
+                    <i class='bx bx-archive'></i>
+                </div>
+                <div class="ojt-reports-stat-info">
+                    <h3>
+                        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                            {{ weekly_reports }}
+                        {% elif request.user.user_type == 14 %}
+                            {{ user_weekly_reports }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </h3>
+                    <p>Weekly Reports</p>
+                </div>
+            </div>
+
+            <div class="ojt-reports-stat-card">
+                <div class="ojt-reports-stat-icon ojt-reports-stat-monthly">
+                    <i class='bx bx-calendar'></i>
+                </div>
+                <div class="ojt-reports-stat-info">
+                    <h3>
+                        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                            {{ monthly_reports }}
+                        {% elif request.user.user_type == 14 %}
+                            {{ user_monthly_reports }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </h3>
+                    <p>Monthly Reports</p>
+                </div>
+            </div>
+
+            <div class="ojt-reports-stat-card">
+                <div class="ojt-reports-stat-icon ojt-reports-stat-final">
+                    <i class='bx bx-flag'></i>
+                </div>
+                <div class="ojt-reports-stat-info">
+                    <h3>
+                        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                            {{ final_reports }}
+                        {% elif request.user.user_type == 14 %}
+                            {{ user_final_reports }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </h3>
+                    <p>Final Reports</p>
+                </div>
+            </div>
+
+            <div class="ojt-reports-stat-card">
+                <div class="ojt-reports-stat-icon ojt-reports-stat-incident">
+                    <i class='bx bx-error'></i>
+                </div>
+                <div class="ojt-reports-stat-info">
+                    <h3>
+                        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                            {{ incident_reports }}
+                        {% elif request.user.user_type == 14 %}
+                            {{ user_incident_reports }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </h3>
+                    <p>Incident Reports</p>
+                </div>
+            </div>
+
+            <div class="ojt-reports-stat-card">
+                <div class="ojt-reports-stat-icon ojt-reports-stat-complaint">
+                    <i class='bx bx-message-error'></i>
+                </div>
+                <div class="ojt-reports-stat-info">
+                    <h3>
+                        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                            {{ complaint_reports }}
+                        {% elif request.user.user_type == 14 %}
+                            {{ user_complaint_reports }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </h3>
+                    <p>Complaint Reports</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="report-search" placeholder="Search reports..." class="search-input" value="{{ request.GET.search|default:'' }}">
+            </div>
+
+            <!-- Type Filter -->
+            <div class="status-sort">
+                <select id="type-filter" class="styled-select">
+                    <option value="all">All Types</option>
+                    <option value="weekly">Weekly Report</option>
+                    <option value="monthly">Monthly Report</option>
+                    <option value="final">Final Report</option>
+                    <option value="incident">Incident Report</option>
+                    <option value="complaint">Complaint Report</option>
+                </select>
+            </div>
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 or request.user.user_type == 14 %}
+            <button class="primary-btn" onclick="openReportCreateModal()"><i class="ri-add-line"></i> Submit Report</button>
+            {% endif %}
+            
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+            <button class="primary-btn" id="export-report-btn" data-export-url="{% url 'export-ojt-reports' %}">
+                <i class='bx bx-export'></i> Export Data
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Initial server-rendered table for first load -->
+<table class="data-table" id="reports-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Report Title</th>
+            <th>Type</th>
+            <th>Student</th>
+            <th>Company</th>
+            <th>Report Date</th>
+            <th>Status</th>
+            <th>Attachment</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="reports-tbody">
+        {% if ojt_reports %}
+            {% for report in ojt_reports %}
+            <tr>
+                <td>{{ report.id }}</td>
+                <td>
+                    <strong>{{ report.title }}</strong>
+                    {% if report.is_complaint_report %}
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="type-badge type-{{ report.report_type }}">
+                        {{ report.get_report_type_display }}
+                    </span>
+                </td>
+                <td>{{ report.student_name }}</td>
+                <td>{{ report.company_name }}</td>
+                <td>{{ report.report_date|date:"M d, Y" }}</td>
+                <td>
+                    <span class="status-badge status-{{ report.status }}">
+                        {{ report.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    {% if report.attachments.exists %}
+                    <i class='bx bx-file' title="Has attachment"></i>
+                    {% else %}
+                    <span class="text-muted">None</span>
+                    {% endif %}
+                </td>
+                <td class="action-buttons">
+                    <!-- View button - always visible -->
+                    <button class="btn-action view-btn" onclick="openReportViewModal({{ report.id }})" title="View">
+                        <i class='bx bx-show'></i>
+                    </button>
+
+                    <!-- Edit button logic -->
+                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                        <!-- Admins can always edit regardless of status -->
+                        <button class="btn-action edit-btn" onclick="openReportEditModal({{ report.id }})" title="Edit">
+                            <i class='bx bx-edit'></i>
+                        </button>
+                    {% elif request.user.user_type == 14 and report.submitted_by == request.user %}
+                        <!-- Students can only edit when status is 'submitted' -->
+                        {% if report.status == 'submitted' %}
+                        <button class="btn-action edit-btn" onclick="openReportEditModal({{ report.id }})" title="Edit">
+                            <i class='bx bx-edit'></i>
+                        </button>
+                        {% endif %}
+                    {% endif %}
+
+                    <!-- Review button - only for admin and only when status is 'submitted' -->
+                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                        {% if report.status == 'submitted' %}
+                        <button class="btn-action review-btn" onclick="openReportReviewModal({{ report.id }})" title="Review">
+                            <i class='bx bx-check'></i>
+                        </button>
+                        {% endif %}
+                    {% endif %}
+
+                    <!-- Archive button logic -->
+                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                        <!-- Admins can always archive regardless of status -->
+                        <button class="btn-action archive-btn" onclick="openReportArchiveModal({{ report.id }})" title="Archive">
+                            <i class='bx bx-archive'></i>
+                        </button>
+                    {% elif request.user.user_type == 14 and report.submitted_by == request.user %}
+                        <!-- Students can only archive when status is 'submitted' -->
+                        {% if report.status == 'submitted' %}
+                        <button class="btn-action archive-btn" onclick="openReportArchiveModal({{ report.id }})" title="Archive">
+                            <i class='bx bx-archive'></i>
+                        </button>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr id="no-data-row">
+                <td colspan="10" style="text-align: center; padding: 20px; font-style: italic; color: #888;">
+                    No reports found
+                </td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<!-- Pagination Container -->
+<div class="pagination-container" id="report-pagination-container">
+    {% if ojt_reports.has_other_pages %}
+    <div class="pagination-info">
+        Showing {{ ojt_reports.start_index }} to {{ ojt_reports.end_index }} of {{ ojt_reports.paginator.count }} entries
+    </div>
+    <div class="pagination-controls">
+        {% if ojt_reports.has_previous %}
+            <a href="javascript:void(0)" class="pagination-btn first-page" title="First Page" onclick="loadReportsPageWithCurrentFilters(1)">
+                <i class='bx bx-chevrons-left'></i>
+            </a>
+            <a href="javascript:void(0)" class="pagination-btn prev-page" title="Previous Page" onclick="loadReportsPageWithCurrentFilters({{ ojt_reports.previous_page_number }})">
+                <i class='bx bx-chevron-left'></i>
+            </a>
+        {% else %}
+            <span class="pagination-btn first-page disabled" title="First Page">
+                <i class='bx bx-chevrons-left'></i>
+            </span>
+            <span class="pagination-btn prev-page disabled" title="Previous Page">
+                <i class='bx bx-chevron-left'></i>
+            </span>
+        {% endif %}
+
+        <div class="page-numbers">
+            {% for num in ojt_reports.paginator.page_range %}
+                {% if ojt_reports.number == num %}
+                    <span class="pagination-btn current-page active">{{ num }}</span>
+                {% elif num > ojt_reports.number|add:'-3' and num < ojt_reports.number|add:'3' %}
+                    <a href="javascript:void(0)" class="pagination-btn page-number" onclick="loadReportsPageWithCurrentFilters({{ num }})">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if ojt_reports.has_next %}
+            <a href="javascript:void(0)" class="pagination-btn next-page" title="Next Page" onclick="loadReportsPageWithCurrentFilters({{ ojt_reports.next_page_number }})">
+                <i class='bx bx-chevron-right'></i>
+            </a>
+            <a href="javascript:void(0)" class="pagination-btn last-page" title="Last Page" onclick="loadReportsPageWithCurrentFilters({{ ojt_reports.paginator.num_pages }})">
+                <i class='bx bx-chevrons-right'></i>
+            </a>
+        {% else %}
+            <span class="pagination-btn next-page disabled" title="Next Page">
+                <i class='bx bx-chevron-right'></i>
+            </span>
+            <span class="pagination-btn last-page disabled" title="Last Page">
+                <i class='bx bx-chevrons-right'></i>
+            </span>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="pagination-info">
+        Showing {{ ojt_reports.paginator.count }} entries
+    </div>
+    {% endif %}
+</div>
+
+{% endblock ojt-reports-content %}

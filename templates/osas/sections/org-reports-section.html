@@ -1,0 +1,284 @@
+{% block content %}
+<div class="accomplishment-reports-container">
+    <div class="section-header">
+        <div class="header-content">
+            <div class="title-section">
+                {% if user.is_superuser or user.user_type == 10 or user.user_type == 1 %}
+                <h2 class="section-heading">Accomplishment Reports</h2>
+                {% else %}
+                <h2 class="section-heading">Your Accomplishment Reports</h2>
+                {% endif %}
+                <div class="divider"></div>
+            </div>
+            
+            <div class="header-actions">
+                <!-- Search and Filters in Header -->
+                <div class="header-filters">
+                    <!-- Search Input -->
+                    <div class="search-box">
+                        <i class='bx bx-search'></i>
+                        <input
+                            type="text"
+                            id="accomplishmentSearch"
+                            placeholder="Search reports..."
+                            class="search-input"
+                        >
+                    </div>
+
+                    <!-- Report Type Filter -->
+                    <div class="filter-group">
+                        <select id="reportTypeFilter" class="filter-select">
+                            <option value="all">All Types</option>
+                            <option value="event">Event/Activity</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="training">Training/Workshop</option>
+                            <option value="community">Community Service</option>
+                            <option value="achievement">Achievement/Award</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Semester Filter -->
+                    <div class="filter-group">
+                        <select id="semesterFilter" class="filter-select">
+                            <option value="all">All Semesters</option>
+                            <option value="1st">1st Semester</option>
+                            <option value="2nd">2nd Semester</option>
+                            <option value="summer">Summer</option>
+                        </select>
+                    </div>
+
+                    <!-- School Year Filter -->
+                    <div class="filter-group">
+                        <select id="schoolYearFilter" class="filter-select">
+                            <option value="all">All Years</option>
+                            <!-- This will be populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Clear Button -->
+                    <button id="clearFilters" class="secondary-btn">
+                        <i class='bx bx-reset'></i> Clear
+                    </button>
+                </div>
+
+                <!-- Submit Report Button -->
+                {% if user.is_superuser or user.user_type == 10 or user.user_type == 1 or user.user_type == 15 %}
+                <button class="primary-btn" onclick="openAccomplishmentCreateModal()">
+                    <i class='bx bx-plus'></i> Submit Report
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    {% if user.is_superuser or user.user_type == 10 or user.user_type == 1 %}
+    <div class="statistics-container">
+        <div class="statistics-grid">
+            <div class="statistic-card">
+                <div class="statistic-icon total">
+                    <i class='bx bxs-report'></i>
+                </div>
+                <div class="statistic-content">
+                    <h3 class="statistic-value">{{ total_accomplishment_reports }}</h3>
+                    <p class="statistic-label">Total Reports</p>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon event">
+                    <i class='bx bx-calendar-event'></i>
+                </div>
+                <div class="statistic-content">
+                    <h3 class="statistic-value">{{ event_reports_count }}</h3>
+                    <p class="statistic-label">Events/Activities</p>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon training">
+                    <i class='bx bx-book-reader'></i>
+                </div>
+                <div class="statistic-content">
+                    <h3 class="statistic-value">{{ training_reports_count }}</h3>
+                    <p class="statistic-label">Trainings/Workshops</p>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon community">
+                    <i class='bx bx-group'></i>
+                </div>
+                <div class="statistic-content">
+                    <h3 class="statistic-value">{{ community_reports_count }}</h3>
+                    <p class="statistic-label">Community Service</p>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon achievement">
+                    <i class='bx bx-trophy'></i>
+                </div>
+                <div class="statistic-content">
+                    <h3 class="statistic-value">{{ achievement_reports_count }}</h3>
+                    <p class="statistic-label">Achievements/Awards</p>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon semester">
+                    <i class='bx bx-calendar'></i>
+                </div>
+                <div class="statistic-content">
+                    <h3 class="statistic-value">{{ first_sem_reports }}</h3>
+                    <p class="statistic-label">1st Semester Reports</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Simplified Accomplishment Reports Table Section -->
+    <div class="table-section">
+        <div id="accomplishment-reports-table-container" class="table-container">
+            <table class="data-table" id="accomplishment-reports-table">
+                <thead>
+                    <tr>
+                        <th>Report Title</th>
+                        <th>Type</th>
+                        <th>Semester</th>
+                        <th>Date Conducted</th>
+                        <th>Participants</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in accomplishment_reports %}
+                    <tr>
+                        <td>
+                            <div class="report-title-cell">
+                                <strong class="report-title">{{ report.title }}</strong>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="type-badge {% if report.record_type == 'event' %}event
+                                {% elif report.record_type == 'training' %}training
+                                {% elif report.record_type == 'community' %}community
+                                {% elif report.record_type == 'achievement' %}achievement
+                                {% else %}other{% endif %}">
+                                {{ report.get_record_type_display }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="semester-info">
+                                {{ report.get_semester_display }}<br>
+                                <small>{{ report.school_year }}</small>
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="date-conducted">
+                                {{ report.date_conducted|date:"M d, Y" }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="participant-count">
+                                👥 {{ report.number_of_participants }}
+                            </span>
+                        </td>
+
+                        <td class="actions-cell">
+                            <div class="action-buttons">
+                                <button class="btn-icon btn-view-ar" onclick="openAccomplishmentViewModal({{ report.id }})" title="View Report">
+                                    <i class="ri-eye-fill"></i>
+                                </button>
+
+                                {% if user.is_superuser or user.user_type == 10 or user.user_type == 1 or user.user_type == 15 %}
+                                    <button class="btn-icon btn-edit-ar" onclick="openEditAccomplishmentModal({{ report.id }})" title="Edit Report">
+                                        <i class='bx bx-edit'></i>
+                                    </button>
+
+                                    <button class="btn-icon btn-archive-ar" onclick="openArchiveAccomplishmentModal({{ report.id }}, '{{ report.title }}')" title="Archive Report">
+                                        <i class='bx bxs-archive'></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-table">
+                            <div class="empty-state">
+                                <i class='bx bxs-report'></i>
+                                <p>No accomplishment reports found</p>
+                                {% if user.is_superuser or user.user_type == 10 or user.user_type == 1 or user.user_type == 15 %}
+                                <button class="primary-btn" onclick="openAccomplishmentCreateModal()">
+                                    <i class='bx bx-plus'></i> Submit First Report
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination controls -->
+            {% if accomplishment_reports %}
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Showing {{ accomplishment_reports.start_index }} to {{ accomplishment_reports.end_index }} of {{ accomplishment_reports.paginator.count }} entries
+                </div>
+                <div class="pagination-controls">
+                    {% if accomplishment_reports.has_previous %}
+                        <a href="?accomplishment_page=1#accomplishment-reports" class="pagination-btn first-page" title="First Page">
+                            <i class='bx bx-chevrons-left'></i>
+                        </a>
+                        <a href="?accomplishment_page={{ accomplishment_reports.previous_page_number }}#accomplishment-reports" class="pagination-btn prev-page" title="Previous Page">
+                            <i class='bx bx-chevron-left'></i>
+                        </a>
+                    {% else %}
+                        <span class="pagination-btn first-page disabled" title="First Page">
+                            <i class='bx bx-chevrons-left'></i>
+                        </span>
+                        <span class="pagination-btn prev-page disabled" title="Previous Page">
+                            <i class='bx bx-chevron-left'></i>
+                        </span>
+                    {% endif %}
+
+                    <div class="page-numbers">
+                        {% for num in accomplishment_reports.paginator.page_range %}
+                            {% if accomplishment_reports.number == num %}
+                                <span class="pagination-btn current-page active">{{ num }}</span>
+                            {% elif num > accomplishment_reports.number|add:'-3' and num < accomplishment_reports.number|add:'3' %}
+                                <a href="?accomplishment_page={{ num }}#accomplishment-reports" class="pagination-btn page-number">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    {% if accomplishment_reports.has_next %}
+                        <a href="?accomplishment_page={{ accomplishment_reports.next_page_number }}#accomplishment-reports" class="pagination-btn next-page" title="Next Page">
+                            <i class='bx bx-chevron-right'></i>
+                        </a>
+                        <a href="?accomplishment_page={{ accomplishment_reports.paginator.num_pages }}#accomplishment-reports" class="pagination-btn last-page" title="Last Page">
+                            <i class='bx bx-chevrons-right'></i>
+                        </a>
+                    {% else %}
+                        <span class="pagination-btn next-page disabled" title="Next Page">
+                            <i class='bx bx-chevron-right'></i>
+                        </span>
+                        <span class="pagination-btn last-page disabled" title="Last Page">
+                            <i class='bx bx-chevrons-right'></i>
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

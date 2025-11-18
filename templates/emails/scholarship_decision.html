@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Container */
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .email-header {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .email-header h2 {
+            margin: 10px 0 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* Content */
+        .email-content {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .welcome-text {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #2d3748;
+        }
+
+        .decision {
+            padding: 20px;
+            margin: 20px 0;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 4px;
+            font-size: 18px;
+        }
+
+        .approved {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .notes {
+            background: #f8f9fa;
+            border-left: 4px solid #6c757d;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .notes h4 {
+            margin-top: 0;
+            color: #2d3748;
+        }
+
+        /* Footer */
+        .email-footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .social-links {
+            margin: 20px 0;
+        }
+
+        .social-links a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                padding: 10px;
+            }
+
+            .email-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>Cavite State University - Bacoor City Campus</h1>
+            <h2>Office of Student Affairs and Services</h2>
+        </div>
+
+        <!-- Main content -->
+        <div class="email-content">
+            <p class="welcome-text">Dear <strong>{{ student_name }}</strong>,</p>
+
+            <p>We would like to inform you about the status of your scholarship application for <strong>{{ scholarship_name }}</strong>.</p>
+
+            <div class="decision {% if decision == 'approved' %}approved{% else %}rejected{% endif %}">
+                Your application has been <strong>{{ decision|upper }}</strong>
+            </div>
+
+            {% if notes %}
+            <div class="notes">
+                <h4>Notes from the reviewer:</h4>
+                <p>{{ notes }}</p>
+            </div>
+            {% endif %}
+
+            <p>This decision was made on <strong>{{ status_update_date }}</strong> by <strong>{{ status_updated_by }}</strong>.</p>
+
+            <p>For any questions or concerns, please contact the OSAS Scholarship Unit at <a href="mailto:cvsubacoorosas@gmail.com">cvsubacoorosas@gmail.com</a>.</p>
+
+            <p>Thank you for applying to our scholarship program.</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="email-footer">
+            <div class="social-links">
+                <a href="https://web.facebook.com/">Facebook</a> |
+                <a href="https://x.com/">Twitter</a> |
+                <a href="https://www.instagram.com/">Instagram</a>
+            </div>
+
+            <p>© {% now "Y" %} Cavite State University - Bacoor Campus. All rights reserved.</p>
+            <p>
+                <a href="#">Privacy Policy</a> |
+                <a href="#">Terms of Service</a>
+            </p>
+
+            <p style="font-size: 12px; color: #a0aec0;">
+                This is an automated message. Please do not reply to this email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

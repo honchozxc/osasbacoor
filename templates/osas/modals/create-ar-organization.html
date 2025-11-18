@@ -1,0 +1,206 @@
+{% block create-ar-organization %}
+<div id="accomplishmentCreateModal" class="modal">
+    <div class="modal-overlay" onclick="closeAccomplishmentCreateModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Submit Accomplishment Report</h2>
+                <p class="header-description">Report your organization's activities and accomplishments</p>
+            </div>
+            <button class="modal-close" onclick="closeAccomplishmentCreateModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="accomplishmentCreateForm" method="post" action="{% url 'add-accomplishment' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <p>Please provide all required information about your organization's accomplishment. Fields marked with <span class="required-asterisk">*</span> are mandatory.</p>
+                </div>
+
+                <div id="accomplishmentFormResponse" class="form-response"></div>
+
+                <div class="form-columns">
+                    <!-- Left Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="id_title">Report Title <span class="required-asterisk">*</span></label>
+                            <input type="text" name="title" id="id_title" class="form-input" required placeholder="Enter report title">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_record_type">Activity Type <span class="required-asterisk">*</span></label>
+                            <select name="record_type" id="id_record_type" class="form-input" required>
+                                <option value="">Select activity type</option>
+                                <option value="event">Event/Activity</option>
+                                <option value="meeting">Meeting</option>
+                                <option value="training">Training/Workshop</option>
+                                <option value="community">Community Service</option>
+                                <option value="achievement">Achievement/Award</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_date_conducted">Date Conducted <span class="required-asterisk">*</span></label>
+                            <input type="date" name="date_conducted" id="id_date_conducted" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_venue">Venue/Location</label>
+                            <input type="text" name="venue" id="id_venue" class="form-input" placeholder="Enter venue or location">
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="id_semester">Semester <span class="required-asterisk">*</span></label>
+                            <select name="semester" id="id_semester" class="form-input" required>
+                                <option value="">Select semester</option>
+                                <option value="1st">1st Semester</option>
+                                <option value="2nd">2nd Semester</option>
+                                <option value="summer">Summer</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_school_year">School Year <span class="required-asterisk">*</span></label>
+                            <input type="text" name="school_year" id="id_school_year" class="form-input" required
+                                   placeholder="2024-2025" pattern="\d{4}-\d{4}"
+                                   title="Format: YYYY-YYYY (e.g., 2024-2025)">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_number_of_participants">Number of Participants</label>
+                            <input type="number" name="number_of_participants" id="id_number_of_participants"
+                                   class="form-input" min="0" value="0" placeholder="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_duration_hours">Duration (hours)</label>
+                            <input type="number" name="duration_hours" id="id_duration_hours"
+                                   class="form-input" min="0" step="0.5" value="0" placeholder="0.0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Objectives and Outcomes Section -->
+                <div class="form-columns">
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="id_objectives">Objectives</label>
+                            <textarea name="objectives" id="id_objectives" class="form-input" rows="3"
+                                      placeholder="What were the main objectives of this activity?"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="id_outcomes">Outcomes/Results</label>
+                            <textarea name="outcomes" id="id_outcomes" class="form-input" rows="3"
+                                      placeholder="What were the outcomes or results achieved?"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Budget Information -->
+                <div class="form-group">
+                    <label for="id_budget_utilized">Budget Utilized (Optional)</label>
+                    <input type="number" name="budget_utilized" id="id_budget_utilized"
+                           class="form-input" min="0" step="0.01" placeholder="0.00">
+                    <small class="form-help">Enter the total budget utilized for this activity (if any)</small>
+                </div>
+
+                <!-- Main Report File Upload -->
+                <div class="form-group file-upload-group">
+                    <label for="mainReportFileInput">Main Report Document <span class="required-asterisk">*</span></label>
+                    <div class="file-upload-container">
+                        <div class="file-upload-box" onclick="document.getElementById('mainReportFileInput').click()">
+                            <div class="file-upload-content">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                <p>Click to upload main report</p>
+                                <small>Supports: PDF, DOC, DOCX (Max 10MB)</small>
+                            </div>
+                            <input type="file" name="main_report" id="mainReportFileInput" class="file-input" required
+                                   accept=".pdf,.doc,.docx" style="display: none;">
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name" id="mainReportFileName">No file selected</div>
+                            <div class="file-size" id="mainReportFileSize"></div>
+                            <button type="button" class="file-remove" id="removeMainReportFile" style="display: none;" onclick="removeMainReportFile()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supporting Files Upload - SIMPLIFIED (Just like main report but multiple) -->
+                <div class="form-group file-upload-group">
+                    <label for="supportingFilesInput">Supporting Files (Optional)</label>
+                    <div class="file-upload-container">
+                        <div class="file-upload-box" onclick="document.getElementById('supportingFilesInput').click()">
+                            <div class="file-upload-content">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                <p>Click to upload supporting files</p>
+                                <small>Supports: PDF, DOC, DOCX, JPG, JPEG, PNG, XLS, XLSX, MP4, AVI, MOV, ZIP (Max 10MB per file)</small>
+                            </div>
+                            <input type="file" name="supporting_files" id="supportingFilesInput" class="file-input"
+                                   multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx,.mp4,.avi,.mov,.zip"
+                                   style="display: none;">
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name" id="supportingFilesName">No files selected</div>
+                            <div class="file-count" id="supportingFilesCount" style="display: none;"></div>
+                            <div class="file-size" id="supportingFilesSize"></div>
+                            <button type="button" class="file-remove" id="removeSupportingFiles" style="display: none;" onclick="removeSupportingFiles()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeAccomplishmentCreateModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Submit Report</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock create-ar-organization %}

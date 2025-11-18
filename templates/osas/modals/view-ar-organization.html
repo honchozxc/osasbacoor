@@ -1,0 +1,147 @@
+{% block accomplishment-view-modal %}
+<div id="accomplishmentViewModal" class="modal">
+    <div class="modal-overlay" onclick="closeAccomplishmentViewModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Accomplishment Report Details</h2>
+                <p class="header-description">Comprehensive overview of accomplishment report</p>
+            </div>
+            <button class="modal-close" onclick="closeAccomplishmentViewModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="form-body">
+            <div class="accomplishment-layout-container">
+                <!-- TOP SECTION - Basic Information -->
+                <div class="accomplishment-info-section">
+                    <div class="accomplishment-main-card">
+                        <!-- Report Header -->
+                        <div class="accomplishment-header">
+                            <div class="accomplishment-title-section">
+                                <h3 class="accomplishment-title" id="viewAccomplishmentTitle">-</h3>
+                                <div class="accomplishment-meta-info">
+                                    <span class="accomplishment-type-badge" id="viewAccomplishmentType">-</span>
+                                    <span class="semester-badge" id="viewSemester">-</span>
+                                    <span class="date-conducted" id="viewDateConducted">-</span>
+                                </div>
+                            </div>
+                            <div class="accomplishment-submitter-section">
+                                <div class="submitter-info">
+                                    <span class="submitter-label">Submitted by:</span>
+                                    <span class="submitter-name" id="viewAccomplishmentSubmitter">-</span>
+                                    <span class="organization-name" id="viewOrganization">-</span>
+                                    <span class="submit-date" id="viewAccomplishmentSubmitDate">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Basic Details Grid -->
+                            <div class="details-column">
+                                <div class="details-group">
+                                    <h4 class="details-group-title">
+                                        <i class='bx bx-calendar'></i>
+                                        Academic Information
+                                    </h4>
+                                    <div class="details-content">
+                                        <div class="info-item">
+                                            <span class="info-label">Semester:</span>
+                                            <span class="info-value" id="viewSemesterDetail">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Venue:</span>
+                                            <span class="info-value" id="viewVenue">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Participants:</span>
+                                            <span class="info-value" id="viewParticipants">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Duration:</span>
+                                            <span class="info-value" id="viewDuration">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Budget Utilized:</span>
+                                            <span class="info-value" id="viewBudget">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+
+                <!-- MIDDLE SECTION - Content -->
+                <div class="accomplishment-content-section">
+                    <div class="content-grid">
+                        <!-- Objectives & Outcomes -->
+                        <div class="content-card">
+                            <div class="content-group">
+                                <h4 class="content-title">
+                                    <i class='bx bx-target-lock'></i>
+                                    Objectives
+                                </h4>
+                                <div class="content-text" id="viewObjectives">
+                                    <!-- Objectives will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="content-group">
+                                <h4 class="content-title">
+                                    <i class='bx bx-check-circle'></i>
+                                    Outcomes & Results
+                                </h4>
+                                <div class="content-text" id="viewOutcomes">
+                                    <!-- Outcomes will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM SECTION - Files -->
+                <div class="accomplishment-files-section">
+                    <div class="files-grid">
+                        <!-- Main Report -->
+                        <div class="files-column">
+                            <div class="files-section">
+                                <h4 class="section-title">
+                                    <i class='bx bx-file'></i>
+                                    Main Report Document
+                                </h4>
+                                <div class="file-item main-report" id="viewMainReportFile">
+                                    <!-- Main report file will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Supporting Files -->
+                        <div class="files-column">
+                            <div class="files-section">
+                                <h4 class="section-title">
+                                    <i class='bx bx-paperclip'></i>
+                                    Supporting Files
+                                    <span class="files-count" id="viewSupportingFilesCount">0 files</span>
+                                </h4>
+                                <div class="supporting-files-list" id="viewSupportingFiles">
+                                    <!-- Supporting files will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-close-modal" onclick="closeAccomplishmentViewModal()">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock accomplishment-view-modal %}

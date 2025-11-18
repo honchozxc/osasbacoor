@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OJT Program | CvSU OSAS Bacoor City Campus</title>
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link rel="stylesheet" href="{% static 'css/core/ojt.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    {% include 'core/navbar.html' %}
+
+    <div class="ojt-container">
+        <!-- Hero Section -->
+        <section class="ojt-hero">
+            <div class="ojt-hero-container">
+                <div class="ojt-hero-content">
+                    <h1>{{ ojt_content.hero_title }}</h1>
+                    <p>{{ ojt_content.hero_subtitle }}</p>
+                    <div class="ojt-hero-buttons">
+                        <a href="{% url 'add-ojt-application' %}" class="ojt-btn ojt-btn-primary apply-ojt-btn">Apply Now</a>
+                    </div>
+                </div>
+                <div class="ojt-hero-visual">
+                    <div class="ojt-visual-card">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Career Growth</h3>
+                        <p>Boost your professional development</p>
+                    </div>
+                    <div class="ojt-visual-card">
+                        <i class="fas fa-handshake"></i>
+                        <h3>Industry Partners</h3>
+                        <p>Connect with leading companies</p>
+                    </div>
+                    <div class="ojt-visual-card">
+                        <i class="fas fa-certificate"></i>
+                        <h3>Certification</h3>
+                        <p>Earn valuable credentials</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Overview Section -->
+        <section id="overview" class="ojt-overview">
+            <div class="ojt-container-inner">
+                <div class="ojt-section-header">
+                    <h2>{{ ojt_content.overview_title }}</h2>
+                    <p>{{ ojt_content.overview_subtitle }}</p>
+                </div>
+                <div class="ojt-overview-grid">
+                    {% for card in ojt_content.overview_cards %}
+                    <div class="ojt-overview-card">
+                        <div class="ojt-card-icon">
+                            <i class="{{ card.icon }}"></i>
+                        </div>
+                        <h3>{{ card.title }}</h3>
+                        <p>{{ card.description }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="ojt-services">
+            <div class="ojt-container-inner">
+                <div class="ojt-section-header">
+                    <h2>{{ ojt_content.services_title }}</h2>
+                    <p>{{ ojt_content.services_subtitle }}</p>
+                </div>
+                <div class="ojt-services-grid">
+                    {% for card in ojt_content.services_cards %}
+                    <div class="ojt-service-card">
+                        <h3><i class="{{ card.icon }}"></i> {{ card.title }}</h3>
+                        <p>{{ card.description }}</p>
+                        <ul>
+                            {% for item in card.items %}
+                            <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Partners Section -->
+        <section id="partners" class="ojt-partners">
+            <div class="ojt-container-inner">
+                <div class="ojt-section-header">
+                    <h2>{{ ojt_content.partners_title }}</h2>
+                    <p>{{ ojt_content.partners_subtitle }}</p>
+                </div>
+                <div class="ojt-partners-grid">
+                    {% for company in top_companies %}
+                    <div class="ojt-partner-card">
+                        <div class="ojt-partner-logo">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <h3>{{ company.name }}</h3>
+                        <p>{{ company.description|default:"Industry Leader"|truncatewords:10 }}</p>
+                        <span class="ojt-partner-tag">{{ company.filled_slots }}+ interns placed</span>
+                    </div>
+                    {% empty %}
+                    <!-- Empty State -->
+                    <div class="ojt-empty-state">
+                        <div class="ojt-empty-icon">
+                            <i class="fas fa-building fa-3x"></i>
+                        </div>
+                        <h3>No Partner Companies Yet</h3>
+                        <p>We're currently establishing partnerships with leading companies. Check back soon to see our industry partners!</p>
+                        <div class="ojt-empty-actions">
+                            <a href="#contact" class="ojt-btn ojt-btn-secondary">Become a Partner</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Process Section -->
+        <section id="process" class="ojt-process">
+            <div class="ojt-container-inner">
+                <div class="ojt-section-header">
+                    <h2>{{ ojt_content.process_title }}</h2>
+                    <p>{{ ojt_content.process_subtitle }}</p>
+                </div>
+                <div class="ojt-process-steps">
+                    {% for step in ojt_content.process_steps %}
+                    <div class="ojt-step">
+                        <div class="ojt-step-number">{{ step.number }}</div>
+                        <div class="ojt-step-content">
+                            <h3>{{ step.title }}</h3>
+                            <p>{{ step.description }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="ojt-faq">
+            <div class="ojt-container-inner">
+                <div class="ojt-section-header">
+                    <h2>{{ ojt_content.faq_title }}</h2>
+                    <p>{{ ojt_content.faq_subtitle }}</p>
+                </div>
+                <div class="ojt-faq-grid">
+                    {% for faq in ojt_content.faq_content %}
+                    <div class="ojt-faq-item">
+                        <div class="ojt-faq-question">
+                            <h3>{{ faq.question }}</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="ojt-faq-answer">
+                            <p>{{ faq.answer|linebreaks }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section id="contact" class="ojt-cta">
+            <div class="ojt-container-inner">
+                <div class="ojt-cta-content">
+                    <h2>{{ ojt_content.cta_title }}</h2>
+                    <p>{{ ojt_content.cta_subtitle }}</p>
+                    <a href="{% url 'add-ojt-application' %}" class="ojt-btn ojt-btn-primary ojt-btn-large apply-ojt-btn">{{ ojt_content.cta_button_text }}</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h3 id="modalTitle">Authentication Required</h3>
+            <p id="modalMessage">You must be logged in to access this page.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary close-modal-btn">Okay</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/core/ojt.js' %}"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal elements
+        const authModal = document.getElementById('authModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const closeModalButtons = document.querySelectorAll('.close-modal, .close-modal-btn');
+
+        // Apply OJT buttons
+        const applyButtons = document.querySelectorAll('.apply-ojt-btn');
+
+        // Function to show modal
+        function showModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            authModal.style.display = 'block';
+            setTimeout(() => {
+                authModal.classList.add('show');
+            }, 10);
+        }
+
+        // Function to hide modal
+        function hideModal() {
+            authModal.classList.remove('show');
+            setTimeout(() => {
+                authModal.style.display = 'none';
+            }, 300);
+        }
+
+        // Close modal when clicking X or cancel button
+        closeModalButtons.forEach(button => {
+            button.addEventListener('click', hideModal);
+        });
+
+        // Close modal when clicking outside
+        authModal.addEventListener('click', function(e) {
+            if (e.target === authModal) {
+                hideModal();
+            }
+        });
+
+        // Apply OJT button click handlers
+        applyButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                // Check if user is authenticated
+                const isAuthenticated = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
+
+                if (!isAuthenticated) {
+                    e.preventDefault();
+                    showModal(
+                        'Authentication Required',
+                        'You must login before accessing the OJT application page.'
+                    );
+                    return;
+                }
+
+                // Check if user is a student (user_type = 14)
+                const isStudent = {% if request.user.is_authenticated and request.user.user_type == 14 %}true{% else %}false{% endif %};
+
+                if (!isStudent) {
+                    e.preventDefault();
+                    showModal(
+                        'Access Restricted',
+                        'Only students are allowed to apply for OJT programs.'
+                    );
+                }
+            });
+        });
+    });
+    </script>
+
+    {% include 'core/footer.html' %}
+
+</body>
+</html>

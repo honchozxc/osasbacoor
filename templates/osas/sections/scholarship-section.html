@@ -1,0 +1,210 @@
+{% block content %}
+<div class="section-header">
+    <div class="header-content">
+        <div class="title-section">
+            <h2 class="section-heading">Scholarships</h2>
+            <div class="divider"></div>
+        </div>
+        <div class="controls">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="scholarship-search" placeholder="Search scholarships..." class="search-input">
+            </div>
+
+            <!-- Type filter dropdown -->
+            <div class="filter-dropdown">
+                <select id="type-filter" class="styled-select">
+                    <option value="all">All Types</option>
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                </select>
+            </div>
+
+            <!-- Status filter dropdown -->
+            <div class="filter-dropdown">
+                <select id="status-filter" class="styled-select">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+
+            {% if perms.osas.add_scholarship %}
+            <button class="primary-btn" onclick="openScholarshipCreateModal()">
+                <i class='bx bx-plus'></i> Add Scholarship
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="statistics-container">
+    <div class="statistics-grid">
+        <div class="statistic-card">
+            <div class="statistic-icon total">
+                <i class='bx bx-bookmark-alt'></i>
+            </div>
+            <div class="statistic-content">
+                <h3 class="statistic-value">{{ total_scholarships }}</h3>
+                <p class="statistic-label">Total Scholarships</p>
+            </div>
+        </div>
+
+        <div class="statistic-card">
+            <div class="statistic-icon public">
+                <i class='bx bx-building-house'></i>
+            </div>
+            <div class="statistic-content">
+                <h3 class="statistic-value">{{ public_scholarships_count }}</h3>
+                <p class="statistic-label">Public Scholarships</p>
+            </div>
+        </div>
+
+        <div class="statistic-card">
+            <div class="statistic-icon private">
+                <i class='bx bx-briefcase-alt'></i>
+            </div>
+            <div class="statistic-content">
+                <h3 class="statistic-value">{{ private_scholarships_count }}</h3>
+                <p class="statistic-label">Private Scholarships</p>
+            </div>
+        </div>
+
+        <div class="statistic-card">
+            <div class="statistic-icon active">
+                <i class='bx bx-check-circle'></i>
+            </div>
+            <div class="statistic-content">
+                <h3 class="statistic-value">{{ active_scholarships_count }}</h3>
+                <p class="statistic-label">Active Scholarships</p>
+            </div>
+        </div>
+
+        <div class="statistic-card">
+            <div class="statistic-icon inactive">
+                <i class='bx bx-x-circle'></i>
+            </div>
+            <div class="statistic-content">
+                <h3 class="statistic-value">{{ inactive_scholarships_count }}</h3>
+                <p class="statistic-label">Inactive Scholarships</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="scholarships-table-container">
+    <!-- Loading overlay for table only -->
+    <div id="scholarships-loading" class="table-loading-overlay" style="display: none;">
+        <div class="table-loading-spinner">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <table class="data-table" id="scholarships-table">
+        <thead>
+            <tr>
+                <th data-sort="name">Name <i class='bx bx-sort'></i></th>
+                <th data-sort="type">Type <i class='bx bx-sort'></i></th>
+                <th data-sort="slots">Slots <i class='bx bx-sort'></i></th>
+                <th data-sort="is_active">Active <i class='bx bx-sort'></i></th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for scholarship in scholarships %}
+            <tr data-created-at="{{ scholarship.created_at|date:'c' }}">
+                <td>{{ scholarship.name }}</td>
+                <td>{{ scholarship.get_scholarship_type_display }}</td>
+                <td>{{ scholarship.slots_available|default:"-" }}</td>
+                <td>
+                    <span class="status-badge {% if scholarship.is_active %}active{% else %}inactive{% endif %}">
+                        {% if scholarship.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </td>
+                <td class="actions">
+                    <button class="btn-icon btn-view-scholarship" onclick="openScholarshipViewModal({{ scholarship.id }})" title="View">
+                        <i class="ri-eye-fill"></i>
+                    </button>
+                    {% if perms.osas.change_scholarship %}
+                    <button class="btn-icon btn-edit-scholarship" onclick="openEditScholarshipModal({{ scholarship.id }})" title="Edit">
+                        <i class='bx bx-edit'></i>
+                    </button>
+                    {% endif %}
+                    {% if perms.osas.delete_scholarship %}
+                    <button class="btn-icon btn-archive-scholarship" onclick="openArchiveScholarshipModal({{ scholarship.id }}, '{{ scholarship.name }}')" title="Archive">
+                        <i class='bx bxs-archive'></i>
+                    </button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="empty-table">
+                    <div class="empty-state">
+                        <i class='bx bx-bookmark-alt'></i>
+                        <p>No scholarships found</p>
+                        {% if perms.osas.add_scholarship %}
+                        <button class="primary-btn" onclick="openScholarshipCreateModal()">
+                            <i class='bx bx-plus'></i> Add Scholarship
+                        </button>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination controls -->
+    {% if scholarships %}
+    <div class="pagination-container">
+        <div class="pagination-info">
+            Showing {{ scholarships.start_index }} to {{ scholarships.end_index }} of {{ scholarships.paginator.count }} entries
+        </div>
+        <div class="pagination-controls">
+            {% if scholarships.has_previous %}
+                <a href="?scholarship_page=1#scholarships" class="pagination-btn first-page" title="First Page">
+                    <i class='bx bx-chevrons-left'></i>
+                </a>
+                <a href="?scholarship_page={{ scholarships.previous_page_number }}#scholarships" class="pagination-btn prev-page" title="Previous Page">
+                    <i class='bx bx-chevron-left'></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn first-page disabled" title="First Page">
+                    <i class='bx bx-chevrons-left'></i>
+                </span>
+                <span class="pagination-btn prev-page disabled" title="Previous Page">
+                    <i class='bx bx-chevron-left'></i>
+                </span>
+            {% endif %}
+
+            <div class="page-numbers">
+                {% for num in scholarships.paginator.page_range %}
+                    {% if scholarships.number == num %}
+                        <span class="pagination-btn current-page active">{{ num }}</span>
+                    {% elif num > scholarships.number|add:'-3' and num < scholarships.number|add:'3' %}
+                        <a href="?scholarship_page={{ num }}#scholarships" class="pagination-btn page-number">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if scholarships.has_next %}
+                <a href="?scholarship_page={{ scholarships.next_page_number }}#scholarships" class="pagination-btn next-page" title="Next Page">
+                    <i class='bx bx-chevron-right'></i>
+                </a>
+                <a href="?scholarship_page={{ scholarships.paginator.num_pages }}#scholarships" class="pagination-btn last-page" title="Last Page">
+                    <i class='bx bx-chevrons-right'></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn next-page disabled" title="Next Page">
+                    <i class='bx bx-chevron-right'></i>
+                </span>
+                <span class="pagination-btn last-page disabled" title="Last Page">
+                    <i class='bx bx-chevrons-right'></i>
+                </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

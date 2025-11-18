@@ -1,0 +1,1589 @@
+<div id="archived-section">
+    {% block archived-content %}
+    <div class="archived-container">
+        <div class="archived-header-section">
+            <h1 class="archived-header">Manage Archived Data</h1>
+            <p class="archived-subheader">View and manage archived records</p>
+        </div>
+
+        <div class="archived-tabs">
+            {% if request.user.is_superuser %}
+            <button class="tab-button active" data-tab="users">Users</button>
+            {% endif %}
+
+            {% if request.user.is_superuser or archived_announcements %}
+            <button class="tab-button {% if not request.user.is_superuser %}active{% endif %}" data-tab="announcements">Announcements</button>
+            {% endif %}
+
+            {% if request.user.is_superuser or archived_downloadables %}
+            <button class="tab-button" data-tab="downloadables">Downloadables</button>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 11 or archived_complaints %}
+            <button class="tab-button" data-tab="complaints">Complaints</button>
+            {% endif %}
+
+            {% if request.user.is_superuser or archived_scholarships %}
+            <button class="tab-button" data-tab="scholarships">Scholarships</button>
+            {% endif %}
+
+            {% if request.user.is_superuser or archived_scholarship_applications %}
+            <button class="tab-button" data-tab="scholarship-applications">Scholarship Applications</button>
+            {% endif %}
+
+            {% if request.user.is_superuser or archived_admissions %}
+            <button class="tab-button" data-tab="admissions">Admissions</button>
+            {% endif %}
+
+            {% if request.user.is_superuser or archived_nstp_students %}
+            <button class="tab-button" data-tab="nstp-students">NSTP Students</button>
+            {% endif %}
+
+            {% if request.user.is_superuser or archived_nstp_files or request.user.user_type == 1 or request.user.user_type == 2 %}
+            <button class="tab-button" data-tab="nstp-files">NSTP Files</button>
+            {% endif %}
+
+            {% if request.user.is_superuser or archived_ojt_companies or request.user.user_type == 1 or request.user.user_type == 13 %}
+            <button class="tab-button" data-tab="ojt-companies">OJT Companies</button>
+            {% endif %}
+
+            {% if request.user.is_superuser or archived_ojt_applications or request.user.user_type == 1 or request.user.user_type == 13 or request.user.user_type == 14 %}
+            <button class="tab-button" data-tab="ojt-applications">OJT Applications</button>
+            {% endif %}
+
+            {% if request.user.is_superuser or archived_ojt_reports or request.user.user_type == 1 or request.user.user_type == 13 or request.user.user_type == 14 %}
+            <button class="tab-button" data-tab="ojt-reports">OJT Reports</button>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 10 or request.user.user_type == 15 %}
+            <button class="tab-button" data-tab="organizations">Organizations</button>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 10 or request.user.user_type == 15 %}
+            <button class="tab-button" data-tab="accomplishment-reports">Accomplishment Reports</button>
+            {% endif %}
+        </div>
+
+        {% if request.user.is_superuser %}
+        <div class="tab-content {% if request.user.is_superuser %}active{% endif %}" id="users-tab">
+            <div class="archived-controls">
+                <div class="controls">
+                <div class="search-box">
+                    <i class='bx bx-search'></i>
+                    <input type="text" id="user-search-archived" placeholder="Search archived users..." class="search-input">
+                </div>
+                <div class="unit-sort">
+                    <select id="archived-unit-sort" class="styled-select">
+                        <option value="">Sort by Unit</option>
+                        <option value="OSAS Staff">OSAS</option>
+                        <option value="NSTP">NSTP</option>
+                        <option value="Clinic">Clinic</option>
+                        <option value="Alumni">Alumni</option>
+                        <option value="Scholarship">Scholarship</option>
+                        <option value="Culture and Arts">Culture and Arts</option>
+                        <option value="Sports Development">Sports Development</option>
+                        <option value="Guidance Counseling">Guidance Counseling</option>
+                        <option value="Student Welfare Services">Student Welfare Services</option>
+                        <option value="Student Development Services">Student Development Services</option>
+                        <option value="Misdeamenor">Misdeamenor</option>
+                        <option value="Admission">Admission</option>
+                        <option value="Job Placement">Job Placement</option>
+                        <option value="Student">Student</option>
+                    </select>
+                </div>
+                <div class="date-sort">
+                    <select id="archived-status-sort" class="styled-select">
+                        <option value="all">Sort by Date</option>
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                        <option value="last_year">Last Year</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                    </select>
+                </div>
+            </div>
+            </div>
+
+            <div class="archived-table-container">
+                <table class="archived-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>User Type</th>
+                            <th>Archived Date</th>
+                            <th>Archived By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in archived_users %}
+                        <tr>
+                            <td>
+                                <div class="user-info">
+                                    <img src="{{ user.profile_picture.url|default:'/static/images/default-profile.png' }}"
+                                         alt="{{ user.username }}" class="user-avatar">
+                                    <div>
+                                        <span class="user-name">
+                                            {% if user.is_organization and user.organization %}
+                                                {{ user.organization.organization_name }}
+                                            {% else %}
+                                                {{ user.get_full_name }}
+                                            {% endif %}
+                                        </span>
+                                        <span class="user-username">@{{ user.username }}</span>
+                                        {% if user.is_organization %}
+                                        <span class="organization-acronym">({{ user.organization.organization_acronym }})</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge">
+                                    {% if user.is_organization %}
+                                        Organization
+                                    {% else %}
+                                        {{ user.get_user_type_display }}
+                                    {% endif %}
+                                </span>
+                                {% if user.is_organization and user.organization %}
+                                <span class="badge organization-type">
+                                    {{ user.organization.get_organization_type_display }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.archived_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                {% if user.archived_by %}
+                                {{ user.archived_by.get_full_name }}
+                                {% else %}
+                                System
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    {% if request.user.is_superuser or user.archived_by == request.user %}
+                                        <button class="action-btn view-btn" data-id="{{ user.id }}" data-type="user">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                    <button class="action-btn retrieve-btn" data-id="{{ user.id }}" data-type="user">
+                                        <i class="fas fa-undo"></i> Retrieve
+                                    </button>
+                                    {% else %}
+                                    <span class="no-permission">No actions available</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="no-data">
+                                <i class="fas fa-inbox"></i>
+                                <span>No archived users found</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if request.user.is_superuser or archived_announcements %}
+        <div class="tab-content {% if not request.user.is_superuser %}active{% endif %}" id="announcements-tab">
+            <div class="archived-controls">
+                <div class="controls">
+                <div class="search-box">
+                    <i class='bx bx-search'></i>
+                    <input type="text" id="announcements-search-archived" class="search-input" placeholder="Search archived announcements...">
+                </div>
+
+                <div class="filter-group">
+                    <select id="ArchivedcategoryFilter" class="styled-select" onchange="filterByCategory()">
+                        <option value="all">Sort by Category</option>
+                        <option value="Basic Announcements">Basic Announcements</option>
+                        <option value="Enrollment Announcements">Enrollment Announcements</option>
+                        <option value="Event Announcements">Event Announcements</option>
+                        <option value="Class Suspension Announcements">Class Suspension Announcements</option>
+                        <option value="Emergency Announcements">Emergency Announcements</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <select id="ArchiveddateFilter" class="styled-select" onchange="filterByDateAdded()">
+                        <option value="all">Sort by Dates</option>
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="this_year">This Year</option>
+                        <option value="last_year">Last Year</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                    </select>
+                </div>
+            </div>
+            </div>
+
+            <div class="archived-table-container">
+                <table class="archived-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Publish Date</th>
+                            <th>Archived Date</th>
+                            <th>Archived By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for announcement in archived_announcements %}
+                        <tr>
+                            <td>{{ announcement.title }}</td>
+                            <td><span class="badge">{{ announcement.get_category_display }}</span></td>
+                            <td>{{ announcement.publish_date|date:"M d, Y H:i" }}</td>
+                            <td>{{ announcement.archived_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                {% if announcement.archived_by %}
+                                {{ announcement.archived_by.get_full_name }}
+                                {% else %}
+                                System
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-btn" data-id="{{ announcement.id }}" data-type="announcement">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    {% if request.user.is_superuser or announcement.author == request.user or announcement.archived_by == request.user %}
+                                    <button class="action-btn retrieve-btn" data-id="{{ announcement.id }}" data-type="announcement">
+                                        <i class="fas fa-undo"></i> Retrieve
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="no-data">
+                                <i class="fas fa-inbox"></i>
+                                <span>No archived announcements found</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if request.user.is_superuser or archived_downloadables %}
+        <div class="tab-content" id="downloadables-tab">
+            <div class="archived-controls">
+                <div class="controls">
+                    <div class="search-box">
+                        <i class='bx bx-search'></i>
+                        <input type="text" id="downloadables-search-archived" placeholder="Search archived templates..." class="search-input">
+                    </div>
+                    <div class="category-filter">
+                        <select id="ArchiveddownloadableCategoryFilter" class="styled-select">
+                            <option value="all">Sort by Categories</option>
+                            <option value="osas_forms">OSAS Forms</option>
+                            <option value="society_forms">Society Forms</option>
+                            <option value="guidelines">Guidelines</option>
+                            <option value="manuals">Manuals</option>
+                            <option value="others">Others</option>
+                        </select>
+                    </div>
+                    <div class="date-filter">
+                        <select id="ArchiveddownloadableDateFilter" class="styled-select">
+                            <option value="all">Sort by Dates</option>
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="this_year">This Year</option>
+                            <option value="last_year">Last Year</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="archived-table-container">
+                <table class="archived-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>File</th>
+                            <th>Archived Date</th>
+                            <th>Archived By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for downloadable in archived_downloadables %}
+                        <tr>
+                            <td>{{ downloadable.title }}</td>
+                            <td><span class="badge">{{ downloadable.get_category_display }}</span></td>
+                            <td>
+                                <span class="file-info">
+                                    <i class="fas fa-file-alt"></i>
+                                    {{ downloadable.get_file_name }} ({{ downloadable.get_file_size }})
+                                </span>
+                            </td>
+                            <td>{{ downloadable.archived_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                {% if downloadable.archived_by %}
+                                {{ downloadable.archived_by.get_full_name }}
+                                {% else %}
+                                System
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-btn" data-id="{{ downloadable.id }}" data-type="downloadable">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    {% if request.user.is_superuser or downloadable.created_by == request.user or downloadable.archived_by == request.user %}
+                                    <button class="action-btn retrieve-btn" data-id="{{ downloadable.id }}" data-type="downloadable">
+                                        <i class="fas fa-undo"></i> Retrieve
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="no-data">
+                                <i class="fas fa-inbox"></i>
+                                <span>No archived downloadables found</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="tab-content" id="complaints-tab">
+            <div class="archived-controls">
+                <div class="controls">
+                    <div class="search-box">
+                        <i class='bx bx-search'></i>
+                        <input type="text" id="complaints-search-archived" placeholder="Search archived complaints..." class="search-input">
+                    </div>
+                    <div class="status-filter">
+                        <select id="ArchivedcomplaintStatusFilter" class="styled-select">
+                            <option value="all">All Statuses</option>
+                            <option value="under_review">Under Review</option>
+                            <option value="resolved">Resolved</option>
+                        </select>
+                    </div>
+                    <div class="date-filter">
+                        <select id="ArchivedcomplaintDateFilter" class="styled-select">
+                            <option value="all">Sort by Dates</option>
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="this_year">This Year</option>
+                            <option value="last_year">Last Year</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="archived-table-container">
+                <table class="archived-table">
+                    <thead>
+                        <tr>
+                            <th>Reference #</th>
+                            <th>Title</th>
+                            <th>Complainant</th>
+                            <th>Status</th>
+                            <th>Archived Date</th>
+                            <th>Archived By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complaint in archived_complaints %}
+                        <tr>
+                            <td>{{ complaint.reference_number }}</td>
+                            <td>{{ complaint.title }}</td>
+                            <td>{{ complaint.complainant_first_name }} {{ complaint.complainant_last_name }}</td>
+                            <td>
+                                <span class="badge {% if complaint.status == 'resolved' %}resolved{% else %}under-review{% endif %}">
+                                    {{ complaint.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ complaint.archived_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                {% if complaint.archived_by %}
+                                {{ complaint.archived_by.get_full_name }}
+                                {% else %}
+                                System
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-btn" data-id="{{ complaint.id }}" data-type="complaint">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 11 or complaint.archived_by == request.user %}
+                                        <button class="action-btn retrieve-btn" data-id="{{ complaint.id }}" data-type="complaint">
+                                            <i class="fas fa-undo"></i> Retrieve
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="no-data">
+                                <i class="fas fa-inbox"></i>
+                                <span>No archived complaints found</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    <div class="tab-content" id="scholarships-tab">
+        <div class="archived-controls">
+            <div class="controls">
+                <div class="search-box">
+                    <i class='bx bx-search'></i>
+                    <input type="text" id="scholarships-search-archived" placeholder="Search archived scholarships..." class="search-input">
+                </div>
+                <div class="type-filter">
+                    <select id="ArchivedscholarshipTypeFilter" class="styled-select">
+                        <option value="all">All Types</option>
+                        <option value="public">Public Scholarship</option>
+                        <option value="private">Private Scholarship</option>
+                    </select>
+                </div>
+                <div class="date-filter">
+                    <select id="ArchivedscholarshipDateFilter" class="styled-select">
+                        <option value="all">Sort by Dates</option>
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="this_year">This Year</option>
+                        <option value="last_year">Last Year</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="archived-table-container">
+            <table class="archived-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Slots Available</th>
+                        <th>Status</th>
+                        <th>Archived Date</th>
+                        <th>Archived By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scholarship in archived_scholarships %}
+                    <tr>
+                        <td>{{ scholarship.name }}</td>
+                        <td><span class="badge">{{ scholarship.get_scholarship_type_display }}</span></td>
+                        <td>{{ scholarship.slots_available|default:"Unlimited" }}</td>
+                        <td>
+                            <span class="badge {% if scholarship.is_active %}active{% else %}inactive{% endif %}">
+                                {% if scholarship.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ scholarship.archived_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if scholarship.archived_by %}
+                            {{ scholarship.archived_by.get_full_name }}
+                            {% else %}
+                            System
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view-btn" data-id="{{ scholarship.id }}" data-type="scholarship">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 5 or scholarship.archived_by == request.user %}
+                                    <button class="action-btn retrieve-btn" data-id="{{ scholarship.id }}" data-type="scholarship">
+                                        <i class="fas fa-undo"></i> Retrieve
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="no-data">
+                            <i class="fas fa-inbox"></i>
+                            <span>No archived scholarships found</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tab-content" id="scholarship-applications-tab">
+        <div class="archived-controls">
+            <div class="controls">
+                <div class="search-box">
+                    <i class='bx bx-search'></i>
+                    <input type="text" id="scholarship-applications-search-archived" placeholder="Search archived applications..." class="search-input">
+                </div>
+                <div class="status-filter">
+                    <select id="ArchivedscholarshipApplicationStatusFilter" class="styled-select">
+                        <option value="all">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="date-filter">
+                    <select id="ArchivedscholarshipApplicationDateFilter" class="styled-select">
+                        <option value="all">Sort by Dates</option>
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                        <option value="last_year">Last Year</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="archived-table-container">
+            <table class="archived-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Scholarship</th>
+                        <th>Status</th>
+                        <th>Application Date</th>
+                        <th>Archived Date</th>
+                        <th>Archived By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for application in archived_scholarship_applications %}
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                {% if application.student.profile_picture %}
+                                <img src="{{ application.student.profile_picture.url }}" alt="{{ application.student.username }}" class="user-avatar">
+                                {% else %}
+                                <div class="avatar-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <span class="user-name">{{ application.student.get_full_name }}</span>
+                                    <span class="user-username">{{ application.student.student_number }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ application.scholarship.name }}</td>
+                        <td>
+                            <span class="badge
+                                {% if application.status == 'approved' %}approved
+                                {% elif application.status == 'rejected' %}rejected
+                                {% elif application.status == 'waitlisted' %}waitlisted
+                                {% elif application.status == 'under_review' %}under-review
+                                {% else %}pending{% endif %}">
+                                {{ application.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ application.application_date|date:"M d, Y H:i" }}</td>
+                        <td>{{ application.archived_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if application.archived_by %}
+                            {{ application.archived_by.get_full_name }}
+                            {% else %}
+                            System
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view-btn" data-id="{{ application.id }}" data-type="scholarship-application">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 5 or application.archived_by == request.user %}
+                                <button class="action-btn retrieve-btn" data-id="{{ application.id }}" data-type="scholarship-application">
+                                    <i class="fas fa-undo"></i> Retrieve
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="no-data">
+                            <i class="fas fa-inbox"></i>
+                            <span>No archived scholarship applications found</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+        <div class="tab-content" id="admissions-tab">
+        <div class="archived-controls">
+            <div class="controls">
+                <div class="search-box">
+                    <i class='bx bx-search'></i>
+                    <input type="text" id="admissions-search-archived" placeholder="Search archived admissions..." class="search-input">
+                </div>
+                <div class="status-filter">
+                    <select id="ArchivedadmissionStatusFilter" class="styled-select">
+                        <option value="all">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="incomplete">Incomplete</option>
+                        <option value="complete">Complete</option>
+                        <option value="verified">Verified</option>
+                    </select>
+                </div>
+                <div class="type-filter">
+                    <select id="ArchivedadmissionTypeFilter" class="styled-select">
+                        <option value="all">All Types</option>
+                        <option value="current_grade12">Current Grade 12</option>
+                        <option value="shs_graduate">SHS Graduate</option>
+                        <option value="transferee">Transferee</option>
+                    </select>
+                </div>
+                <div class="date-filter">
+                    <select id="ArchivedadmissionDateFilter" class="styled-select">
+                        <option value="all">Sort by Dates</option>
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                        <option value="last_year">Last Year</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="archived-table-container">
+            <table class="archived-table">
+                <thead>
+                    <tr>
+                        <th>Control No</th>
+                        <th>Student Type</th>
+                        <th>Course</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Archived Date</th>
+                        <th>Archived By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for admission in archived_admissions %}
+                    <tr>
+                        <td>{{ admission.control_no }}</td>
+                        <td><span class="badge">{{ admission.get_student_type_display }}</span></td>
+                        <td>{{ admission.course.name }}</td>
+                        <td>
+                            <span class="badge
+                                {% if admission.status == 'verified' %}verified
+                                {% elif admission.status == 'complete' %}complete
+                                {% elif admission.status == 'incomplete' %}incomplete
+                                {% else %}pending{% endif %}">
+                                {{ admission.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ admission.date|date:"M d, Y" }}</td>
+                        <td>{{ admission.archived_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if admission.archived_by %}
+                            {{ admission.archived_by.get_full_name }}
+                            {% else %}
+                            System
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view-btn" data-id="{{ admission.id }}" data-type="admission">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 12 or admission.archived_by == request.user %}
+                                <button class="action-btn retrieve-btn" data-id="{{ admission.id }}" data-type="admission">
+                                    <i class="fas fa-undo"></i> Retrieve
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            <i class="fas fa-inbox"></i>
+                            <span>No archived admissions found</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tab-content" id="nstp-students-tab">
+        <div class="archived-controls">
+            <div class="controls">
+                <div class="search-box">
+                    <i class='bx bx-search'></i>
+                    <input type="text" id="nstp-students-search-archived" placeholder="Search archived NSTP students..." class="search-input">
+                </div>
+                <div class="status-filter">
+                    <select id="ArchivednstpStatusFilter" class="styled-select">
+                        <option value="all">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="semester-filter">
+                    <select id="ArchivednstpSemesterFilter" class="styled-select">
+                        <option value="all">All Semesters</option>
+                        <option value="1st Sem">First Semester</option>
+                        <option value="2nd Sem">Second Semester</option>
+                    </select>
+                </div>
+                <div class="date-filter">
+                    <select id="ArchivednstpDateFilter" class="styled-select">
+                        <option value="all">Sort by Dates</option>
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                        <option value="last_year">Last Year</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="archived-table-container">
+            <table class="archived-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Student Number</th>
+                        <th>Program</th>
+                        <th>Semester</th>
+                        <th>Academic Year</th>
+                        <th>Status</th>
+                        <th>Archived Date</th>
+                        <th>Archived By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in archived_nstp_students %}
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                {% if student.user.profile_picture %}
+                                <img src="{{ student.user.profile_picture.url }}" alt="{{ student.user.username }}" class="user-avatar">
+                                {% else %}
+                                <div class="avatar-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <span class="user-name">{{ student.last_name }}, {{ student.first_name }}</span>
+                                    <span class="user-username">{{ student.user.email }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ student.student_number }}</td>
+                        <td>{{ student.program }}</td>
+                        <td>{{ student.get_semester_display }}</td>
+                        <td>{{ student.academic_year }}</td>
+                        <td>
+                            <span class="badge
+                                {% if student.approval_status == 'approved' %}approved
+                                {% elif student.approval_status == 'rejected' %}rejected
+                                {% else %}pending{% endif %}">
+                                {{ student.get_approval_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ student.archived_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if student.archived_by %}
+                            {{ student.archived_by.get_full_name }}
+                            {% else %}
+                            System
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view-btn" data-id="{{ student.id }}" data-type="nstp-student">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 2 or student.archived_by == request.user %}
+                                <button class="action-btn retrieve-btn" data-id="{{ student.id }}" data-type="nstp-student">
+                                    <i class="fas fa-undo"></i> Retrieve
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="no-data">
+                            <i class="fas fa-inbox"></i>
+                            <span>No archived NSTP students found</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+        <div class="tab-content" id="nstp-files-tab">
+        <div class="archived-controls">
+            <div class="controls">
+                <div class="search-box">
+                    <i class='bx bx-search'></i>
+                    <input type="text" id="nstp-files-search-archived" placeholder="Search archived NSTP files..." class="search-input">
+                </div>
+                <div class="category-filter">
+                    <select id="ArchivednstpFileCategoryFilter" class="styled-select">
+                        <option value="all">All Categories</option>
+                        <option value="accomplishment_reports">Accomplishment Reports</option>
+                        <option value="communication_letters">Communication Letters</option>
+                        <option value="financial_plan">Financial Plan</option>
+                        <option value="letters">Letters</option>
+                        <option value="moa">MOA</option>
+                        <option value="nstp_files">NSTP Files</option>
+                        <option value="recommendation">Recommendation</option>
+                        <option value="schedule">Schedule</option>
+                    </select>
+                </div>
+                <div class="semester-filter">
+                    <select id="ArchivednstpFileSemesterFilter" class="styled-select">
+                        <option value="all">All Semesters</option>
+                        <option value="1st_semester">1st Semester</option>
+                        <option value="2nd_semester">2nd Semester</option>
+                    </select>
+                </div>
+                <div class="date-filter">
+                    <select id="ArchivednstpFileDateFilter" class="styled-select">
+                        <option value="all">Sort by Dates</option>
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                        <option value="last_year">Last Year</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="archived-table-container">
+            <table class="archived-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Semester</th>
+                        <th>School Year</th>
+                        <th>File</th>
+                        <th>Archived Date</th>
+                        <th>Archived By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for nstp_file in archived_nstp_files %}
+                    <tr>
+                        <td>{{ nstp_file.title }}</td>
+                        <td><span class="badge">{{ nstp_file.get_category_display }}</span></td>
+                        <td>{{ nstp_file.get_semester_display }}</td>
+                        <td>{{ nstp_file.school_year }}</td>
+                        <td>
+                            <span class="file-info">
+                                <i class="fas fa-file-alt"></i>
+                                {{ nstp_file.get_file_name }} ({{ nstp_file.get_file_size }})
+                            </span>
+                        </td>
+                        <td>{{ nstp_file.archived_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if nstp_file.archived_by %}
+                            {{ nstp_file.archived_by.get_full_name }}
+                            {% else %}
+                            System
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view-btn" data-id="{{ nstp_file.id }}" data-type="nstp-file">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 2 or nstp_file.archived_by == request.user %}
+                                <button class="action-btn retrieve-btn" data-id="{{ nstp_file.id }}" data-type="nstp-file">
+                                    <i class="fas fa-undo"></i> Retrieve
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            <i class="fas fa-inbox"></i>
+                            <span>No archived NSTP files found</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+        <div class="tab-content" id="ojt-companies-tab">
+        <div class="archived-controls">
+            <div class="controls">
+                <div class="search-box">
+                    <i class='bx bx-search'></i>
+                    <input type="text" id="ojt-companies-search-archived" placeholder="Search archived OJT companies..." class="search-input">
+                </div>
+                <div class="status-filter">
+                    <select id="ArchivedojtCompanyStatusFilter" class="styled-select">
+                        <option value="all">All Statuses</option>
+                        <option value="available">Available</option>
+                        <option value="limited">Limited</option>
+                        <option value="full">Full</option>
+                    </select>
+                </div>
+                <div class="date-filter">
+                    <select id="ArchivedojtCompanyDateFilter" class="styled-select">
+                        <option value="all">Sort by Dates</option>
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                        <option value="last_year">Last Year</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="archived-table-container">
+            <table class="archived-table">
+                <thead>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Address</th>
+                        <th>Contact Number</th>
+                        <th>Slots (Used/Total)</th>
+                        <th>Status</th>
+                        <th>Archived Date</th>
+                        <th>Archived By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for company in archived_ojt_companies %}
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                <div class="avatar-placeholder">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div>
+                                    <span class="user-name">{{ company.name }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ company.address|truncatewords:5 }}</td>
+                        <td>{{ company.contact_number }}</td>
+                        <td>
+                            <span class="slot-info">
+                                {{ company.filled_slots }}/{{ company.available_slots }}
+                                <span class="utilization">({{ company.utilization_rate|floatformat:1 }}%)</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge
+                                {% if company.status == 'Available' %}active
+                                {% elif company.status == 'Limited' %}warning
+                                {% elif company.status == 'Full' %}inactive
+                                {% else %}inactive{% endif %}">
+                                {{ company.status }}
+                            </span>
+                        </td>
+                        <td>{{ company.archived_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if company.archived_by %}
+                            {{ company.archived_by.get_full_name }}
+                            {% else %}
+                            System
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view-btn" data-id="{{ company.id }}" data-type="ojt-company">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                {% if request.user.is_superuser or company.archived_by == request.user %}
+                                <button class="action-btn retrieve-btn" data-id="{{ company.id }}" data-type="ojt-company">
+                                    <i class="fas fa-undo"></i> Retrieve
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            <i class="fas fa-inbox"></i>
+                            <span>No archived OJT companies found</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+        <div class="tab-content" id="ojt-applications-tab">
+            <div class="archived-controls">
+                <div class="controls">
+                    <div class="search-box">
+                        <i class='bx bx-search'></i>
+                        <input type="text" id="ojt-applications-search-archived" placeholder="Search archived OJT applications..." class="search-input">
+                    </div>
+                    <div class="status-filter">
+                        <select id="ArchivedojtApplicationStatusFilter" class="styled-select">
+                            <option value="all">All Statuses</option>
+                            <option value="draft">Draft</option>
+                            <option value="submitted">Submitted</option>
+                            <option value="under_review">Under Review</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="date-filter">
+                        <select id="ArchivedojtApplicationDateFilter" class="styled-select">
+                            <option value="all">Sort by Dates</option>
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="year">This Year</option>
+                            <option value="last_year">Last Year</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="archived-table-container">
+                <table class="archived-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Company</th>
+                            <th>Course</th>
+                            <th>Status</th>
+                            <th>Application Date</th>
+                            <th>Archived Date</th>
+                            <th>Archived By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for application in archived_ojt_applications %}
+                        <tr>
+                            <td>
+                                <div class="user-info">
+                                    {% if application.student.profile_picture %}
+                                    <img src="{{ application.student.profile_picture.url }}" alt="{{ application.student.username }}" class="user-avatar">
+                                    {% else %}
+                                    <div class="avatar-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <span class="user-name">{{ application.student.get_full_name }}</span>
+                                        <span class="user-username">{{ application.student.student_number }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ application.company.name }}</td>
+                            <td>{{ application.student_course }}</td>
+                            <td>
+                                <span class="badge
+                                    {% if application.status == 'approved' %}approved
+                                    {% elif application.status == 'rejected' %}rejected
+                                    {% elif application.status == 'cancelled' %}cancelled
+                                    {% elif application.status == 'under_review' %}under-review
+                                    {% elif application.status == 'submitted' %}submitted
+                                    {% else %}draft{% endif %}">
+                                    {{ application.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ application.application_date|date:"M d, Y H:i" }}</td>
+                            <td>{{ application.archived_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                {% if application.archived_by %}
+                                {{ application.archived_by.get_full_name }}
+                                {% else %}
+                                System
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <!-- View button - always visible for all users -->
+                                    <button class="action-btn view-btn" data-id="{{ application.id }}" data-type="ojt-application">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+
+                                    <!-- Retrieve button logic -->
+                                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                                        <!-- OSAS Staff (user types 1, 13) and superusers can always see retrieve -->
+                                        <button class="action-btn retrieve-btn" data-id="{{ application.id }}" data-type="ojt-application">
+                                            <i class="fas fa-undo"></i> Retrieve
+                                        </button>
+                                    {% elif request.user.user_type == 14 and application.archived_by == request.user %}
+                                        <!-- Student users (type 14) can only see retrieve if THEY archived it -->
+                                        <button class="action-btn retrieve-btn" data-id="{{ application.id }}" data-type="ojt-application">
+                                            <i class="fas fa-undo"></i> Retrieve
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="no-data">
+                                <i class="fas fa-inbox"></i>
+                                <span>No archived OJT applications found</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="ojt-reports-tab">
+        <div class="archived-controls">
+            <div class="controls">
+                <div class="search-box">
+                    <i class='bx bx-search'></i>
+                    <input type="text" id="ojt-reports-search-archived" placeholder="Search archived OJT reports..." class="search-input">
+                </div>
+                <div class="status-filter">
+                    <select id="ArchivedojtReportStatusFilter" class="styled-select">
+                        <option value="all">All Statuses</option>
+                        <option value="submitted">Submitted</option>
+                        <option value="reviewed">Reviewed</option>
+                    </select>
+                </div>
+                <div class="type-filter">
+                    <select id="ArchivedojtReportTypeFilter" class="styled-select">
+                        <option value="all">All Types</option>
+                        <option value="weekly">Weekly Report</option>
+                        <option value="monthly">Monthly Report</option>
+                        <option value="final">Final Report</option>
+                        <option value="incident">Incident Report</option>
+                        <option value="complaint">Complaint Report</option>
+                    </select>
+                </div>
+                <div class="date-filter">
+                    <select id="ArchivedojtReportDateFilter" class="styled-select">
+                        <option value="all">Sort by Dates</option>
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                        <option value="last_year">Last Year</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="archived-table-container">
+            <table class="archived-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Student</th>
+                        <th>Company</th>
+                        <th>Report Date</th>
+                        <th>Status</th>
+                        <th>Archived Date</th>
+                        <th>Archived By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in archived_ojt_reports %}
+                    <tr>
+                        <td>{{ report.title }}</td>
+                        <td><span class="badge">{{ report.get_report_type_display }}</span></td>
+                        <td>
+                            <div class="user-info">
+                                {% if report.submitted_by.profile_picture %}
+                                <img src="{{ report.submitted_by.profile_picture.url }}" alt="{{ report.submitted_by.username }}" class="user-avatar">
+                                {% else %}
+                                <div class="avatar-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <span class="user-name">{{ report.student_name }}</span>
+                                    <span class="user-username">{{ report.application.student.student_number }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ report.company_name }}</td>
+                        <td>{{ report.report_date|date:"M d, Y" }}</td>
+                        <td>
+                            <span class="badge {% if report.status == 'reviewed' %}reviewed{% else %}submitted{% endif %}">
+                                {{ report.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ report.archived_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if report.archived_by %}
+                            {{ report.archived_by.get_full_name }}
+                            {% else %}
+                            System
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view-btn" data-id="{{ report.id }}" data-type="ojt-report">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+
+                                <!-- Retrieve button logic -->
+                                {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                                    <!-- OSAS Staff (user types 1, 13) and superusers can always see retrieve -->
+                                    <button class="action-btn retrieve-btn" data-id="{{ report.id }}" data-type="ojt-report">
+                                        <i class="fas fa-undo"></i> Retrieve
+                                    </button>
+                                {% elif request.user.user_type == 14 and report.archived_by == request.user %}
+                                    <!-- Student users (type 14) can only see retrieve if THEY archived it -->
+                                    <button class="action-btn retrieve-btn" data-id="{{ report.id }}" data-type="ojt-report">
+                                        <i class="fas fa-undo"></i> Retrieve
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="no-data">
+                            <i class="fas fa-inbox"></i>
+                            <span>No archived OJT reports found</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+        <div class="tab-content" id="organizations-tab">
+            <div class="archived-controls">
+                <div class="controls">
+                    <div class="search-box">
+                        <i class='bx bx-search'></i>
+                        <input type="text" id="organizations-search-archived" placeholder="Search archived organizations..." class="search-input">
+                    </div>
+                    <div class="type-filter">
+                        <select id="ArchivedorganizationTypeFilter" class="styled-select">
+                            <option value="all">All Types</option>
+                            <option value="student">Student Organization</option>
+                            <option value="sociocultural">Sociocultural Organization</option>
+                        </select>
+                    </div>
+                    <div class="status-filter">
+                        <select id="ArchivedorganizationStatusFilter" class="styled-select">
+                            <option value="all">All Statuses</option>
+                            <option value="active">Active</option>
+                            <option value="pending">Pending</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="expired">Expired</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div class="date-filter">
+                        <select id="ArchivedorganizationDateFilter" class="styled-select">
+                            <option value="all">Sort by Dates</option>
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="year">This Year</option>
+                            <option value="last_year">Last Year</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="archived-table-container">
+                <table class="archived-table">
+                    <thead>
+                        <tr>
+                            <th>Organization Name</th>
+                            <th>Acronym</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Valid Until</th>
+                            <th>Members</th>
+                            <th>Archived Date</th>
+                            <th>Archived By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for organization in archived_organizations %}
+                        <tr>
+                            <td>
+                                <div class="organization-info">
+                                    {% if organization.organization_logo %}
+                                    <img src="{{ organization.organization_logo.url }}" alt="{{ organization.organization_name }}" class="organization-logo-small">
+                                    {% else %}
+                                    <div class="organization-logo-small placeholder">
+                                        <i class='bx bxs-group'></i>
+                                    </div>
+                                    {% endif %}
+                                    <div class="organization-details">
+                                        <strong>{{ organization.organization_name }}</strong>
+                                        <small>{{ organization.organization_email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ organization.organization_acronym }}</td>
+                            <td>
+                                <span class="badge {% if organization.organization_type == 'student' %}student{% else %}sociocultural{% endif %}">
+                                    {{ organization.get_organization_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% with status=organization.organization_status %}
+                                <span class="badge
+                                    {% if status == 'active' %}active
+                                    {% elif status == 'pending' %}pending
+                                    {% elif status == 'expired' %}expired
+                                    {% elif status == 'rejected' %}rejected
+                                    {% elif status == 'cancelled' %}cancelled
+                                    {% else %}inactive{% endif %}">
+                                    {% if status == 'active' %}Active
+                                    {% elif status == 'pending' %}Pending
+                                    {% elif status == 'expired' %}Expired
+                                    {% elif status == 'rejected' %}Rejected
+                                    {% elif status == 'cancelled' %}Cancelled
+                                    {% else %}Inactive{% endif %}
+                                </span>
+                                {% endwith %}
+                            </td>
+                            <td>
+                                {% if organization.organization_valid_until %}
+                                    {{ organization.organization_valid_until|date:"M d, Y" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ organization.organization_member_count }} members</td>
+                            <td>{{ organization.archived_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                {% if organization.archived_by %}
+                                {{ organization.archived_by.get_full_name }}
+                                {% else %}
+                                System
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <!-- View button - always visible for users who can see the organization -->
+                                    <button class="action-btn view-btn" data-id="{{ organization.id }}" data-type="organization">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+
+                                    {% if request.user.is_superuser or request.user.user_type == 10 %}
+                                        <!-- Super users and user_type 1 or 10 can retrieve ANY organization -->
+                                        <button class="action-btn retrieve-btn" data-id="{{ organization.id }}" data-type="organization">
+                                            <i class="fas fa-undo"></i> Retrieve
+                                        </button>
+                                    {% elif request.user.user_type == 15 and organization.archived_by == request.user %}
+                                        <!-- Organization users can only retrieve if THEY archived it -->
+                                        <button class="action-btn retrieve-btn" data-id="{{ organization.id }}" data-type="organization">
+                                            <i class="fas fa-undo"></i> Retrieve
+                                        </button>
+                                    {% else %}
+                                        <!-- No retrieve permission -->
+                                        <span class="no-permission">Cannot retrieve</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="no-data">
+                                <i class="fas fa-inbox"></i>
+                                <span>No archived organizations found</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="accomplishment-reports-tab">
+    <div class="archived-controls">
+        <div class="controls">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="accomplishment-reports-search-archived" placeholder="Search archived accomplishment reports..." class="search-input">
+            </div>
+            <div class="type-filter">
+                <select id="ArchivedaccomplishmentReportTypeFilter" class="styled-select">
+                    <option value="all">All Types</option>
+                    <option value="event">Event/Activity</option>
+                    <option value="meeting">Meeting</option>
+                    <option value="training">Training/Workshop</option>
+                    <option value="community">Community Service</option>
+                    <option value="achievement">Achievement/Award</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="semester-filter">
+                <select id="ArchivedaccomplishmentReportSemesterFilter" class="styled-select">
+                    <option value="all">All Semesters</option>
+                    <option value="1st">1st Semester</option>
+                    <option value="2nd">2nd Semester</option>
+                    <option value="summer">Summer</option>
+                </select>
+            </div>
+            <div class="date-filter">
+                <select id="ArchivedaccomplishmentReportDateFilter" class="styled-select">
+                    <option value="all">Sort by Dates</option>
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="year">This Year</option>
+                    <option value="last_year">Last Year</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="archived-table-container">
+        <table class="archived-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Organization</th>
+                    <th>Type</th>
+                    <th>Date Conducted</th>
+                    <th>Semester</th>
+                    <th>Participants</th>
+                    <th>Archived Date</th>
+                    <th>Archived By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in archived_accomplishment_reports %}
+                <tr>
+                    <td>{{ report.title }}</td>
+                    <td>
+                        {% if report.organization %}
+                            {{ report.organization.organization_acronym }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td><span class="badge">{{ report.get_record_type_display }}</span></td>
+                    <td>{{ report.date_conducted|date:"M d, Y" }}</td>
+                    <td>{{ report.get_semester_display }}</td>
+                    <td>{{ report.number_of_participants }}</td>
+                    <td>{{ report.archived_at|date:"M d, Y H:i" }}</td>
+                    <td>
+                        {% if report.archived_by %}
+                        {{ report.archived_by.get_full_name }}
+                        {% else %}
+                        System
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn view-btn" data-id="{{ report.id }}" data-type="accomplishment-report">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+
+                            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 10 %}
+                                <!-- User type 1 or 10 can always retrieve -->
+                                <button class="action-btn retrieve-btn" data-id="{{ report.id }}" data-type="accomplishment-report">
+                                    <i class="fas fa-undo"></i> Retrieve
+                                </button>
+                            {% elif request.user.user_type == 15 and report.archived_by == request.user %}
+                                <!-- User type 15 can only retrieve if they archived it -->
+                                <button class="action-btn retrieve-btn" data-id="{{ report.id }}" data-type="accomplishment-report">
+                                    <i class="fas fa-undo"></i> Retrieve
+                                </button>
+                            {% else %}
+                                <!-- No retrieve permission -->
+                                <span class="no-permission">Cannot retrieve</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="no-data">
+                        <i class="fas fa-inbox"></i>
+                        <span>No archived accomplishment reports found</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+    </div>
+    {% endblock archived-content %}
+</div>

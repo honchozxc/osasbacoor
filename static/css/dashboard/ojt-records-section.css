@@ -1,0 +1,3919 @@
+/* Statistics Section */
+.ojt-reports-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.ojt-reports-stat-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.ojt-reports-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.ojt-reports-stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.ojt-reports-stat-total {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.ojt-reports-stat-reviewed {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.ojt-reports-stat-pending {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+}
+
+.ojt-reports-stat-weekly {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
+
+.ojt-reports-stat-monthly {
+    background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+}
+
+.ojt-reports-stat-final {
+    background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+}
+
+.ojt-reports-stat-incident {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+
+.ojt-reports-stat-complaint {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+}
+
+.ojt-reports-stat-info h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0 0 0.25rem 0;
+    line-height: 1;
+}
+
+.ojt-reports-stat-info p {
+    font-size: 0.875rem;
+    color: #718096;
+    margin: 0;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .ojt-reports-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .ojt-reports-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Review Button */
+.btn-action.review-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: 1px solid #10b981;
+    color: white;
+}
+
+.btn-action.review-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    border-color: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-action.review-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+}
+
+/* Animation for Review Button */
+.btn-action.review-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-action.review-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-action.review-btn:hover::before {
+    left: 100%;
+}
+
+/* Loading state for review process */
+.btn-action.review-btn.loading {
+    background: #9ca3af;
+    border-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.btn-action.review-btn.loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.btn-action.review-btn[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2937;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 1000;
+}
+
+.btn-action.review-btn[title]::after {
+    content: none;
+}
+
+.btn-action.review-btn[title]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-bottom-color: #1f2937;
+}
+
+/* -------------------------------------------- OJT Create/Add Modal ------------------------------------------------ */
+#reportCreateModal {
+    --ojt-primary: #003366;
+    --ojt-primary-light: #004080;
+    --ojt-primary-dark: #002244;
+    --ojt-accent: #0066cc;
+    --ojt-background: #f8fafc;
+    --ojt-surface: #ffffff;
+    --ojt-border: #e2e8f0;
+    --ojt-text: #1e293b;
+    --ojt-text-light: #64748b;
+    --ojt-success: #10b981;
+    --ojt-error: #ef4444;
+    --ojt-warning: #f59e0b;
+}
+
+#reportCreateModal .modal-container {
+    max-width: 900px;
+    max-height: 90vh;
+    background: var(--ojt-surface);
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 51, 102, 0.25);
+    border: 1px solid var(--ojt-border);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#reportCreateModal .modal-header {
+    background: linear-gradient(135deg, var(--ojt-primary) 0%, var(--ojt-primary-light) 100%);
+    color: white;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+#reportCreateModal .modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    transform: translate(30%, -30%);
+}
+
+#reportCreateModal .header-content h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: white;
+}
+
+#reportCreateModal .header-description {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    margin: 0;
+    font-weight: 400;
+}
+
+#reportCreateModal .modal-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+}
+
+#reportCreateModal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+/* Form Body */
+#reportCreateModal .form-body {
+    padding: 0 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(90vh - 200px);
+}
+
+/* Form Intro */
+#reportCreateModal .form-intro {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+#reportCreateModal .form-intro svg {
+    color: var(--ojt-primary);
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+
+#reportCreateModal .form-intro p {
+    margin: 0;
+    color: var(--ojt-text);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+/* Form Layout */
+#reportCreateModal .form-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 1.5rem 0;
+}
+
+#reportCreateModal .form-full-width {
+    margin: 2rem 0;
+}
+
+/* Form Groups */
+#reportCreateModal .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#reportCreateModal .form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--ojt-text);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+#reportCreateModal .required-asterisk {
+    color: var(--ojt-error);
+}
+
+#reportCreateModal .form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--ojt-border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background: var(--ojt-surface);
+}
+
+#reportCreateModal .form-input:focus {
+    outline: none;
+    border-color: var(--ojt-accent);
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+#reportCreateModal .form-input.error {
+    border-color: var(--ojt-error);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Period Fields */
+#reportCreateModal .period-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+#reportCreateModal .period-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ojt-text-light);
+}
+
+#reportCreateModal .help-text {
+    color: var(--ojt-text-light);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    display: block;
+}
+
+/* File Upload Area */
+#reportCreateModal .file-upload-area {
+    border: 2px dashed var(--ojt-border);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: var(--ojt-background);
+    cursor: pointer;
+}
+
+#reportCreateModal .file-upload-area:hover {
+    border-color: var(--ojt-accent);
+    background: #f0f9ff;
+}
+
+#reportCreateModal .file-upload-area.dragover {
+    border-color: var(--ojt-primary);
+    background: #e0f2fe;
+    transform: scale(1.02);
+}
+
+#reportCreateModal .file-upload-content svg {
+    color: var(--ojt-primary-light);
+    margin-bottom: 1rem;
+}
+
+#reportCreateModal .file-upload-content p {
+    font-weight: 600;
+    color: var(--ojt-text);
+    margin: 0 0 0.5rem 0;
+}
+
+#reportCreateModal .file-upload-content small {
+    color: var(--ojt-text-light);
+}
+
+#reportCreateModal .file-input {
+    display: none;
+}
+
+/* File List */
+#reportCreateModal .file-list {
+    margin-top: 1rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#reportCreateModal .file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--ojt-background);
+    border: 1px solid var(--ojt-border);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+#reportCreateModal .file-item:hover {
+    background: #f1f5f9;
+    border-color: var(--ojt-accent);
+}
+
+#reportCreateModal .file-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+#reportCreateModal .file-icon {
+    font-size: 1.25rem;
+}
+
+#reportCreateModal .file-details {
+    display: flex;
+    flex-direction: column;
+}
+
+#reportCreateModal .file-name {
+    font-weight: 500;
+    color: var(--ojt-text);
+    font-size: 0.9rem;
+}
+
+#reportCreateModal .file-size {
+    font-size: 0.8rem;
+    color: var(--ojt-text-light);
+}
+
+#reportCreateModal .file-remove {
+    background: none;
+    border: none;
+    color: var(--ojt-text-light);
+    padding: 0.25rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#reportCreateModal .file-remove:hover {
+    color: var(--ojt-error);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Textareas */
+#reportCreateModal textarea.form-input {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+/* Response Messages */
+#reportCreateModal .form-response {
+    margin: 1rem 0;
+}
+
+#reportCreateModal .response-message {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+#reportCreateModal .response-success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+}
+
+#reportCreateModal .response-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+/* Modal Footer */
+#reportCreateModal .modal-footer {
+    background: var(--ojt-background);
+    border-top: 1px solid var(--ojt-border);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+#reportCreateModal .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+}
+
+#reportCreateModal .btn-cancel {
+    background: var(--ojt-surface);
+    color: var(--ojt-text);
+    border: 2px solid var(--ojt-border);
+}
+
+#reportCreateModal .btn-cancel:hover {
+    background: #f1f5f9;
+    border-color: var(--ojt-text-light);
+}
+
+#reportCreateModal .btn-primary {
+    background: linear-gradient(135deg, var(--ojt-primary) 0%, var(--ojt-primary-light) 100%);
+    color: white;
+    overflow: hidden;
+}
+
+#reportCreateModal .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+#reportCreateModal .btn-primary:hover::before {
+    left: 100%;
+}
+
+#reportCreateModal .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.3);
+}
+
+#reportCreateModal .btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Loading State */
+#reportCreateModal .is-loading .btn-text {
+    opacity: 0;
+}
+
+#reportCreateModal .btn-loader {
+    display: none;
+}
+
+#reportCreateModal .is-loading .btn-loader {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#reportCreateModal .btn-loader svg {
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Error Messages */
+#reportCreateModal .error-message {
+    color: var(--ojt-error);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #reportCreateModal .modal-container {
+        margin: 1rem;
+        max-width: calc(100vw - 2rem);
+        max-height: 95vh;
+    }
+
+    #reportCreateModal .form-body {
+        max-height: calc(95vh - 200px);
+        padding: 0 1rem;
+    }
+
+    #reportCreateModal .form-columns {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    #reportCreateModal .period-inputs {
+        grid-template-columns: 1fr;
+    }
+
+    #reportCreateModal .modal-header {
+        padding: 1.5rem;
+    }
+
+    #reportCreateModal .modal-footer {
+        padding: 1rem 1.5rem;
+        flex-direction: column-reverse;
+    }
+
+    #reportCreateModal .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+#reportCreateModal .file-list::-webkit-scrollbar,
+#reportCreateModal .form-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+#reportCreateModal .file-list::-webkit-scrollbar-track,
+#reportCreateModal .form-body::-webkit-scrollbar-track {
+    background: var(--ojt-background);
+    border-radius: 3px;
+}
+
+#reportCreateModal .file-list::-webkit-scrollbar-thumb,
+#reportCreateModal .form-body::-webkit-scrollbar-thumb {
+    background: var(--ojt-border);
+    border-radius: 3px;
+}
+
+#reportCreateModal .file-list::-webkit-scrollbar-thumb:hover,
+#reportCreateModal .form-body::-webkit-scrollbar-thumb:hover {
+    background: var(--ojt-text-light);
+}
+
+#reportViewModal {
+    --ojt-primary: #003366;
+    --ojt-primary-light: #004080;
+    --ojt-primary-dark: #002244;
+    --ojt-accent: #0066cc;
+    --ojt-background: #f8fafc;
+    --ojt-surface: #ffffff;
+    --ojt-border: #e2e8f0;
+    --ojt-text: #1e293b;
+    --ojt-text-light: #64748b;
+    --ojt-success: #10b981;
+    --ojt-warning: #f59e0b;
+    --ojt-error: #ef4444;
+    --ojt-info: #3b82f6;
+}
+
+#reportViewModal .modal-container {
+    max-width: 1000px;
+    max-height: 90vh;
+    background: var(--ojt-surface);
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 51, 102, 0.25);
+    border: 1px solid var(--ojt-border);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#reportViewModal .modal-header {
+    background: linear-gradient(135deg, var(--ojt-primary) 0%, var(--ojt-primary-light) 100%);
+    color: white;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+#reportViewModal .modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    transform: translate(30%, -30%);
+}
+
+#reportViewModal .header-content h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: white;
+}
+
+#reportViewModal .header-description {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    margin: 0;
+    font-weight: 400;
+}
+
+#reportViewModal .modal-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+}
+
+#reportViewModal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+#reportViewModal .form-body {
+    padding: 0;
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(90vh - 140px);
+}
+
+#reportViewModal .report-layout-container {
+    padding: 0;
+}
+
+#reportViewModal .report-info-section {
+    padding: 2rem 2rem 1rem;
+    background: var(--ojt-background);
+    border-bottom: 1px solid var(--ojt-border);
+}
+
+#reportViewModal .report-main-card {
+    background: var(--ojt-surface);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 51, 102, 0.08);
+    border: 1px solid var(--ojt-border);
+}
+
+#reportViewModal .report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--ojt-border);
+}
+
+#reportViewModal .report-title-section {
+    flex: 1;
+}
+
+#reportViewModal .report-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ojt-primary);
+    margin: 0 0 1rem 0;
+    line-height: 1.3;
+}
+
+#reportViewModal .report-meta-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+#reportViewModal .report-type-badge {
+    background: linear-gradient(135deg, var(--ojt-primary) 0%, var(--ojt-primary-light) 100%);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+#reportViewModal .report-status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+#reportViewModal .report-status-badge:contains("submitted") {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+#reportViewModal .report-status-badge:contains("reviewed") {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+#reportViewModal .report-date {
+    color: var(--ojt-text-light);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+#reportViewModal .report-submitter-section {
+    text-align: right;
+}
+
+#reportViewModal .submitter-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+#reportViewModal .submitter-label {
+    font-size: 0.8rem;
+    color: var(--ojt-text-light);
+    font-weight: 500;
+}
+
+#reportViewModal .submitter-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ojt-text);
+}
+
+#reportViewModal .submit-date {
+    font-size: 0.8rem;
+    color: var(--ojt-text-light);
+}
+
+#reportViewModal .report-details-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+#reportViewModal .details-column {
+    display: flex;
+    flex-direction: column;
+}
+
+#reportViewModal .details-group {
+    flex: 1;
+}
+
+#reportViewModal .details-group-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ojt-primary);
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--ojt-border);
+}
+
+#reportViewModal .details-group-title i {
+    font-size: 1.25rem;
+}
+
+#reportViewModal .student-info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+#reportViewModal .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.5rem 0;
+}
+
+#reportViewModal .info-label {
+    font-weight: 600;
+    color: var(--ojt-text);
+    font-size: 0.9rem;
+    min-width: 100px;
+}
+
+#reportViewModal .info-value {
+    color: var(--ojt-text);
+    font-size: 0.9rem;
+    text-align: right;
+    flex: 1;
+    margin-left: 1rem;
+}
+
+#reportViewModal .report-period-section {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 1.25rem;
+}
+
+#reportViewModal .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ojt-primary);
+    margin: 0 0 1rem 0;
+}
+
+#reportViewModal .section-title i {
+    font-size: 1.25rem;
+}
+
+#reportViewModal .period-dates {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+#reportViewModal .period-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+#reportViewModal .period-label {
+    font-size: 0.8rem;
+    color: var(--ojt-text-light);
+    font-weight: 500;
+}
+
+#reportViewModal .period-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ojt-text);
+}
+
+#reportViewModal .report-content-section {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--ojt-border);
+}
+
+#reportViewModal .content-card {
+    background: var(--ojt-surface);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 51, 102, 0.08);
+    border: 1px solid var(--ojt-border);
+}
+
+#reportViewModal .content-group {
+    margin-bottom: 2rem;
+}
+
+#reportViewModal .content-group:last-child {
+    margin-bottom: 0;
+}
+
+#reportViewModal .content-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ojt-primary);
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--ojt-border);
+}
+
+#reportViewModal .content-title i {
+    font-size: 1.25rem;
+}
+
+#reportViewModal .content-text {
+    color: var(--ojt-text);
+    line-height: 1.6;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+    background: var(--ojt-background);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--ojt-border);
+    min-height: 80px;
+}
+
+#reportViewModal .report-footer-section {
+    padding: 1.5rem 2rem;
+    background: var(--ojt-background);
+}
+
+#reportViewModal .footer-grid {
+    display: block;
+}
+
+#reportViewModal .footer-column {
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+#reportViewModal .footer-column:last-child {
+    margin-bottom: 0;
+}
+
+#reportViewModal .attachments-section {
+    background: var(--ojt-surface);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 51, 102, 0.08);
+    border: 1px solid var(--ojt-border);
+    width: 100%;
+}
+
+#reportViewModal .attachments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#reportViewModal .attachment-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: var(--ojt-background);
+    border: 1px solid var(--ojt-border);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+#reportViewModal .attachment-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
+}
+
+#reportViewModal .attachment-details {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+#reportViewModal .attachment-name {
+    font-weight: 500;
+    color: var(--ojt-text);
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#reportViewModal .attachment-meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+#reportViewModal .attachment-size {
+    font-size: 0.8rem;
+    color: var(--ojt-text-light);
+    background: var(--ojt-surface);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--ojt-border);
+}
+
+#reportViewModal .attachment-date {
+    font-size: 0.8rem;
+    color: var(--ojt-text-light);
+}
+
+#reportViewModal .attachment-actions {
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+#reportViewModal .attachments-section .section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ojt-primary);
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--ojt-border);
+}
+
+#reportViewModal .no-attachments-message {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--ojt-text-light);
+    background: var(--ojt-background);
+    border-radius: 8px;
+    border: 2px dashed var(--ojt-border);
+}
+
+#reportViewModal .no-attachments-message i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+    color: var(--ojt-border);
+}
+
+#reportViewModal .no-attachments-message p {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+#reportViewModal .no-attachments-subtext {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+    #reportViewModal .report-footer-section {
+        padding: 1rem;
+    }
+
+    #reportViewModal .attachment-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    #reportViewModal .attachment-info {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    #reportViewModal .attachment-meta {
+        justify-content: space-between;
+    }
+
+    #reportViewModal .attachment-actions {
+        margin-left: 0;
+        align-self: stretch;
+    }
+
+    #reportViewModal .attachment-download {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+#reportViewModal .attachment-item {
+    animation: slideInUp 0.3s ease;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#reportViewModal .review-section,
+#reportViewModal .attachments-section {
+    margin-bottom: 0;
+}
+
+#reportViewModal .attachments-count {
+    background: var(--ojt-primary);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+#reportViewModal .modal-footer {
+    background: var(--ojt-background);
+    border-top: 1px solid var(--ojt-border);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+#reportViewModal .btn-close-modal {
+    background: linear-gradient(135deg, var(--ojt-primary) 0%, var(--ojt-primary-light) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+#reportViewModal .btn-close-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+#reportViewModal .btn-close-modal:hover::before {
+    left: 100%;
+}
+
+#reportViewModal .btn-close-modal:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.3);
+}
+
+#reportViewModal .btn-close-modal:active {
+    transform: translateY(0);
+}
+
+#reportViewModal .form-body::-webkit-scrollbar,
+#reportViewModal .attachments-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+#reportViewModal .form-body::-webkit-scrollbar-track,
+#reportViewModal .attachments-list::-webkit-scrollbar-track {
+    background: var(--ojt-background);
+    border-radius: 3px;
+}
+
+#reportViewModal .form-body::-webkit-scrollbar-thumb,
+#reportViewModal .attachments-list::-webkit-scrollbar-thumb {
+    background: var(--ojt-border);
+    border-radius: 3px;
+}
+
+#reportViewModal .form-body::-webkit-scrollbar-thumb:hover,
+#reportViewModal .attachments-list::-webkit-scrollbar-thumb:hover {
+    background: var(--ojt-text-light);
+}
+
+@media (max-width: 768px) {
+    #reportViewModal .modal-container {
+        margin: 1rem;
+        max-width: calc(100vw - 2rem);
+        max-height: 95vh;
+    }
+
+    #reportViewModal .form-body {
+        max-height: calc(95vh - 140px);
+    }
+
+    #reportViewModal .report-info-section,
+    #reportViewModal .report-content-section,
+    #reportViewModal .report-footer-section {
+        padding: 1rem;
+    }
+
+    #reportViewModal .report-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    #reportViewModal .report-submitter-section {
+        text-align: left;
+        width: 100%;
+    }
+
+    #reportViewModal .report-details-grid,
+    #reportViewModal .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    #reportViewModal .period-dates {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    #reportViewModal .info-item,
+    #reportViewModal .review-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.25rem;
+    }
+
+    #reportViewModal .info-value,
+    #reportViewModal .review-value {
+        text-align: left;
+        margin-left: 0;
+    }
+
+    #reportViewModal .modal-footer {
+        padding: 1rem 1.5rem;
+    }
+
+    #reportViewModal .btn-close-modal {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+#reportViewModal .report-status-badge.submitted {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+#reportViewModal .report-status-badge.reviewed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+#reportViewModal .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--ojt-text-light);
+    font-style: italic;
+}
+
+#reportViewModal .empty-state i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+    color: var(--ojt-border);
+}
+
+/* Review Information Section */
+#reportViewModal .review-section {
+    background: var(--ojt-surface);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 51, 102, 0.08);
+    border: 1px solid var(--ojt-border);
+    transition: all 0.3s ease;
+}
+
+#reportViewModal .review-section:hover {
+    box-shadow: 0 4px 16px rgba(0, 51, 102, 0.12);
+    transform: translateY(-1px);
+}
+
+#reportViewModal .review-section .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ojt-primary);
+    margin: 0 0 1.5rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e0f2fe;
+    position: relative;
+}
+
+#reportViewModal .review-section .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--ojt-primary), var(--ojt-accent));
+    border-radius: 2px;
+}
+
+#reportViewModal .review-section .section-title i {
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, var(--ojt-primary), var(--ojt-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+#reportViewModal .review-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+#reportViewModal .review-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+#reportViewModal .review-item:hover {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-color: #cbd5e1;
+}
+
+#reportViewModal .review-item.full-width {
+    flex-direction: column;
+    align-items: stretch;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+}
+
+#reportViewModal .review-item.full-width:hover {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+}
+
+#reportViewModal .review-label {
+    font-weight: 600;
+    color: var(--ojt-primary);
+    font-size: 0.9rem;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#reportViewModal .review-label::before {
+    content: '•';
+    color: var(--ojt-accent);
+    font-size: 1.2rem;
+}
+
+#reportViewModal .review-value {
+    color: var(--ojt-text);
+    font-size: 0.95rem;
+    font-weight: 500;
+    flex: 1;
+}
+
+#reportViewModal .review-item.full-width .review-label {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    min-width: auto;
+}
+
+#reportViewModal .review-item.full-width .review-label::before {
+    content: '💬';
+    font-size: 1rem;
+}
+
+#reportViewModal .feedback-content {
+    background: white;
+    border-radius: 8px;
+    padding: 1.25rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 51, 102, 0.05);
+}
+
+#reportViewModal .feedback-text {
+    color: var(--ojt-text);
+    line-height: 1.7;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--ojt-accent);
+    position: relative;
+}
+
+#reportViewModal .feedback-text::before {
+    content: '"';
+    font-size: 3rem;
+    color: var(--ojt-border);
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
+    font-family: serif;
+    opacity: 0.3;
+}
+
+#reportViewModal .no-feedback-message {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    color: #92400e;
+    font-style: italic;
+}
+
+#reportViewModal .no-feedback-message i {
+    font-size: 1.5rem;
+    color: #f59e0b;
+}
+
+#reportViewModal .no-feedback-message span {
+    font-weight: 500;
+}
+
+/* Review Status Indicators */
+#reportViewModal .review-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+#reportViewModal .review-status-pending {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+}
+
+#reportViewModal .review-status-completed {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #34d399;
+}
+
+#reportViewModal .review-status-rejected {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+/* Review Timestamp */
+#reportViewModal .review-timestamp {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--ojt-text-light);
+    margin-top: 0.25rem;
+}
+
+#reportViewModal .review-timestamp i {
+    font-size: 0.9rem;
+}
+
+/* Reviewer Avatar Style */
+#reportViewModal .reviewer-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ojt-primary), var(--ojt-accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+}
+
+/* Animation for review section */
+#reportViewModal .review-section {
+    animation: slideInReview 0.5s ease-out;
+}
+
+@keyframes slideInReview {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive Design for Review Section */
+@media (max-width: 768px) {
+    #reportViewModal .review-section {
+        padding: 1.25rem;
+        margin: 0.5rem 0;
+    }
+
+    #reportViewModal .review-section .section-title {
+        font-size: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    #reportViewModal .review-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        padding: 0.75rem;
+    }
+
+    #reportViewModal .review-label {
+        min-width: auto;
+        font-size: 0.85rem;
+    }
+
+    #reportViewModal .review-value {
+        font-size: 0.9rem;
+        text-align: left;
+    }
+
+    #reportViewModal .feedback-text {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+
+    #reportViewModal .no-feedback-message {
+        padding: 1rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    #reportViewModal .review-status-indicator {
+        align-self: flex-start;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Enhanced focus states for accessibility */
+#reportViewModal .review-item:focus-within {
+    outline: 2px solid var(--ojt-accent);
+    outline-offset: 2px;
+}
+
+/* Print styles for review section */
+@media print {
+    #reportViewModal .review-section {
+        box-shadow: none;
+        border: 2px solid #e2e8f0;
+        break-inside: avoid;
+    }
+
+    #reportViewModal .review-section .section-title {
+        color: #000;
+        border-bottom-color: #ccc;
+    }
+}
+
+/* ------------------------------------------------ OJT Report Edit Modal ------------------------------------------- */
+#reportEditModal.modal {
+    --ojt-primary: #003366;
+    --ojt-primary-light: #004080;
+    --ojt-primary-soft: rgba(0, 51, 102, 0.08);
+    --ojt-primary-border: rgba(0, 51, 102, 0.15);
+    --modal-shadow: 0 25px 50px -12px rgba(0, 51, 102, 0.25);
+    --backdrop: rgba(0, 51, 102, 0.4);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+}
+
+#reportEditModal.modal.active {
+    display: block;
+}
+
+#reportEditModal.modal .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    box-shadow: 0 25px 50px -12px rgba(0, 51, 102, 0.25);
+}
+
+#reportEditModal.modal .modal-container {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: var(--modal-shadow);
+    border: 1px solid var(--ojt-primary-border);
+    max-width: 800px;
+    width: 90vw;
+    max-height: 90vh;
+    margin: 2rem auto;
+    overflow: hidden;
+    transform: translateY(0);
+    animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header Styles */
+#reportEditModal.modal .modal-header {
+    background: linear-gradient(135deg, var(--ojt-primary) 0%, var(--ojt-primary-light) 100%);
+    color: white;
+    padding: 2rem 2rem 1.5rem;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+#reportEditModal.modal .header-content h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+    color: white;
+}
+
+#reportEditModal.modal .header-description {
+    opacity: 0.9;
+    font-size: 0.9rem;
+    margin: 0;
+    font-weight: 400;
+}
+
+#reportEditModal.modal .modal-close {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+#reportEditModal.modal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+/* Form Body */
+#reportEditModal.modal .form-body {
+    padding: 0 2rem;
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(90vh - 200px);
+}
+
+/* Form Intro */
+#reportEditModal.modal .form-intro {
+    background: var(--ojt-primary-soft);
+    border: 1px solid var(--ojt-primary-border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+#reportEditModal.modal .form-intro svg {
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+#reportEditModal.modal .form-intro p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ojt-primary);
+    line-height: 1.5;
+}
+
+#reportEditModal.modal .required-asterisk {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* Form Columns */
+#reportEditModal.modal .form-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Form Groups */
+#reportEditModal.modal .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#reportEditModal.modal .form-group label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    color: var(--ojt-primary);
+}
+
+#reportEditModal.modal .form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+#reportEditModal.modal .form-input:focus {
+    outline: none;
+    border-color: var(--ojt-primary);
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+}
+
+#reportEditModal.modal .form-input:hover {
+    border-color: #d1d5db;
+}
+
+/* Textareas */
+#reportEditModal.modal textarea.form-input {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+/* Current Status */
+#reportEditModal.modal .current-status {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+#reportEditModal.modal .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--ojt-primary-soft);
+    color: var(--ojt-primary);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid var(--ojt-primary-border);
+}
+
+/* Submission Info */
+#reportEditModal.modal .submission-info {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+#reportEditModal.modal .info-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+#reportEditModal.modal .info-item:last-child {
+    margin-bottom: 0;
+}
+
+#reportEditModal.modal .info-label {
+    font-weight: 500;
+    color: var(--ojt-primary);
+    font-size: 0.8rem;
+    min-width: 100px;
+}
+
+#reportEditModal.modal .info-value {
+    color: #374151;
+    font-size: 0.8rem;
+}
+
+/* File Upload Area */
+#reportEditModal.modal .file-upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: #fafafa;
+    cursor: pointer;
+    position: relative;
+}
+
+#reportEditModal.modal .file-upload-area:hover,
+#reportEditModal.modal .file-upload-area.dragover {
+    border-color: var(--ojt-primary);
+    background: var(--ojt-primary-soft);
+}
+
+#reportEditModal.modal .upload-content {
+    color: #6b7280;
+}
+
+#reportEditModal.modal .file-upload-area:hover .upload-content,
+#reportEditModal.modal .file-upload-area.dragover .upload-content {
+    color: var(--ojt-primary);
+}
+
+#reportEditModal.modal .upload-title {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+#reportEditModal.modal .upload-subtitle {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+#reportEditModal.modal .file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Current Attachments */
+#reportEditModal.modal .current-attachments {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    min-height: 60px;
+}
+
+/* Help Text */
+#reportEditModal.modal .help-text {
+    display: block;
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+/* Footer */
+#reportEditModal.modal .modal-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e5e7eb;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+#reportEditModal.modal .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#reportEditModal.modal .btn-cancel {
+    background: #6b7280;
+    color: white;
+}
+
+#reportEditModal.modal .btn-cancel:hover {
+    background: #4b5563;
+}
+
+#reportEditModal.modal .btn-primary {
+    background: var(--ojt-primary);
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+#reportEditModal.modal .btn-primary:hover {
+    background: var(--ojt-primary-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.3);
+}
+
+#reportEditModal.modal .btn-loader {
+    display: none;
+}
+
+#reportEditModal.modal .btn-primary.loading .btn-text {
+    opacity: 0;
+}
+
+#reportEditModal.modal .btn-primary.loading .btn-loader {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#reportEditModal.modal .btn-loader svg {
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Form Response */
+#reportEditModal.modal .form-response {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+#reportEditModal.modal .form-response.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+#reportEditModal.modal .form-response.error {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+/* Custom Scrollbar for Form Body */
+#reportEditModal.modal .form-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+#reportEditModal.modal .form-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#reportEditModal.modal .form-body::-webkit-scrollbar-thumb {
+    background: var(--ojt-primary);
+    border-radius: 3px;
+}
+
+#reportEditModal.modal .form-body::-webkit-scrollbar-thumb:hover {
+    background: var(--ojt-primary-light);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #reportEditModal.modal .modal-container {
+        width: 95vw;
+        margin: 1rem auto;
+        max-height: 95vh;
+    }
+
+    #reportEditModal.modal .form-body {
+        padding: 0 1rem;
+        max-height: calc(95vh - 200px);
+    }
+
+    #reportEditModal.modal .form-columns {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    #reportEditModal.modal .modal-header {
+        padding: 1.5rem 1rem 1rem;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    #reportEditModal.modal .modal-footer {
+        padding: 1rem;
+        flex-direction: column-reverse;
+    }
+
+    #reportEditModal.modal .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Print Styles */
+@media print {
+    #reportEditModal.modal .modal-overlay {
+        display: none;
+    }
+
+    #reportEditModal.modal .modal-container {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+}
+
+/* ------------------------------------------------- Archive Modal -------------------------------------------------- */
+#reportArchiveModal.modal {
+    --ojt-primary: #003366;
+    --ojt-primary-light: #004080;
+    --ojt-primary-soft: rgba(0, 51, 102, 0.08);
+    --ojt-primary-border: rgba(0, 51, 102, 0.15);
+    --modal-shadow: 0 25px 50px -12px rgba(0, 51, 102, 0.25);
+    --backdrop: rgba(0, 51, 102, 0.4);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+}
+
+#reportArchiveModal.modal.active {
+    display: block;
+}
+
+#reportArchiveModal.modal .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#reportArchiveModal.modal .modal-container {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 51, 102, 0.25);
+    border: 1px solid var(--ojt-primary-border);
+    max-width: 700px;
+    width: 90vw;
+    max-height: 90vh;
+    margin: 2rem auto;
+    overflow: hidden;
+    transform: translateY(0);
+    animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header Styles */
+#reportArchiveModal.modal .modal-header {
+    background: linear-gradient(135deg, var(--ojt-primary) 0%, var(--ojt-primary-light) 100%);
+    color: white;
+    padding: 2rem 2rem 1.5rem;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+#reportArchiveModal.modal .header-content h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+    color: white;
+}
+
+#reportArchiveModal.modal .header-description {
+    opacity: 0.9;
+    font-size: 0.9rem;
+    margin: 0;
+    font-weight: 400;
+}
+
+#reportArchiveModal.modal .modal-close {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+#reportArchiveModal.modal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+/* Form Body */
+#reportArchiveModal.modal .form-body {
+    padding: 0 2rem;
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(90vh - 200px);
+}
+
+/* Form Intro */
+#reportArchiveModal.modal .form-intro {
+    background: var(--ojt-primary-soft);
+    border: 1px solid var(--ojt-primary-border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+#reportArchiveModal.modal .form-intro svg {
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+#reportArchiveModal.modal .form-intro p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ojt-primary);
+    line-height: 1.5;
+}
+
+/* Report Preview Styles */
+#reportArchiveModal.modal .report-preview {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+#reportArchiveModal.modal .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+#reportArchiveModal.modal .preview-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2937;
+    flex: 1;
+    line-height: 1.4;
+}
+
+#reportArchiveModal.modal .preview-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+#reportArchiveModal.modal .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+#reportArchiveModal.modal .preview-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+#reportArchiveModal.modal .preview-label {
+    font-weight: 500;
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+#reportArchiveModal.modal .preview-value {
+    font-size: 0.9rem;
+    color: #374151;
+    word-break: break-word;
+    font-weight: 500;
+}
+
+/* Type and Status Badges */
+#reportArchiveModal.modal .type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+#reportArchiveModal.modal .type-weekly {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+
+#reportArchiveModal.modal .type-monthly {
+    background: #f0f9ff;
+    color: #0c4a6e;
+    border: 1px solid #e0f2fe;
+}
+
+#reportArchiveModal.modal .type-final {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+#reportArchiveModal.modal .type-incident {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+#reportArchiveModal.modal .type-complaint {
+    background: #fce7f3;
+    color: #9d174d;
+    border: 1px solid #fbcfe8;
+}
+
+#reportArchiveModal.modal .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+#reportArchiveModal.modal .status-submitted {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+#reportArchiveModal.modal .status-reviewed {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+#reportArchiveModal.modal .status-archived {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+/* Description Preview */
+#reportArchiveModal.modal .description-preview {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+#reportArchiveModal.modal .preview-description {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #4b5563;
+    max-height: 80px;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+}
+
+/* Period Information */
+#reportArchiveModal.modal .period-info {
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    background: #f0f9ff;
+    border: 1px solid #e0f2fe;
+    border-radius: 8px;
+}
+
+/* Archive Impact Warning */
+#reportArchiveModal.modal .archive-impact-warning {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+#reportArchiveModal.modal .warning-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+#reportArchiveModal.modal .warning-header i {
+    color: #d97706;
+    font-size: 1.25rem;
+}
+
+#reportArchiveModal.modal .warning-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #92400e;
+    font-weight: 600;
+}
+
+#reportArchiveModal.modal .warning-content p {
+    margin: 0 0 0.75rem 0;
+    font-weight: 500;
+    color: #92400e;
+}
+
+#reportArchiveModal.modal .warning-content ul {
+    margin: 0 0 0.75rem 0;
+    padding-left: 1.25rem;
+    color: #92400e;
+}
+
+#reportArchiveModal.modal .warning-content li {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+#reportArchiveModal.modal .review-status-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #f0f9ff;
+    border: 1px solid #e0f2fe;
+    border-radius: 8px;
+    margin-top: 0.75rem;
+}
+
+#reportArchiveModal.modal .review-status-warning i {
+    color: var(--ojt-primary);
+    font-size: 1.1rem;
+    margin-top: 0.125rem;
+}
+
+#reportArchiveModal.modal .review-status-warning div {
+    flex: 1;
+    font-size: 0.85rem;
+    color: var(--ojt-primary);
+    line-height: 1.4;
+}
+
+/* Form Response */
+#reportArchiveModal.modal .form-response {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+#reportArchiveModal.modal .form-response.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+#reportArchiveModal.modal .form-response.error {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+/* Footer */
+#reportArchiveModal.modal .modal-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e5e7eb;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+#reportArchiveModal.modal .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#reportArchiveModal.modal .btn-cancel {
+    background: #6b7280;
+    color: white;
+}
+
+#reportArchiveModal.modal .btn-cancel:hover {
+    background: #4b5563;
+}
+
+#reportArchiveModal.modal .btn-warning {
+    background: #f59e0b;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+#reportArchiveModal.modal .btn-warning:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+#reportArchiveModal.modal .btn-loader {
+    display: none;
+}
+
+#reportArchiveModal.modal .btn-warning.loading .btn-text {
+    opacity: 0;
+}
+
+#reportArchiveModal.modal .btn-warning.loading .btn-loader {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#reportArchiveModal.modal .btn-loader svg {
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Loading Overlay */
+#reportArchiveModal.modal .modal-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 16px;
+}
+
+#reportArchiveModal.modal .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f4f6;
+    border-top: 3px solid var(--ojt-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+#reportArchiveModal.modal .loading-text {
+    color: var(--ojt-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Custom Scrollbar */
+#reportArchiveModal.modal .form-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+#reportArchiveModal.modal .form-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#reportArchiveModal.modal .form-body::-webkit-scrollbar-thumb {
+    background: var(--ojt-primary);
+    border-radius: 3px;
+}
+
+#reportArchiveModal.modal .form-body::-webkit-scrollbar-thumb:hover {
+    background: var(--ojt-primary-light);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #reportArchiveModal.modal .modal-container {
+        width: 95vw;
+        margin: 1rem auto;
+        max-height: 95vh;
+    }
+
+    #reportArchiveModal.modal .form-body {
+        padding: 0 1rem;
+        max-height: calc(95vh - 200px);
+    }
+
+    #reportArchiveModal.modal .preview-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    #reportArchiveModal.modal .preview-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    #reportArchiveModal.modal .preview-badges {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    #reportArchiveModal.modal .modal-header {
+        padding: 1.5rem 1rem 1rem;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    #reportArchiveModal.modal .modal-footer {
+        padding: 1rem;
+        flex-direction: column-reverse;
+    }
+
+    #reportArchiveModal.modal .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Print Styles */
+@media print {
+    #reportArchiveModal.modal .modal-overlay {
+        display: none;
+    }
+
+    #reportArchiveModal.modal .modal-container {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+}
+
+/* -------------------------------------------------- Review Modal -------------------------------------------------- */
+#reportReviewModal.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+}
+
+#reportReviewModal.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#reportReviewModal .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+#reportReviewModal .modal-container {
+    max-width: 600px;
+    max-height: 90vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    overflow: hidden;
+    position: relative;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+}
+
+#reportReviewModal .modal-header {
+    background: linear-gradient(135deg, #003366 0%, #002244 100%);
+    padding: 24px 32px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+#reportReviewModal .modal-header::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+}
+
+#reportReviewModal .modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: -30px;
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+}
+
+#reportReviewModal .modal-header h2 {
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.025em;
+    position: relative;
+    z-index: 2;
+}
+
+#reportReviewModal .header-description {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    margin: 0;
+    font-weight: 400;
+    position: relative;
+    z-index: 2;
+}
+
+#reportReviewModal .modal-close {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+}
+
+#reportReviewModal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+/* Form Body Styling */
+#reportReviewModal .form-body {
+    padding: 32px;
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(90vh - 200px);
+}
+
+#reportReviewModal .form-intro {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #f0f4f8;
+    border: 1px solid #c5d5e5;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+}
+
+#reportReviewModal .form-intro svg {
+    color: #003366;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+#reportReviewModal .form-intro p {
+    margin: 0;
+    color: #003366;
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+/* Report Preview - Minimalist */
+#reportReviewModal .report-preview {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+#reportReviewModal .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+#reportReviewModal .preview-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #003366;
+    flex: 1;
+    line-height: 1.4;
+}
+
+#reportReviewModal .preview-badges {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+#reportReviewModal .type-badge {
+    background: #e0e7ff;
+    color: #003366;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    border: 1px solid #c7d2fe;
+}
+
+#reportReviewModal .status-badge {
+    background: #fff7ed;
+    color: #9c4221;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    border: 1px solid #fed7aa;
+}
+
+#reportReviewModal .preview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+#reportReviewModal .preview-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#reportReviewModal .preview-label {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+#reportReviewModal .preview-value {
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+#reportReviewModal .description-preview {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 16px;
+}
+
+#reportReviewModal .description-preview .preview-label {
+    margin-bottom: 6px;
+}
+
+#reportReviewModal .preview-description {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #475569;
+    margin-top: 4px;
+    max-height: 80px;
+    overflow-y: auto;
+    padding-right: 8px;
+    background: white;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Feedback Section */
+#reportReviewModal .form-section {
+    margin-bottom: 24px;
+}
+
+#reportReviewModal .form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #003366;
+    margin-bottom: 8px;
+}
+
+#reportReviewModal .optional {
+    color: #94a3b8;
+    font-weight: 400;
+    font-size: 12px;
+}
+
+#reportReviewModal .form-textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #374151;
+    background: white;
+    resize: vertical;
+    min-height: 100px;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+#reportReviewModal .form-textarea:focus {
+    outline: none;
+    border-color: #003366;
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+}
+
+#reportReviewModal .form-hint {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+/* Review Impact Section */
+#reportReviewModal .review-impact-info {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+#reportReviewModal .info-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+#reportReviewModal .info-header i {
+    color: #003366;
+    font-size: 18px;
+}
+
+#reportReviewModal .info-header h4 {
+    margin: 0;
+    color: #003366;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#reportReviewModal .info-content p {
+    margin: 0 0 8px 0;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+#reportReviewModal .info-content ul {
+    margin: 0;
+    padding-left: 16px;
+    color: #475569;
+}
+
+#reportReviewModal .info-content li {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 4px;
+}
+
+/* Modal Footer - Fixed at bottom */
+#reportReviewModal .modal-footer {
+    padding: 24px 32px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    background: #fafafa;
+    flex-shrink: 0;
+}
+
+#reportReviewModal .btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 120px;
+    justify-content: center;
+}
+
+#reportReviewModal .btn-cancel {
+    background: white;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+
+#reportReviewModal .btn-cancel:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #475569;
+}
+
+#reportReviewModal .btn-success {
+    background: #003366;
+    color: white;
+    border: 1px solid #003366;
+}
+
+#reportReviewModal .btn-success:hover:not(:disabled) {
+    background: #002244;
+    border-color: #002244;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.3);
+}
+
+#reportReviewModal .btn-success:active {
+    transform: translateY(0);
+}
+
+#reportReviewModal .btn-success:disabled {
+    background: #94a3b8;
+    border-color: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Loading State */
+#reportReviewModal .is-loading .btn-text {
+    opacity: 0;
+}
+
+#reportReviewModal .is-loading .btn-loader {
+    opacity: 1;
+}
+
+#reportReviewModal .btn-loader {
+    opacity: 0;
+    width: 16px;
+    height: 16px;
+}
+
+#reportReviewModal .btn-loader svg {
+    width: 100%;
+    height: 100%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Response Messages */
+#reportReviewModal .form-response {
+    margin-top: 16px;
+}
+
+#reportReviewModal .response-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+#reportReviewModal .response-success {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: #003366;
+}
+
+#reportReviewModal .response-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+/* Loading Overlay */
+#reportReviewModal .modal-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+}
+
+#reportReviewModal .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid #003366;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+#reportReviewModal .loading-text {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Scrollbar Styling for Form Body */
+#reportReviewModal .form-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+#reportReviewModal .form-body::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+#reportReviewModal .form-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+#reportReviewModal .form-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Scrollbar for description preview */
+#reportReviewModal .preview-description::-webkit-scrollbar {
+    width: 4px;
+}
+
+#reportReviewModal .preview-description::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 2px;
+}
+
+#reportReviewModal .preview-description::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
+}
+
+#reportReviewModal .preview-description::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+    #reportReviewModal .modal-container {
+        margin: 20px;
+        max-width: calc(100vw - 40px);
+        max-height: 85vh;
+    }
+
+    #reportReviewModal .form-body {
+        padding: 20px;
+        max-height: calc(85vh - 160px);
+    }
+
+    #reportReviewModal .modal-header {
+        padding: 20px 24px;
+    }
+
+    #reportReviewModal .modal-footer {
+        padding: 20px 24px;
+        flex-direction: column-reverse;
+    }
+
+    #reportReviewModal .preview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #reportReviewModal .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    #reportReviewModal .preview-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    #reportReviewModal .preview-badges {
+        align-self: flex-start;
+    }
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+/* ------------------------------------------------- Export Modal --------------------------------------------------- */
+#reportExportModal.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#reportExportModal.modal.active {
+    display: flex;
+}
+
+#reportExportModal .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+}
+
+#reportExportModal .modal-container {
+    max-width: 1000px;
+    width: 100%;
+    max-height: 90vh;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    position: relative;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Modal Header */
+#reportExportModal .modal-header {
+    background: linear-gradient(135deg, #003366 0%, #002244 100%);
+    padding: 28px 32px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+#reportExportModal .modal-header::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+}
+
+#reportExportModal .modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: -30px;
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+}
+
+#reportExportModal .modal-header h2 {
+    color: white;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.025em;
+    position: relative;
+    z-index: 2;
+    font-family: 'Montserrat', sans-serif;
+}
+
+#reportExportModal .header-description {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 15px;
+    margin: 0;
+    font-weight: 400;
+    position: relative;
+    z-index: 2;
+}
+
+#reportExportModal .modal-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    z-index: 2;
+}
+
+#reportExportModal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+/* Form Body */
+#reportExportModal .form-body {
+    padding: 32px;
+    overflow-y: auto;
+    flex: 1;
+    background: #f8fafc;
+    max-height: calc(90vh - 200px);
+}
+
+#reportExportModal .form-intro {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%);
+    border: 1px solid #c5d9f1;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 28px;
+}
+
+#reportExportModal .form-intro svg {
+    color: #003366;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+#reportExportModal .form-intro p {
+    margin: 0;
+    color: #003366;
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+/* Form Layout */
+#reportExportModal .form-main-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+    min-height: min-content;
+}
+
+#reportExportModal .form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Form Sections */
+#reportExportModal .form-section {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+#reportExportModal .section-title {
+    color: #003366;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f1f5f9;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Form Groups */
+#reportExportModal .form-group {
+    margin-bottom: 20px;
+}
+
+#reportExportModal .form-group:last-child {
+    margin-bottom: 0;
+}
+
+#reportExportModal .form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #003366;
+    margin-bottom: 10px;
+}
+
+#reportExportModal .form-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #374151;
+    background: white;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+#reportExportModal .form-input:focus {
+    outline: none;
+    border-color: #003366;
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+}
+
+#reportExportModal .form-hint {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+/* Checkbox Groups */
+#reportExportModal .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#reportExportModal .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 8px 0;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+}
+
+#reportExportModal .checkbox-label:hover {
+    background: #f8fafc;
+}
+
+#reportExportModal .checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+#reportExportModal .checkbox-label input[type="checkbox"]:checked {
+    background: #003366;
+    border-color: #003366;
+}
+
+#reportExportModal .checkbox-label input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#reportExportModal .checkbox-label span {
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
+}
+
+/* Preset Buttons */
+#reportExportModal .preset-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+#reportExportModal .preset-btn {
+    padding: 8px 16px;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+#reportExportModal .preset-btn:hover {
+    background: #003366;
+    border-color: #003366;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Date Range */
+#reportExportModal .date-range-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+#reportExportModal .date-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#reportExportModal .date-input-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    margin-bottom: 0;
+}
+
+/* Export Preview */
+#reportExportModal .export-preview {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+#reportExportModal .preview-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+#reportExportModal .preview-item:last-child {
+    border-bottom: none;
+}
+
+#reportExportModal .preview-item strong {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+#reportExportModal .preview-item span {
+    font-size: 13px;
+    font-weight: 500;
+    color: #003366;
+    text-align: right;
+}
+
+/* Export Summary */
+#reportExportModal .export-summary {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%);
+    border: 1px solid #c5d9f1;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+#reportExportModal .summary-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+}
+
+#reportExportModal .summary-item:not(:last-child) {
+    border-bottom: 1px solid rgba(0, 51, 102, 0.1);
+}
+
+#reportExportModal .summary-item i {
+    color: #003366;
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+}
+
+#reportExportModal .summary-item div {
+    flex: 1;
+}
+
+#reportExportModal .summary-item strong {
+    font-size: 13px;
+    font-weight: 600;
+    color: #003366;
+}
+
+#reportExportModal .summary-item span {
+    font-size: 13px;
+    color: #475569;
+}
+
+/* Form Response */
+#reportExportModal .form-response {
+    margin-top: 16px;
+}
+
+#reportExportModal .response-message {
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+#reportExportModal .response-success {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: #003366;
+}
+
+#reportExportModal .response-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+/* Modal Footer */
+#reportExportModal .modal-footer {
+    padding: 24px 32px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    background: white;
+    flex-shrink: 0;
+}
+
+#reportExportModal .btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Montserrat', sans-serif;
+    text-decoration: none;
+}
+
+#reportExportModal .btn-cancel {
+    background: white;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+
+#reportExportModal .btn-cancel:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #475569;
+}
+
+#reportExportModal .btn-primary {
+    background: #003366;
+    color: white;
+    border: 1px solid #003366;
+    position: relative;
+    overflow: hidden;
+}
+
+#reportExportModal .btn-primary:hover:not(:disabled) {
+    background: #002244;
+    border-color: #002244;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 51, 102, 0.3);
+}
+
+#reportExportModal .btn-primary:active {
+    transform: translateY(0);
+}
+
+#reportExportModal .btn-primary:disabled {
+    background: #94a3b8;
+    border-color: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Loading State */
+#reportExportModal .is-loading .btn-text {
+    opacity: 0;
+}
+
+#reportExportModal .is-loading .btn-loader {
+    opacity: 1;
+}
+
+#reportExportModal .btn-loader {
+    opacity: 0;
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#reportExportModal .btn-loader svg {
+    width: 100%;
+    height: 100%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Scrollbar Styling */
+#reportExportModal .form-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+#reportExportModal .form-body::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+#reportExportModal .form-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+#reportExportModal .form-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #reportExportModal .modal-container {
+        margin: 20px;
+        max-height: 85vh;
+    }
+
+    #reportExportModal .form-body {
+        padding: 20px;
+        max-height: calc(85vh - 160px);
+    }
+
+    #reportExportModal .form-main-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    #reportExportModal .modal-header {
+        padding: 20px 24px;
+    }
+
+    #reportExportModal .modal-footer {
+        padding: 20px 24px;
+        flex-direction: column-reverse;
+    }
+
+    #reportExportModal .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    #reportExportModal .date-range-group {
+        grid-template-columns: 1fr;
+    }
+
+    #reportExportModal .preset-buttons {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    #reportExportModal.modal {
+        padding: 10px;
+    }
+
+    #reportExportModal .modal-container {
+        margin: 10px;
+        max-height: 90vh;
+    }
+
+    #reportExportModal .form-body {
+        padding: 16px;
+        max-height: calc(90vh - 140px);
+    }
+
+    #reportExportModal .form-section {
+        padding: 16px;
+    }
+
+    #reportExportModal .modal-header h2 {
+        font-size: 24px;
+    }
+
+    #reportExportModal .section-title {
+        font-size: 16px;
+    }
+}
+
+/* Animation for modal appearance */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+#reportExportModal.modal.active .modal-container {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+#reportExportModal .btn:focus,
+#reportExportModal .form-input:focus,
+#reportExportModal .checkbox-label input:focus {
+    outline: 2px solid #003366;
+    outline-offset: 2px;
+}
+
+body.modal-open {
+    overflow: hidden;
+}

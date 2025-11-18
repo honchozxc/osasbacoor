@@ -1,0 +1,868 @@
+/* Calendar Container */
+.calendar-view-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 24px;
+}
+
+/* Tabs and Legend Container */
+.tabs-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 1rem;
+}
+
+.view-tabs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.view-tab {
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #666;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.view-tab.active {
+    color: #4361ee;
+    background-color: #f0f4ff;
+}
+
+.view-tab:hover:not(.active) {
+    color: #333;
+    background-color: #f5f5f5;
+}
+
+/* Calendar Legend Styles */
+.calendar-legend {
+    display: flex;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #555;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+/* Category-specific dot colors */
+.legend-dot.basic {
+    background-color: #4B5563;
+}
+
+.legend-dot.enrollment {
+    background-color: #4361ee;
+}
+
+.legend-dot.event {
+    background-color: #9F2B68;
+}
+
+.legend-dot.suspension {
+    background-color: #B7410E;
+}
+
+.legend-dot.emergency {
+    background-color: #CC0000;
+}
+
+/* Calendar Views */
+.calendar-view {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.calendar-view.active-view {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Month View Styles */
+.calendar-container {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.calendar-nav {
+    background: #f5f5f5;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: #555;
+}
+
+.calendar-nav:hover {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.calendar-nav i {
+    font-size: 20px;
+}
+
+.calendar-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.calendar-grid {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.calendar-day:hover {
+    background: #f5f5f5;
+    border-color: #e0e0e0;
+}
+
+.calendar-day.empty {
+    visibility: hidden;
+}
+
+.calendar-day.today {
+    background: #e3f2fd;
+    font-weight: bold;
+    border-color: #bbdefb;
+}
+
+.calendar-day.selected {
+    background: #4361ee;
+    color: white;
+    border-color: #3a56d4;
+}
+
+.day-number {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.announcement-dots {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-top: 4px;
+    max-width: 100%;
+}
+
+.announcement-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Announcement dot colors */
+.announcement-dot.basic {
+    background-color: #4B5563;
+}
+
+.announcement-dot.enrollment {
+    background-color: #4361ee;
+}
+
+.announcement-dot.event {
+    background-color: #9F2B68;
+}
+
+.announcement-dot.suspension {
+    background-color: #B7410E;
+}
+
+.announcement-dot.emergency {
+    background-color: #CC0000;
+}
+
+.announcement-dot.more {
+    background: #9e9e9e;
+    font-size: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    width: 8px;
+    height: 8px;
+}
+
+.announcement-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    min-width: 180px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s;
+    z-index: 10;
+    pointer-events: none;
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.announcement-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+.announcement-tooltip-item {
+    display: block;
+    padding: 4px 0;
+    border-bottom: 1px solid #444;
+    line-height: 1.4;
+}
+
+.announcement-tooltip-item:last-child {
+    border-bottom: none;
+}
+
+/* Tooltip item colors */
+.announcement-tooltip-item.basic {
+    color: #d1d5db;
+}
+
+.announcement-tooltip-item.enrollment {
+    color: #93c5fd;
+}
+
+.announcement-tooltip-item.event {
+    color: #f9a8d4;
+}
+
+.announcement-tooltip-item.suspension {
+    color: #fdba74;
+}
+
+.announcement-tooltip-item.emergency {
+    color: #fca5a5;
+}
+
+.calendar-day:hover .announcement-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Announcements List */
+.announcements-list {
+    background: #f9f9f9;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.announcements-list h3 {
+    margin: 0 0 16px 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.announcements-list h3 span {
+    font-weight: normal;
+    color: #666;
+}
+
+#dateAnnouncements {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Announcement Item Styles */
+.announcement-item {
+    padding: 16px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    position: relative;
+    border-left: 4px solid;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.announcement-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Announcement item border colors */
+.announcement-item.basic {
+    border-left-color: #4B5563;
+}
+
+.announcement-item.enrollment {
+    border-left-color: #4361ee;
+}
+
+.announcement-item.event {
+    border-left-color: #9F2B68;
+}
+
+.announcement-item.suspension {
+    border-left-color: #B7410E;
+}
+
+.announcement-item.emergency {
+    border-left-color: #CC0000;
+}
+
+.announcement-item h4 {
+    margin: 0 0 8px 0;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1rem;
+}
+
+.announcement-item p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.announcement-item .announcement-meta {
+    font-size: 0.8rem;
+    color: #999;
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Announcement category badges */
+.announcement-category {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.announcement-category.basic {
+    background: #e5e7eb;
+    color: #1f2937;
+}
+
+.announcement-category.enrollment {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.announcement-category.event {
+    background: #fce7f3;
+    color: #831843;
+}
+
+.announcement-category.suspension {
+    background: #ffedd5;
+    color: #9a3412;
+}
+
+.announcement-category.emergency {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.announcement-range {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #eee;
+}
+
+/* View Details Button */
+.view-details-btn {
+    background-color: #4361ee;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: background-color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.view-details-btn:hover {
+    background-color: #3a56d4;
+}
+
+.view-details-btn i {
+    font-size: 0.9rem;
+}
+
+/* Week View Styles */
+.week-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.week-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.week-announcements-container {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.week-day {
+    border: 1px solid #eaeaea;
+    border-radius: 10px;
+    padding: 16px;
+    min-height: 300px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.week-day-header {
+    font-weight: bold;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    color: #333;
+}
+
+.week-day-header small {
+    font-weight: normal;
+    color: #777;
+    display: block;
+    margin-top: 4px;
+}
+
+.week-day-announcements {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.no-announcements {
+    color: #999;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Week View Announcement Items */
+/* Add these styles to your CSS */
+/* Week View - Card Style */
+.week-announcements-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.week-day {
+    border: 1px solid #eaeaea;
+    border-radius: 10px;
+    padding: 16px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    min-height: 200px;
+}
+
+.week-day-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+}
+
+.week-day-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.week-day-date {
+    color: #777;
+    font-size: 0.9rem;
+}
+
+.week-day-announcements {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Week View Announcement Items */
+.week-announcement-item {
+    padding: 12px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-left: 4px solid;
+}
+
+.week-announcement-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.week-announcement-title {
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.week-announcement-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.week-announcement-category {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Category-specific styles */
+.week-announcement-item.basic {
+    border-left-color: #4B5563;
+    background-color: #f8f9fa;
+}
+
+.week-announcement-item.enrollment {
+    border-left-color: #4361ee;
+    background-color: #f0f5ff;
+}
+
+.week-announcement-item.event {
+    border-left-color: #9F2B68;
+    background-color: #fdf2f9;
+}
+
+.week-announcement-item.suspension {
+    border-left-color: #B7410E;
+    background-color: #fff8f0;
+}
+
+.week-announcement-item.emergency {
+    border-left-color: #CC0000;
+    background-color: #fff0f0;
+}
+
+.week-announcement-category.basic {
+    background: #e5e7eb;
+    color: #1f2937;
+}
+
+.week-announcement-category.enrollment {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.week-announcement-category.event {
+    background: #fce7f3;
+    color: #831843;
+}
+
+.week-announcement-category.suspension {
+    background: #ffedd5;
+    color: #9a3412;
+}
+
+.week-announcement-category.emergency {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.no-announcements {
+    color: #999;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 16px 0;
+    background: #fafafa;
+    border-radius: 6px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .week-announcements-container {
+        grid-template-columns: 1fr;
+    }
+
+    .week-day {
+        min-height: auto;
+    }
+}
+
+/* Year View Design */
+.year-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.year-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.year-announcements-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.year-month {
+    border: 1px solid #eaeaea;
+    border-radius: 10px;
+    padding: 16px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.year-month-header {
+    font-weight: bold;
+    margin-bottom: 12px;
+    text-align: center;
+    color: #333;
+    font-size: 1.1rem;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.year-month-announcements {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Year View Announcement */
+.year-announcement-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border-left: 4px solid;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease;
+}
+
+.year-announcement-item:hover {
+    transform: translateY(-2px);
+}
+
+.year-announcement-item.basic {
+    background-color: #f8f9fa;
+    border-left-color: #4B5563;
+}
+
+.year-announcement-item.enrollment {
+    background-color: #f0f5ff;
+    border-left-color: #4361ee;
+}
+
+.year-announcement-item.event {
+    background-color: #fdf2f9;
+    border-left-color: #9F2B68;
+}
+
+.year-announcement-item.suspension {
+    background-color: #fff8f0;
+    border-left-color: #B7410E;
+}
+
+.year-announcement-item.emergency {
+    background-color: #fff0f0;
+    border-left-color: #CC0000;
+}
+
+.year-announcement-title {
+    font-weight: 500;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+    color: #333;
+}
+
+/* -------------------------------------------------- Responsive Design --------------------------------------------- */
+@media (max-width: 1024px) {
+    .year-announcements-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .tabs-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .calendar-legend {
+        gap: 0.75rem;
+    }
+
+    .week-announcements-container {
+        grid-template-columns: 1fr;
+    }
+
+    .year-announcements-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .calendar-day {
+        padding: 4px;
+    }
+}
+
+@media (max-width: 576px) {
+    .calendar-view-container {
+        padding: 16px;
+    }
+
+    .year-announcements-container {
+        grid-template-columns: 1fr;
+    }
+
+    .calendar-header h2,
+    .week-header h2,
+    .year-header h2 {
+        font-size: 1.2rem;
+    }
+}
+
+/* Recent Added Design */
+/* Scholarship  */
+.legend-dot.scholarship {
+    background-color: #3a0ca3;
+}
+
+.announcement-item.scholarship {
+    border-left-color: #3a0ca3;
+}
+
+.announcement-category.scholarship {
+    background: #e0d6ff;
+    color: #3a0ca3;
+}
+
+.week-announcement-item.scholarship {
+    border-left-color: #3a0ca3;
+    background-color: #f3efff;
+}
+
+.year-announcement-item.scholarship {
+    background-color: #f3efff;
+    border-left-color: #3a0ca3;
+}
+
+.announcement-dot.scholarship {
+    background-color: #3a0ca3;
+}
+
+.announcement-tooltip-item.scholarship {
+    color: #c1b3ff;
+}

@@ -1,0 +1,282 @@
+{% block nstp-content %}
+<div class="nstp-dashboard">
+    <!-- Header Section -->
+    <div class="nstp-header">
+        <div class="nstp-header-content">
+            <h1 class="nstp-title">Manage NSTP Files</h1>
+            <p class="nstp-subtitle">Manage and access all NSTP-related documents in one place</p>
+        </div>
+
+        {% if perms.osas.add_nstpfile %}
+        <button class="nstp-upload-btn" onclick="openNSTPFileCreateModal()">
+            <i class='bx bx-cloud-upload'></i> Upload New
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="nstp-stats-grid">
+        <div class="nstp-stat-card">
+            <div class="stat-icon">
+                <i class='bx bx-file'></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value" id="total-nstp-count">{{ nstp_files.paginator.count|default:0 }}</span>
+                <span class="stat-label">Total Documents</span>
+            </div>
+        </div>
+
+        <!-- 1st Semester Count -->
+        <div class="nstp-stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #4CAF50, #2E7D32);">
+                <i class='bx bx-calendar'></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value" id="first-sem-count">{{ first_sem_count|default:0 }}</span>
+                <span class="stat-label">1st Semester</span>
+            </div>
+        </div>
+
+        <!-- 2nd Semester Count -->
+        <div class="nstp-stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #FF9800, #EF6C00);">
+                <i class='bx bx-calendar'></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value" id="second-sem-count">{{ second_sem_count|default:0 }}</span>
+                <span class="stat-label">2nd Semester</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="nstp-category-stats" id="nstp-category-stats">
+        <h3>Documents by Category</h3>
+        <div class="category-stats-grid">
+            <div class="category-stat">
+                <span class="category-name">Accomplishment Reports</span>
+                <span class="category-count">{{ accomplishment_reports_count|default:0 }}</span>
+            </div>
+            <div class="category-stat">
+                <span class="category-name">Communication Letters</span>
+                <span class="category-count">{{ communication_letters_count|default:0 }}</span>
+            </div>
+            <div class="category-stat">
+                <span class="category-name">Financial Plans</span>
+                <span class="category-count">{{ financial_plan_count|default:0 }}</span>
+            </div>
+            <div class="category-stat">
+                <span class="category-name">Letters</span>
+                <span class="category-count">{{ letters_count|default:0 }}</span>
+            </div>
+            <div class="category-stat">
+                <span class="category-name">MOA</span>
+                <span class="category-count">{{ moa_count|default:0 }}</span>
+            </div>
+            <div class="category-stat">
+                <span class="category-name">NSTP Files</span>
+                <span class="category-count">{{ nstp_files_count|default:0 }}</span>
+            </div>
+            <div class="category-stat">
+                <span class="category-name">Recommendations</span>
+                <span class="category-count">{{ recommendation_count|default:0 }}</span>
+            </div>
+            <div class="category-stat">
+                <span class="category-name">Schedules</span>
+                <span class="category-count">{{ schedule_count|default:0 }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="nstp-search-filter">
+        <div class="search-container">
+            <input type="text" id="nstp-doc-search" placeholder="Search documents..." class="search-input">
+        </div>
+
+        <div class="filter-container">
+            <select id="nstpDocCategory" class="filter-select">
+                <option value="all">All Categories</option>
+                <option value="accomplishment_reports">Accomplishment Reports</option>
+                <option value="communication_letters">Communication Letters</option>
+                <option value="financial_plan">Financial Plan</option>
+                <option value="letters">Letters</option>
+                <option value="moa">MOA</option>
+                <option value="nstp_files">NSTP Files</option>
+                <option value="recommendation">Recommendation</option>
+                <option value="schedule">Schedule</option>
+            </select>
+
+            <select id="nstpDocSemester" class="filter-select">
+                <option value="all">All Semesters</option>
+                <option value="1st_semester">1st Semester</option>
+                <option value="2nd_semester">2nd Semester</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Documents Grid -->
+    <div class="nstp-documents-grid" id="nstp-documents-container">
+        {% for file in nstp_files %}
+        <div class="document-card"
+             data-id="{{ file.id }}"
+             data-category="{{ file.category }}"
+             data-semester="{{ file.semester }}"
+             data-year="{{ file.school_year }}">
+            <div class="card-header">
+                <div class="file-icon">
+                    {% if file.file.name|lower|slice:'-4:' == '.pdf' %}
+                        <i class='bx bxs-file-pdf'></i>
+                    {% elif file.file.name|lower|slice:'-4:' == '.doc' or file.file.name|lower|slice:'-5:' == '.docx' %}
+                        <i class='bx bxs-file-doc'></i>
+                    {% elif file.file.name|lower|slice:'-4:' == '.xls' or file.file.name|lower|slice:'-5:' == '.xlsx' %}
+                        <i class='bx bxs-file-xls'></i>
+                    {% else %}
+                        <i class='bx bxs-file'></i>
+                    {% endif %}
+                </div>
+
+                <div class="file-meta">
+                    <span class="file-category category-{{ file.category }}">
+                        {{ file.get_category_display }}
+                    </span>
+                    <span class="file-semester semester-{{ file.semester }}">
+                        {{ file.get_semester_display }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <h3 class="file-title">{{ file.title }}</h3>
+                <p class="nstp-file-description">
+                    {{ file.description|default:"No description provided"|truncatechars:100 }}
+                </p>
+
+                <div class="nstp-file-details">
+                    <span class="nstp-detail-item">
+                        <i class='bx bx-calendar'></i> {{ file.created_at|date:"M d, Y" }}
+                    </span>
+                    <span class="nstp-detail-item">
+                        <i class='bx bx-time'></i> {{ file.created_at|date:"h:i A" }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="file-actions">
+                    <a href="{{ file.file.url }}" class="action-btn download" title="Download" download>
+                        <i class='bx bx-download'></i>
+                    </a>
+
+                    {% if perms.osas.view_nstpfile %}
+                    <button class="action-btn view-nstp-files" title="View Details" data-file-id="{{ file.id }}">
+                        <i class='bx bx-show'></i>
+                    </button>
+                    {% endif %}
+
+                    {% if perms.osas.change_nstpfile %}
+                    <button class="action-btn edit-nstp-files" title="Edit" data-file-id="{{ file.id }}">
+                        <i class='bx bx-edit'></i>
+                    </button>
+                    {% endif %}
+
+                    {% if perms.osas.delete_nstpfile %}
+                    <button class="action-btn archive-nstp-files" title="Archive" data-file-id="{{ file.id }}">
+                        <i class='bx bx-archive'></i>
+                    </button>
+                    {% endif %}
+                </div>
+
+                <div class="file-info">
+                    <span class="file-size">{{ file.file.size|filesizeformat }}</span>
+                    <span class="file-year">{{ file.school_year }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Loading State -->
+    <div class="nstp-loading-state" id="nstp-loading" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Loading documents...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="nstp-empty-state" id="nstp-empty-state" style="display: {% if not nstp_files %}flex{% else %}none{% endif %};">
+        <div class="empty-icon">
+            <i class='bx bx-folder-open'></i>
+        </div>
+        <h3>No Documents Found</h3>
+        <p>Upload your first document to get started</p>
+        {% if perms.osas.add_nstpfile %}
+        <button class="nstp-upload-btn" onclick="openNSTPFileCreateModal()">
+            <i class='bx bx-cloud-upload'></i> Upload Document
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- No Results State -->
+    <div class="nstp-no-results" id="nstp-no-results" style="display: none;">
+        <div class="no-results-icon">
+            <i class='bx bx-search-alt'></i>
+        </div>
+        <h3>No Documents Found</h3>
+        <p>Try adjusting your search or filter criteria</p>
+        <button class="nstp-reset-filters-btn" onclick="resetNSTPFilters()">
+            <i class='bx bx-refresh'></i> Reset Filters
+        </button>
+    </div>
+
+    <!-- Pagination Container -->
+    <div class="pagination-container" id="nstp-pagination-container">
+        {% if nstp_files %}
+        <div class="pagination-info">
+            Showing {{ nstp_files.start_index }} to {{ nstp_files.end_index }} of {{ nstp_files.paginator.count }} entries
+        </div>
+        <div class="pagination-controls">
+            {% if nstp_files.has_previous %}
+                <a href="?nstp_page=1#nstp-files" class="pagination-btn first-page" title="First Page">
+                    <i class='bx bx-chevrons-left'></i>
+                </a>
+                <a href="?nstp_page={{ nstp_files.previous_page_number }}#nstp-files" class="pagination-btn prev-page" title="Previous Page">
+                    <i class='bx bx-chevron-left'></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn first-page disabled" title="First Page">
+                    <i class='bx bx-chevrons-left'></i>
+                </span>
+                <span class="pagination-btn prev-page disabled" title="Previous Page">
+                    <i class='bx bx-chevron-left'></i>
+                </span>
+            {% endif %}
+
+            <div class="page-numbers">
+                {% for num in nstp_files.paginator.page_range %}
+                    {% if nstp_files.number == num %}
+                        <span class="pagination-btn current-page active">{{ num }}</span>
+                    {% elif num > nstp_files.number|add:'-3' and num < nstp_files.number|add:'3' %}
+                        <a href="?nstp_page={{ num }}#nstp-files" class="pagination-btn page-number">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if nstp_files.has_next %}
+                <a href="?nstp_page={{ nstp_files.next_page_number }}#nstp-files" class="pagination-btn next-page" title="Next Page">
+                    <i class='bx bx-chevron-right'></i>
+                </a>
+                <a href="?nstp_page={{ nstp_files.paginator.num_pages }}#nstp-files" class="pagination-btn last-page" title="Last Page">
+                    <i class='bx bx-chevrons-right'></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn next-page disabled" title="Next Page">
+                    <i class='bx bx-chevron-right'></i>
+                </span>
+                <span class="pagination-btn last-page disabled" title="Last Page">
+                    <i class='bx bx-chevrons-right'></i>
+                </span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock nstp-content %}

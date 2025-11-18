@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSTP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link rel="stylesheet" href="{% static 'css/core/nstp.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    {% include 'core/navbar.html' %}
+
+    <!-- Hero Section -->
+    <section class="nstp-hero">
+        <div class="nstp-hero-container">
+            <div class="nstp-hero-content">
+                <h1 class="nstp-hero-title" data-nstp-scroll>
+                    {{ nstp_content.hero_title }}
+                </h1>
+                <p class="nstp-hero-subtitle" data-nstp-scroll>{{ nstp_content.hero_subtitle }}</p>
+                <div class="nstp-hero-buttons">
+                    <a href="#nstp-programs" class="nstp-cta-button" data-nstp-scroll>
+                        <span>Explore Programs</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="/nstp/register" class="nstp-secondary-button" data-nstp-scroll id="registerBtn">Register Now</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="nstp-about" id="nstp-about">
+        <div class="nstp-container">
+            <div class="nstp-section-header">
+                <h2 class="nstp-section-title" data-nstp-scroll>{{ nstp_content.about_title }}</h2>
+                <div class="nstp-section-divider"></div>
+            </div>
+            <div class="nstp-about-content">
+                <div class="nstp-about-text" data-nstp-scroll>
+                    <h3>What is NSTP?</h3>
+                    <p>{{ nstp_content.about_text }}</p>
+                </div>
+                <div class="nstp-about-image" data-nstp-scroll>
+                    <div class="nstp-image-card">
+                        <img src="{{ nstp_content.about_image.url }}" alt="NSTP Students">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Programs Section -->
+    <section class="nstp-programs" id="nstp-programs">
+        <div class="nstp-container">
+            <div class="nstp-section-header">
+                <h2 class="nstp-section-title" data-nstp-scroll>Program Offerings</h2>
+                <div class="nstp-section-divider"></div>
+            </div>
+            <div class="nstp-program-cards">
+                {% for program in nstp_content.programs %}
+                <div class="nstp-program-card" data-nstp-scroll>
+                    <div class="nstp-card-icon">
+                        <i class="{{ program.icon }}"></i>
+                    </div>
+                    <h3>{{ program.title }}</h3>
+                    <p>{{ program.description }}</p>
+                    <div class="nstp-card-number">0{{ forloop.counter }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="nstp-faq" id="nstp-faq">
+        <div class="nstp-container">
+            <div class="nstp-section-header">
+                <h2 class="nstp-section-title" data-nstp-scroll>Frequently Asked Questions</h2>
+                <div class="nstp-section-divider"></div>
+            </div>
+            <div class="nstp-faq-container">
+                {% for faq in nstp_content.faqs %}
+                <div class="nstp-faq-item" data-nstp-scroll>
+                    <div class="nstp-faq-question">
+                        <span>{{ faq.question }}</span>
+                        <span class="nstp-toggle-icon">
+                            <i class="fas fa-plus"></i>
+                            <i class="fas fa-minus"></i>
+                        </span>
+                    </div>
+                    <div class="nstp-faq-answer">
+                        <p>{{ faq.answer }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Authentication Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h3 id="modalTitle">Authentication Required</h3>
+            <p id="modalMessage">You must be logged in to access NSTP registration.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary close-modal-btn">Okay</button>
+            </div>
+        </div>
+    </div>
+
+    {% include 'core/footer.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Modal elements
+            const authModal = document.getElementById('authModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const closeModalButtons = document.querySelectorAll('.close-modal, .close-modal-btn');
+            const registerBtn = document.getElementById('registerBtn');
+
+            // Function to show modal
+            function showModal(title, message) {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                authModal.style.display = 'block';
+                setTimeout(() => {
+                    authModal.classList.add('show');
+                }, 10);
+            }
+
+            // Function to hide modal
+            function hideModal() {
+                authModal.classList.remove('show');
+                setTimeout(() => {
+                    authModal.style.display = 'none';
+                }, 300);
+            }
+
+            // Close modal when clicking X or cancel button
+            closeModalButtons.forEach(button => {
+                button.addEventListener('click', hideModal);
+            });
+
+            // Close modal when clicking outside
+            authModal.addEventListener('click', function(e) {
+                if (e.target === authModal) {
+                    hideModal();
+                }
+            });
+
+            // Register button click handler
+            if (registerBtn) {
+                registerBtn.addEventListener('click', function(e) {
+                    // Check if user is authenticated via Django template variable
+                    const isAuthenticated = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
+
+                    if (!isAuthenticated) {
+                        e.preventDefault();
+                        showModal(
+                            'Authentication Required',
+                            'You must login before accessing the NSTP registration page.'
+                        );
+                        return;
+                    }
+
+                    // Check if user is a student (user_type = 14)
+                    const isStudent = {% if request.user.is_authenticated and request.user.user_type == 14 %}true{% else %}false{% endif %};
+
+                    if (!isStudent) {
+                        e.preventDefault();
+                        showModal(
+                            'Access Restricted',
+                            'Only students are allowed to register for NSTP programs.'
+                        );
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script src="{% static 'js/core/nstp.js' %}"></script>
+
+</body>
+</html>

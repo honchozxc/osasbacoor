@@ -1,0 +1,1344 @@
+/* Export Design */
+#exportAdmissionModal .export-modal-container {
+    position: relative;
+    width: 100%;
+    max-width: 650px;
+    max-height: 90vh;
+    background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(67, 97, 238, 0.1);
+    overflow-y: auto;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+#exportAdmissionModal.active .export-modal-container {
+    transform: translateY(0);
+}
+
+#exportAdmissionModal .export-modal-header {
+    background: #1F2E6C;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#exportAdmissionModal .export-modal-title {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+#exportAdmissionModal .export-modal-title::before {
+    content: "📊";
+    font-size: 1.3rem;
+}
+
+#exportAdmissionModal .export-modal-close {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#exportAdmissionModal .export-modal-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: rotate(90deg);
+}
+
+#exportAdmissionModal .export-modal-body {
+    padding: 1.75rem;
+}
+
+#exportAdmissionModal .export-form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+#exportAdmissionModal .export-form-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+#exportAdmissionModal .export-form-label::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 16px;
+    background: linear-gradient(to bottom, #4361ee, #3a56d4);
+    margin-right: 10px;
+    border-radius: 2px;
+}
+
+#exportAdmissionModal .export-radio-group {
+    background: #f8fafc;
+    padding: 1.25rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+#exportAdmissionModal .export-radio-label {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    font-weight: 500;
+    color: #2d3748;
+}
+
+#exportAdmissionModal .export-radio-label:hover {
+    background-color: rgba(67, 97, 238, 0.05);
+}
+
+#exportAdmissionModal .export-radio-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e0;
+    margin-right: 12px;
+    position: relative;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+}
+
+#exportAdmissionModal .export-radio-label input:checked + .export-radio-custom {
+    border-color: #4361ee;
+    background-color: #4361ee;
+}
+
+#exportAdmissionModal .export-radio-label input:checked + .export-radio-custom::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+}
+
+#exportAdmissionModal .export-radio-label input {
+    position: absolute;
+    opacity: 0;
+}
+
+#exportAdmissionModal .export-form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+#exportAdmissionModal .export-form-col {
+    flex: 1;
+}
+
+#exportAdmissionModal .export-form-input,
+#exportAdmissionModal .export-form-select {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+#exportAdmissionModal .export-form-input:focus,
+#exportAdmissionModal .export-form-select:focus {
+    outline: none;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+#exportAdmissionModal .export-modal-footer {
+    padding: 1.25rem 1.75rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    background-color: #f8fafc;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+#exportAdmissionModal .export-secondary-btn {
+    padding: 0.75rem 1.5rem;
+    background: white;
+    border: 1px solid #dce2e6;
+    border-radius: 6px;
+    color: #4a5568;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#exportAdmissionModal .export-secondary-btn:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e0;
+}
+
+#exportAdmissionModal .export-primary-btn {
+    padding: 0.75rem 1.5rem;
+    background: #1F2E6C;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(67, 97, 238, 0.3);
+}
+
+#exportAdmissionModal .export-primary-btn:hover {
+    background: linear-gradient(to right, #3a56d4, #3046c0);
+    box-shadow: 0 4px 8px rgba(67, 97, 238, 0.4);
+    transform: translateY(-2px);
+}
+
+#exportAdmissionModal .export-primary-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(67, 97, 238, 0.3);
+}
+
+/* Modal backdrop */
+#exportAdmissionModal.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#exportAdmissionModal.modal.active {
+    display: flex;
+}
+
+/* Loading state for export button */
+#exportAdmissionModal .btn-loading {
+    position: relative;
+    color: transparent !important;
+}
+
+#exportAdmissionModal .btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    top: 50%;
+    left: 50%;
+    margin: -9px 0 0 -9px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-right-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Statistics */
+.admission-stats-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.admission-stats-group {
+    flex: 1;
+    min-width: 300px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.admission-stats-group h4 {
+    margin-bottom: 20px;
+    color: #555;
+    font-weight: 600;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.admission-stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 15px;
+    min-width: 130px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center;
+    flex: 1;
+    max-width: 160px;
+}
+
+.admission-stat-box.total {
+    background-color: #f1f8e9;
+    border-top: 3px solid #4caf50;
+}
+
+.stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    color: white;
+    font-size: 24px;
+}
+
+.stat-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.stat-number {
+    font-size: 22px;
+    font-weight: 700;
+    color: #333;
+    line-height: 1.2;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.3;
+    font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .admission-stats-container {
+        flex-direction: column;
+    }
+
+    .admission-stats-group {
+        min-width: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .admission-stats-section {
+        padding: 15px;
+    }
+
+    .admission-stats-group {
+        padding: 15px;
+    }
+
+    .stats-row {
+        gap: 12px;
+    }
+
+    .admission-stat-box {
+        min-width: 110px;
+        padding: 15px 10px;
+        max-width: 130px;
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    .stat-number {
+        font-size: 20px;
+    }
+
+    .stat-label {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-row {
+        justify-content: center;
+    }
+
+    .admission-stat-box {
+        min-width: 100px;
+        max-width: 120px;
+        padding: 12px 8px;
+    }
+
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+
+    .stat-number {
+        font-size: 18px;
+    }
+
+    .stat-label {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admission-stats-section h3 {
+        font-size: 18px;
+    }
+
+    .admission-stats-group h4 {
+        font-size: 16px;
+    }
+
+    .stats-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .admission-stat-box {
+        width: 100%;
+        max-width: 200px;
+        flex: none;
+    }
+}
+
+/* Loadting State */
+.table-loading-overlay {
+    position: relative;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: #4a5568;
+}
+
+.loading-spinner i {
+    font-size: 24px;
+}
+
+.table-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+#admissionViewModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#admissionViewModal.active {
+    display: flex;
+    opacity: 1;
+}
+
+#admissionViewModal.loading {
+    display: flex;
+    opacity: 1;
+}
+
+#admissionViewModal .modal-container {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    position: relative;
+}
+
+/* Modal Header */
+#admissionViewModal .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1e40af;
+    color: white;
+    border-radius: 8px 8px 0 0;
+}
+
+#admissionViewModal .header-content h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+#admissionViewModal .header-description {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+#admissionViewModal .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-left: 1rem;
+    color: white;
+}
+
+/* Modal Body */
+#admissionViewModal .form-body {
+    padding: 1.5rem;
+}
+
+#admissionViewModal .admission-header {
+    margin-bottom: 1.5rem;
+}
+
+#admissionViewModal .admission-control-no {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    color: #1e40af;
+}
+
+#admissionViewModal .admission-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+#admissionViewModal .status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+#admissionViewModal .status-badge.pending {
+    background-color: #f59e0b;
+    color: white;
+}
+
+#admissionViewModal .status-badge.incomplete {
+    background-color: #ef4444;
+    color: white;
+}
+
+#admissionViewModal .status-badge.complete {
+    background-color: #10b981;
+    color: white;
+}
+
+#admissionViewModal .status-badge.verified {
+    background-color: #3b82f6;
+    color: white;
+}
+
+#admissionViewModal .type-tag {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: #e0e7ff;
+    color: #1e40af;
+}
+
+#admissionViewModal .divider {
+    height: 1px;
+    background-color: #e5e7eb;
+    margin: 1.5rem 0;
+}
+
+/* Detail Groups */
+#admissionViewModal .detail-group {
+    margin-bottom: 1.5rem;
+}
+
+#admissionViewModal .detail-label {
+    margin: 0 0 1rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+#admissionViewModal .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+#admissionViewModal .detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+#admissionViewModal .detail-item.full-width {
+    grid-column: 1 / -1;
+}
+
+#admissionViewModal .detail-sub-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+}
+
+#admissionViewModal .detail-value {
+    font-size: 0.9375rem;
+    color: #1f2937;
+    font-weight: 500;
+}
+
+#admissionViewModal .detail-content {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 0.75rem;
+    font-size: 0.9375rem;
+    color: #1f2937;
+}
+
+/* Requirements Section */
+#admissionViewModal .requirements-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px dashed #e5e7eb;
+}
+
+#admissionViewModal .requirements-heading {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+#admissionViewModal .requirement-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    font-size: 0.9375rem;
+}
+
+#admissionViewModal .requirement-item i {
+    font-size: 1.25rem;
+}
+
+#admissionViewModal .requirement-item i.success {
+    color: #10b981;
+}
+
+#admissionViewModal .requirement-item i.error {
+    color: #ef4444;
+}
+
+#admissionViewModal .file-link {
+    margin-left: auto;
+    color: #3b82f6;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+}
+
+#admissionViewModal .file-link:hover {
+    text-decoration: underline;
+}
+
+/* Modal Footer */
+#admissionViewModal .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    background-color: #f9fafb;
+    border-radius: 0 0 8px 8px;
+}
+
+#admissionViewModal .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#admissionViewModal .btn-secondary {
+    background-color: #e5e7eb;
+    color: #1f2937;
+    border: 1px solid #d1d5db;
+}
+
+#admissionViewModal .btn-secondary:hover {
+    background-color: #d1d5db;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+    #admissionViewModal .modal-container {
+        width: 95%;
+        max-height: 85vh;
+    }
+
+    #admissionViewModal .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #admissionViewModal .modal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    #admissionViewModal .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+    }
+}
+
+/* -------------------------------------------------- Edit Modal ---------------------------------------------------- */
+#admissionEditModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#admissionEditModal.active {
+    display: flex;
+    opacity: 1;
+}
+
+#admissionEditModal .modal-container {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    position: relative;
+}
+
+/* Modal Header */
+#admissionEditModal .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1e40af;
+    color: white;
+    border-radius: 8px 8px 0 0;
+}
+
+#admissionEditModal .header-content h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+#admissionEditModal .header-description {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+#admissionEditModal .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-left: 1rem;
+    color: white;
+}
+
+/* Form Body */
+#admissionEditModal .form-body {
+    padding: 1.5rem;
+}
+
+#admissionEditModal .form-intro {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem;
+    background-color: #f0f7ff;
+    border-radius: 6px;
+    color: #1e40af;
+}
+
+#admissionEditModal .form-intro svg {
+    flex-shrink: 0;
+}
+
+#admissionEditModal .form-intro p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+#admissionEditModal .required-asterisk {
+    color: #ef4444;
+}
+
+#admissionEditModal .form-response {
+    margin-bottom: 1rem;
+}
+
+#admissionEditModal .form-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 640px) {
+    #admissionEditModal .form-columns {
+        grid-template-columns: 1fr;
+    }
+}
+
+#admissionEditModal .form-group {
+    margin-bottom: 1rem;
+}
+
+#admissionEditModal .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+#admissionEditModal .form-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 0.9375rem;
+    transition: border-color 0.2s;
+}
+
+#admissionEditModal .form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+#admissionEditModal .form-input[readonly] {
+    background-color: #f3f4f6;
+    color: #6b7280;
+}
+
+#admissionEditModal textarea.form-input {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Requirements Section */
+#admissionEditModal .form-section {
+    margin: 1.5rem 0;
+}
+
+#admissionEditModal .section-header {
+    margin-bottom: 1rem;
+}
+
+#admissionEditModal .section-header h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.125rem;
+    color: #1f2937;
+}
+
+#admissionEditModal .divider {
+    height: 1px;
+    background-color: #e5e7eb;
+}
+
+#admissionEditModal .requirements-container {
+    margin-top: 1rem;
+}
+
+#admissionEditModal .requirement-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+#admissionEditModal .requirement-info {
+    flex: 1;
+}
+
+#admissionEditModal .requirement-name {
+    display: block;
+    font-weight: 500;
+    color: #1f2937;
+}
+
+#admissionEditModal .requirement-file-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+#admissionEditModal .requirement-file-link:hover {
+    text-decoration: underline;
+}
+
+#admissionEditModal .file-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+#admissionEditModal .remove-file-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+#admissionEditModal .remove-file-btn:hover {
+    background-color: #fecaca;
+}
+
+#admissionEditModal .file-upload-control {
+    min-width: 160px;
+}
+
+#admissionEditModal .file-input {
+    display: none;
+}
+
+#admissionEditModal .file-label {
+    display: inline-block;
+    cursor: pointer;
+}
+
+#admissionEditModal .file-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background-color: #f3f4f6;
+    border-radius: 4px;
+    font-size: 0.8125rem;
+    color: #374151;
+    transition: background-color 0.2s;
+}
+
+#admissionEditModal .file-cta:hover {
+    background-color: #e5e7eb;
+}
+
+/* Toggle Switch */
+#admissionEditModal .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+#admissionEditModal .toggle-checkbox {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+#admissionEditModal .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #d1d5db;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+#admissionEditModal .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+#admissionEditModal .toggle-checkbox:checked + .toggle-slider {
+    background-color: #10b981;
+}
+
+#admissionEditModal .toggle-checkbox:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+#admissionEditModal .toggle-label-text {
+    margin-left: 0.5rem;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+/* Modal Footer */
+#admissionEditModal .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    background-color: #f9fafb;
+    border-radius: 0 0 8px 8px;
+}
+
+#admissionEditModal .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid transparent;
+}
+
+#admissionEditModal .btn-cancel {
+    background-color: #f3f4f6;
+    color: #374151;
+    border-color: #d1d5db;
+}
+
+#admissionEditModal .btn-cancel:hover {
+    background-color: #e5e7eb;
+}
+
+#admissionEditModal .btn-primary {
+    background-color: #1e40af;
+    color: white;
+}
+
+#admissionEditModal .btn-primary:hover {
+    background-color: #1e3a8a;
+}
+
+#admissionEditModal .btn.is-loading .btn-text {
+    visibility: hidden;
+}
+
+#admissionEditModal .btn.is-loading .btn-loader {
+    display: block;
+}
+
+#admissionEditModal .btn-loader {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+}
+
+#admissionEditModal .btn-loader svg {
+    width: 100%;
+    height: 100%;
+    animation: rotate 1s linear infinite;
+}
+
+#admissionEditModal .btn-loader circle {
+    stroke: currentColor;
+    stroke-dasharray: 80px, 200px;
+    stroke-dashoffset: 0;
+    stroke-linecap: round;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Response Messages */
+#admissionEditModal .response-message {
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#admissionEditModal .response-success {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+#admissionEditModal .response-error {
+    background-color: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+/* File Upload Preview Styles */
+.file-preview {
+    margin-top: 8px;
+}
+
+.file-preview-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background-color: var(--gray-100);
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+.file-preview-name {
+    font-size: 13px;
+    color: var(--gray-800);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.file-preview-remove {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    padding: 0;
+    margin-left: 8px;
+    font-size: 16px;
+}
+
+.file-preview-remove:hover {
+    color: var(--danger-dark);
+}
+
+/* File Upload Controls */
+.file-upload-control {
+    position: relative;
+}
+
+.file-input {
+    position: absolute;
+    left: -9999px;
+}
+
+.file-label {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.file-cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background-color: var(--primary-light);
+    color: var(--primary);
+    border-radius: 4px;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.file-cta:hover {
+    background-color: var(--primary-light-hover);
+}
+
+.file-icon {
+    margin-right: 6px;
+}
+
+.file-label-text {
+    white-space: nowrap;
+}
+
+/* File Actions */
+.file-actions {
+    margin-top: 4px;
+}
+
+.requirement-file-link {
+    color: var(--primary);
+    font-size: 13px;
+    margin-right: 8px;
+    text-decoration: none;
+}
+
+.requirement-file-link:hover {
+    text-decoration: underline;
+}
+
+.remove-file-btn {
+    background-color: var(--danger-light);
+    color: var(--danger);
+    border: none;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.remove-file-btn:hover {
+    background-color: var(--danger-light-hover);
+}
+
+.status-badge.incomplete {
+    background-color: #FFEBEE;
+    color: #C62828;
+    border-color: #FFCDD2;
+}
+
+.status-badge.complete {
+    background-color: #E8F5E9;
+    color: #2E7D32;
+    border-color: #C8E6C9;
+}
+
+.status-badge.done {
+    background-color: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #C8E6C9;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+    display: inline-block;
+    text-align: center;
+    min-width: 80px;
+}
+
+.remarks-cell[data-status="done"] {
+    color: #2E7D32;
+    font-weight: 500;
+    background-color: #E8F5E9;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* Remarks Cell */
+.remarks-cell {
+    max-width: 250px;
+    overflow: hidden;
+}
+
+/* Highlight for missing requirements */
+.remarks-cell[data-missing="true"] {
+    color: #D32F2F;
+    font-weight: 500;
+    background-color: #FFEBEE;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* Complete requirements highlight */
+.remarks-cell[data-complete="true"] {
+    color: #2E7D32;
+    font-weight: 500;
+    background-color: #E8F5E9;
+    padding: 4px 8px;
+    border-radius: 4px;
+}

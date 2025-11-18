@@ -1,0 +1,1008 @@
+{% load static %}
+{% block content %}
+<title>Account Registration</title>
+<link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+<link rel="stylesheet" href="{% static 'css/dashboard/register.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+{% include 'core/navbar.html' %}
+
+<!-- Toast Notifications Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="registration-container">
+    {% if not request.session.registration_data %}
+    <div class="registration-card glass-card">
+        <div class="registration-header">
+            <div class="header-glow"></div>
+            <h2>Create Account</h2>
+            <p>Join our university community</p>
+            <div class="header-accent"></div>
+        </div>
+
+        {% if form.errors %}
+        <div class="alert-error pulse">
+            <div class="alert-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <div class="alert-content">
+                <strong>Please correct the following errors:</strong>
+                <ul>
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" novalidate class="registration-form" id="registrationForm">
+            {% csrf_token %}
+
+            <!-- User Type Selection -->
+            <div class="form-group">
+                <label for="{{ form.user_type.id_for_label }}">I am registering as: <span class="required">*</span></label>
+                <select name="user_type" id="id_user_type" class="user-type-dropdown" required>
+                    <option value="">Select User Type</option>
+                    {% for choice in form.user_type.field.choices %}
+                        {% if choice.0 != 15 %}  <!-- Hide Organization (15) -->
+                            <option value="{{ choice.0 }}" {% if form.user_type.value|stringformat:"s" == choice.0|stringformat:"s" %}selected{% endif %}>
+                                {{ choice.1 }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                {% if form.user_type.errors %}
+                    <div class="error-message">
+                        {% for error in form.user_type.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Rest of your form remains the same -->
+            <!-- Common Fields -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">First Name <span class="required">*</span></label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="error-message">
+                            {% for error in form.first_name.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">Last Name <span class="required">*</span></label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="error-message">
+                            {% for error in form.last_name.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Email <span class="required">*</span></label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="error-message">
+                            {% for error in form.email.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.phone_number.id_for_label }}">Phone Number <span class="required">*</span></label>
+                    {{ form.phone_number }}
+                    {% if form.phone_number.errors %}
+                        <div class="error-message">
+                            {% for error in form.phone_number.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.gender.id_for_label }}">Gender <span class="required">*</span></label>
+                    {{ form.gender }}
+                    {% if form.gender.errors %}
+                        <div class="error-message">
+                            {% for error in form.gender.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.birth_date.id_for_label }}">Birth Date <span class="required">*</span></label>
+                    {{ form.birth_date }}
+                    {% if form.birth_date.errors %}
+                        <div class="error-message">
+                            {% for error in form.birth_date.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.address.id_for_label }}">Address <span class="required">*</span></label>
+                    {{ form.address }}
+                    {% if form.address.errors %}
+                        <div class="error-message">
+                            {% for error in form.address.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Student Fields -->
+            <div id="student-fields" class="form-section">
+                <h3 class="section-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                    Student Information
+                </h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.student_number.id_for_label }}">Student Number <span class="required">*</span></label>
+                        {{ form.student_number }}
+                        {% if form.student_number.errors %}
+                            <div class="error-message">
+                                {% for error in form.student_number.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.course.id_for_label }}">Course <span class="required">*</span></label>
+                        <select name="course" id="id_course" class="form-input">
+                            <option value="">Select Course</option>
+                            {% for course in courses %}
+                                <option value="{{ course.id }}" {% if form.course.value == course.id %}selected{% endif %}>
+                                    {{ course.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.course.errors %}
+                            <div class="error-message">
+                                {% for error in form.course.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.year_level.id_for_label }}">Year Level <span class="required">*</span></label>
+                        {{ form.year_level }}
+                        {% if form.year_level.errors %}
+                            <div class="error-message">
+                                {% for error in form.year_level.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.section.id_for_label }}">Section <span class="required">*</span></label>
+                        {{ form.section }}
+                        {% if form.section.errors %}
+                            <div class="error-message">
+                                {% for error in form.section.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- OSAS Fields -->
+            <div id="osas-fields" class="form-section" style="display: none;">
+                <h3 class="section-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    OSAS Staff Information
+                </h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.department.id_for_label }}">Department/Unit <span class="required">*</span></label>
+                        {{ form.department }}
+                        {% if form.department.errors %}
+                            <div class="error-message">
+                                {% for error in form.department.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.osas_position.id_for_label }}">Position</label>
+                        {{ form.osas_position }}
+                        {% if form.osas_position.errors %}
+                            <div class="error-message">
+                                {% for error in form.osas_position.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verification Documents -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Verification Documents
+                </h3>
+
+                <div class="file-upload-section">
+                    <div class="file-upload-container">
+                        <!-- ID Photo Upload -->
+                        <div class="file-upload-card" id="id-photo-card">
+                            <div class="file-upload-header">
+                                <div class="file-upload-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="file-upload-info">
+                                    <h4 id="id-photo-title">ID Photo <span class="required" id="id-photo-required">*</span></h4>
+                                    <p>Upload a clear photo of your valid ID</p>
+                                    <small class="field-requirement" id="id-photo-requirement-text">Required for OSAS Staff</small>
+                                </div>
+                            </div>
+
+                            <div class="file-upload-area" id="id-photo-area">
+                                <input type="file" name="id_photo" accept="image/*" id="id_id_photo" class="file-input">
+                                <div class="file-upload-content">
+                                    <div class="file-upload-icon-large">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="17 8 12 3 7 8"></polyline>
+                                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                                        </svg>
+                                    </div>
+                                    <div class="file-upload-text">
+                                        <h5>Click to upload ID Photo</h5>
+                                        <p>JPEG, PNG - Max 5MB</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="file-preview-container" id="id-photo-preview">
+                                <div class="file-preview">
+                                    <div class="file-preview-header">
+                                        <h6 class="file-preview-title">Preview</h6>
+                                        <div class="file-preview-actions">
+                                            <button type="button" class="preview-btn change" onclick="document.getElementById('id_id_photo').click()">Change</button>
+                                            <button type="button" class="preview-btn remove" onclick="removeFile('id_photo')">Remove</button>
+                                        </div>
+                                    </div>
+                                    <div class="file-preview-content">
+                                        <div class="file-preview-image">
+                                            <img id="id-photo-preview-img" src="" alt="ID Photo Preview">
+                                            <div class="file-icon">📷</div>
+                                        </div>
+                                        <div class="file-preview-details">
+                                            <div class="file-preview-name" id="id-photo-name">filename.jpg</div>
+                                            <div class="file-preview-info">
+                                                <span>Size: <span id="id-photo-size">0 KB</span></span>
+                                                <span>Type: <span id="id-photo-type">image/jpeg</span></span>
+                                            </div>
+                                            <div class="file-preview-status valid" id="id-photo-status">Valid</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="upload-progress" id="id-photo-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="id-photo-progress-fill"></div>
+                                </div>
+                                <div class="progress-text" id="id-photo-progress-text">Uploading...</div>
+                            </div>
+
+                            <div class="requirements-panel">
+                                <h6>ID Photo Requirements</h6>
+                                <div class="requirements-list">
+                                    <div class="requirement-item">Clear and legible text</div>
+                                    <div class="requirement-item">Full ID card visible</div>
+                                    <div class="requirement-item">Good lighting conditions</div>
+                                    <div class="requirement-item">No glare or reflections</div>
+                                    <div class="requirement-item">Recent photo (within 6 months)</div>
+                                    <div class="requirement-item">File size under 5MB</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COR Photo Upload -->
+                        <div class="file-upload-card" id="cor-photo-card">
+                            <div class="file-upload-header">
+                                <div class="file-upload-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    </svg>
+                                </div>
+                                <div class="file-upload-info">
+                                    <h4 id="cor-photo-title">Certificate of Registration (COR) <span class="required" id="cor-photo-required">*</span></h4>
+                                    <p>Upload your current semester COR</p>
+                                    <small class="field-requirement" id="cor-photo-requirement-text">Required for Students</small>
+                                </div>
+                            </div>
+
+                            <div class="file-upload-area" id="cor-photo-area">
+                                <input type="file" name="cor_photo" accept="image/*" id="id_cor_photo" class="file-input">
+                                <div class="file-upload-content">
+                                    <div class="file-upload-icon-large">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        </svg>
+                                    </div>
+                                    <div class="file-upload-text">
+                                        <h5>Click to upload COR</h5>
+                                        <p>JPEG, PNG - Max 5MB</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="file-preview-container" id="cor-photo-preview">
+                                <div class="file-preview">
+                                    <div class="file-preview-header">
+                                        <h6 class="file-preview-title">Preview</h6>
+                                        <div class="file-preview-actions">
+                                            <button type="button" class="preview-btn change" onclick="document.getElementById('id_cor_photo').click()">Change</button>
+                                            <button type="button" class="preview-btn remove" onclick="removeFile('cor_photo')">Remove</button>
+                                        </div>
+                                    </div>
+                                    <div class="file-preview-content">
+                                        <div class="file-preview-image">
+                                            <img id="cor-photo-preview-img" src="" alt="COR Preview">
+                                            <div class="file-icon">📄</div>
+                                        </div>
+                                        <div class="file-preview-details">
+                                            <div class="file-preview-name" id="cor-photo-name">filename.jpg</div>
+                                            <div class="file-preview-info">
+                                                <span>Size: <span id="cor-photo-size">0 KB</span></span>
+                                                <span>Type: <span id="cor-photo-type">image/jpeg</span></span>
+                                            </div>
+                                            <div class="file-preview-status valid" id="cor-photo-status">Valid</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="upload-progress" id="cor-photo-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="cor-photo-progress-fill"></div>
+                                </div>
+                                <div class="progress-text" id="cor-photo-progress-text">Uploading...</div>
+                            </div>
+
+                            <div class="requirements-panel">
+                                <h6>COR Requirements</h6>
+                                <div class="requirements-list">
+                                    <div class="requirement-item">Current semester COR</div>
+                                    <div class="requirement-item">Clear and readable text</div>
+                                    <div class="requirement-item">Official university stamp visible</div>
+                                    <div class="requirement-item">Complete document visible</div>
+                                    <div class="requirement-item">No cropping or editing</div>
+                                    <div class="requirement-item">File size under 5MB</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Credentials -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    Account Credentials
+                </h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}">Username <span class="required">*</span></label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="error-message">
+                                {% for error in form.username.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.password1.id_for_label }}">Password <span class="required">*</span></label>
+                        {{ form.password1 }}
+                        <div class="password-requirements">
+                            <p>Password must contain:</p>
+                            <ul>
+                                <li>At least 8 characters</li>
+                                <li>At least one letter</li>
+                                <li>At least one number</li>
+                            </ul>
+                        </div>
+                        {% if form.password1.errors %}
+                            <div class="error-message">
+                                {% for error in form.password1.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.password2.id_for_label }}">Confirm Password <span class="required">*</span></label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                            <div class="error-message">
+                                {% for error in form.password2.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="submit-button" id="submitButton">
+                    <span>Register</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <!-- Registration Summary Section -->
+<div class="registration-card glass-card success-card">
+    <div class="registration-header success-header">
+        <div class="header-glow"></div>
+        <div class="success-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+        </div>
+        <h2>Registration Successful!</h2>
+        <p>Your account is pending verification. You'll receive an email once approved.</p>
+        <div class="header-accent success-accent"></div>
+    </div>
+
+    <div class="registration-summary">
+        <div class="summary-section">
+            <h3 class="summary-title">Account Summary</h3>
+
+            <div class="summary-grid">
+                <!-- Common fields for all users -->
+                <div class="summary-item">
+                    <span class="summary-label">Full Name:</span>
+                    <span class="summary-value">{{ request.session.registration_data.first_name }} {{ request.session.registration_data.last_name }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">User Type:</span>
+                    <span class="summary-value">{{ request.session.registration_data.user_type_display }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Email:</span>
+                    <span class="summary-value">{{ request.session.registration_data.email }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Phone:</span>
+                    <span class="summary-value">{{ request.session.registration_data.phone_number }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Username:</span>
+                    <span class="summary-value">{{ request.session.registration_data.username }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Birth Date:</span>
+                    <span class="summary-value">{{ request.session.registration_data.birth_date }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Address:</span>
+                    <span class="summary-value">{{ request.session.registration_data.address }}</span>
+                </div>
+
+                <!-- Show student-specific fields ONLY for user_type 14 -->
+                {% if request.session.registration_data.user_type == '14' %}
+                <div class="summary-item">
+                    <span class="summary-label">Student Number:</span>
+                    <span class="summary-value">{{ request.session.registration_data.student_number }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Course:</span>
+                    <span class="summary-value">{{ request.session.registration_data.course }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Year Level:</span>
+                    <span class="summary-value">{{ request.session.registration_data.year_level }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Section:</span>
+                    <span class="summary-value">{{ request.session.registration_data.section }}</span>
+                </div>
+                {% else %}
+                <!-- Show OSAS staff fields ONLY for non-students -->
+                <div class="summary-item">
+                    <span class="summary-label">Department:</span>
+                    <span class="summary-value">{{ request.session.registration_data.department }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Position:</span>
+                    <span class="summary-value">{{ request.session.registration_data.position_display }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="summary-actions">
+            <a href="{% url 'clear_registration_session' %}" class="summary-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                Return to Home
+            </a>
+        </div>
+
+        <div class="summary-note">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <p>Please keep your registration details secure. Our team will review your information and notify you via email once your account is approved.</p>
+        </div>
+    </div>
+</div>
+    {% endif %}
+</div>
+
+<script>
+// Toast Notification Functions
+function showToast(message, type) {
+    const toastContainer = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    const icon = document.createElement('div');
+    icon.className = 'toast-icon';
+    icon.innerHTML = type === 'success' ?
+        '✓' :
+        '⚠️';
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'toast-message';
+    messageDiv.textContent = message;
+
+    const closeButton = document.createElement('button');
+    closeButton.className = 'toast-close';
+    closeButton.innerHTML = '×';
+    closeButton.onclick = () => toast.remove();
+
+    toast.appendChild(icon);
+    toast.appendChild(messageDiv);
+    toast.appendChild(closeButton);
+    toastContainer.appendChild(toast);
+
+    // Show toast
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
+// Enhanced File Upload Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    initializeFileUploads();
+});
+
+function initializeFileUploads() {
+    // ID Photo Upload
+    const idPhotoInput = document.getElementById('id_id_photo');
+    const idPhotoArea = document.getElementById('id-photo-area');
+    const idPhotoPreview = document.getElementById('id-photo-preview');
+    const idPhotoPreviewImg = document.getElementById('id-photo-preview-img');
+    const idPhotoCard = document.getElementById('id-photo-card');
+
+    // COR Photo Upload
+    const corPhotoInput = document.getElementById('id_cor_photo');
+    const corPhotoArea = document.getElementById('cor-photo-area');
+    const corPhotoPreview = document.getElementById('cor-photo-preview');
+    const corPhotoPreviewImg = document.getElementById('cor-photo-preview-img');
+    const corPhotoCard = document.getElementById('cor-photo-card');
+
+    // Setup file upload handlers
+    setupEnhancedFileUpload(idPhotoInput, idPhotoArea, idPhotoPreview, idPhotoPreviewImg, idPhotoCard, 'id_photo');
+    setupEnhancedFileUpload(corPhotoInput, corPhotoArea, corPhotoPreview, corPhotoPreviewImg, corPhotoCard, 'cor_photo');
+}
+
+function setupEnhancedFileUpload(input, area, preview, previewImg, card, fileType) {
+    input.addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            const file = this.files[0];
+
+            // Validate file
+            if (validateFile(file, fileType)) {
+                // Show preview
+                showFilePreview(file, preview, previewImg, fileType);
+
+                // Update card state
+                card.classList.add('active');
+                card.classList.remove('error');
+
+                // Update area state
+                area.classList.add('active');
+
+                // Simulate upload progress
+                simulateUploadProgress(fileType);
+            } else {
+                // Show error state
+                card.classList.add('error');
+                area.classList.add('error');
+            }
+        }
+    });
+
+    // Drag and drop functionality
+    area.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('active');
+    });
+
+    area.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('active');
+    });
+
+    area.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('active');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            input.files = files;
+            input.dispatchEvent(new Event('change'));
+        }
+    });
+}
+
+function validateFile(file, fileType) {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+
+    if (!allowedTypes.includes(file.type)) {
+        showToast(`Invalid file type for ${fileType}. Please upload JPEG or PNG files.`, 'error');
+        return false;
+    }
+
+    if (file.size > maxSize) {
+        showToast(`File too large for ${fileType}. Maximum size is 5MB.`, 'error');
+        return false;
+    }
+
+    return true;
+}
+
+function showFilePreview(file, previewContainer, previewImg, fileType) {
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        previewImg.src = e.target.result;
+
+        // Update file info
+        document.getElementById(`${fileType}-name`).textContent = file.name;
+        document.getElementById(`${fileType}-size`).textContent = formatFileSize(file.size);
+        document.getElementById(`${fileType}-type`).textContent = file.type;
+
+        // Show preview container
+        previewContainer.classList.add('show');
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function removeFile(fileType) {
+    const input = document.getElementById(`id_${fileType}`);
+    const preview = document.getElementById(`${fileType}-preview`);
+    const card = document.getElementById(`${fileType}-card`);
+    const area = document.getElementById(`${fileType}-area`);
+
+    // Reset input
+    input.value = '';
+
+    // Hide preview
+    preview.classList.remove('show');
+
+    // Reset card and area states
+    card.classList.remove('active', 'error');
+    area.classList.remove('active', 'error');
+
+    // Hide progress
+    document.getElementById(`${fileType}-progress`).classList.remove('show');
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function simulateUploadProgress(fileType) {
+    const progress = document.getElementById(`${fileType}-progress`);
+    const progressFill = document.getElementById(`${fileType}-progress-fill`);
+    const progressText = document.getElementById(`${fileType}-progress-text`);
+
+    progress.classList.add('show');
+
+    let width = 0;
+    const interval = setInterval(() => {
+        if (width >= 100) {
+            clearInterval(interval);
+            progressText.textContent = 'Upload Complete!';
+
+            // Show success state after upload
+            setTimeout(() => {
+                document.getElementById(`${fileType}-card`).classList.add('success');
+            }, 500);
+        } else {
+            width++;
+            progressFill.style.width = width + '%';
+            progressText.textContent = `Uploading... ${width}%`;
+        }
+    }, 20);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all necessary elements
+    const userTypeSelect = document.getElementById('id_user_type');
+    const studentFields = document.getElementById('student-fields');
+    const osasFields = document.getElementById('osas-fields');
+    const positionSelect = document.getElementById('id_osas_position');
+
+    // Get file upload elements
+    const idPhotoCard = document.getElementById('id-photo-card');
+    const corPhotoCard = document.getElementById('cor-photo-card');
+    const idPhotoRequired = idPhotoCard.querySelector('.required');
+    const corPhotoRequired = corPhotoCard.querySelector('.required');
+    const idPhotoInput = document.getElementById('id_id_photo');
+    const corPhotoInput = document.getElementById('id_cor_photo');
+
+    // Initialize position field with selected value if any
+    if (positionSelect) {
+        const initialPosition = "{{ form.osas_position.value|default:'' }}";
+        if (initialPosition) {
+            positionSelect.value = initialPosition;
+        }
+    }
+
+    // Function to toggle fields based on user type
+    function toggleFields() {
+        const selectedValue = userTypeSelect ? userTypeSelect.value : '';
+
+        if (selectedValue === '14') {  // Student
+            if (studentFields) studentFields.style.display = 'block';
+            if (osasFields) osasFields.style.display = 'none';
+
+            // Update required indicators for Student
+            if (idPhotoRequired) {
+                idPhotoRequired.style.display = 'none';
+                idPhotoRequired.textContent = ''; // Remove asterisk for students
+            }
+            if (corPhotoRequired) {
+                corPhotoRequired.style.display = 'inline';
+                corPhotoRequired.textContent = '*'; // Add asterisk for students
+            }
+
+            // Update form field requirements
+            idPhotoInput.required = false;
+            corPhotoInput.required = true;
+
+            // Update card labels
+            updateCardLabels('Student');
+        }
+        else if (selectedValue && selectedValue !== '' && selectedValue !== '0' && selectedValue !== '15') {  // OSAS staff
+            if (studentFields) studentFields.style.display = 'none';
+            if (osasFields) osasFields.style.display = 'block';
+
+            // Update required indicators for OSAS Staff
+            if (idPhotoRequired) {
+                idPhotoRequired.style.display = 'inline';
+                idPhotoRequired.textContent = '*'; // Add asterisk for OSAS staff
+            }
+            if (corPhotoRequired) {
+                corPhotoRequired.style.display = 'none';
+                corPhotoRequired.textContent = ''; // Remove asterisk for OSAS staff
+            }
+
+            // Update form field requirements
+            idPhotoInput.required = true;
+            corPhotoInput.required = false;
+
+            // Update card labels
+            updateCardLabels('OSAS Staff');
+        }
+        else {  // None selected or invalid value
+            if (studentFields) studentFields.style.display = 'none';
+            if (osasFields) osasFields.style.display = 'none';
+
+            // Hide both required indicators
+            if (idPhotoRequired) idPhotoRequired.style.display = 'none';
+            if (corPhotoRequired) corPhotoRequired.style.display = 'none';
+
+            // Remove requirements until user type is selected
+            idPhotoInput.required = false;
+            corPhotoInput.required = false;
+        }
+    }
+
+    // Function to update card labels based on user type
+    function updateCardLabels(userType) {
+        const idPhotoTitle = idPhotoCard.querySelector('.file-upload-info h4');
+        const corPhotoTitle = corPhotoCard.querySelector('.file-upload-info h4');
+
+        if (userType === 'Student') {
+            // For students: COR is required, ID Photo is optional
+            idPhotoTitle.innerHTML = 'ID Photo <span class="optional">(Optional)</span>';
+            corPhotoTitle.innerHTML = 'Certificate of Registration (COR) <span class="required">*</span>';
+
+            // Update card styling
+            idPhotoCard.classList.remove('required-card');
+            corPhotoCard.classList.add('required-card');
+        } else if (userType === 'OSAS Staff') {
+            // For OSAS staff: ID Photo is required, COR is optional
+            idPhotoTitle.innerHTML = 'ID Photo <span class="required">*</span>';
+            corPhotoTitle.innerHTML = 'Certificate of Registration (COR) <span class="optional">(Optional)</span>';
+
+            // Update card styling
+            idPhotoCard.classList.add('required-card');
+            corPhotoCard.classList.remove('required-card');
+        }
+    }
+
+    // Initialize fields based on current selection
+    toggleFields();
+
+    // Add event listener for user type changes
+    if (userTypeSelect) {
+        userTypeSelect.addEventListener('change', toggleFields);
+    }
+
+    // Form submission handling with dynamic validation
+    const registrationForm = document.getElementById('registrationForm');
+    if (registrationForm) {
+        registrationForm.addEventListener('submit', function(e) {
+            const userTypeValue = userTypeSelect ? userTypeSelect.value : '';
+            if (!userTypeValue) {
+                e.preventDefault();
+                showToast('Please select a user type', 'error');
+                userTypeSelect.focus();
+                return;
+            }
+
+            // Dynamic validation based on user type
+            if (userTypeValue === '14') { // Student
+                if (!corPhotoInput.files || corPhotoInput.files.length === 0) {
+                    e.preventDefault();
+                    showToast('Certificate of Registration (COR) is required for students', 'error');
+                    corPhotoInput.focus();
+                    return;
+                }
+            } else if (userTypeValue && userTypeValue !== '15') { // OSAS Staff
+                if (!idPhotoInput.files || idPhotoInput.files.length === 0) {
+                    e.preventDefault();
+                    showToast('ID Photo is required for OSAS staff', 'error');
+                    idPhotoInput.focus();
+                    return;
+                }
+            }
+
+            const submitButton = document.getElementById('submitButton');
+            if (submitButton) {
+                submitButton.disabled = true;
+                const span = submitButton.querySelector('span');
+                if (span) {
+                    span.textContent = 'Processing...';
+                }
+            }
+        });
+    }
+
+    // Show success toast if registration was successful
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success' %}
+                showToast('{{ message }}', 'success');
+            {% elif message.tags == 'error' %}
+                showToast('{{ message }}', 'error');
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    // Initialize any existing file inputs
+    function initializeFileInputs() {
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(input => {
+            const textId = input.id + '_text';
+            const textElement = document.getElementById(textId);
+            if (textElement && input.files.length > 0) {
+                textElement.textContent = input.files[0].name;
+            }
+        });
+    }
+
+    // Run initialization
+    initializeFileInputs();
+
+    // Position field styling (optional)
+    if (positionSelect) {
+        positionSelect.addEventListener('focus', function() {
+            this.style.borderColor = '#4CAF50';
+        });
+        positionSelect.addEventListener('blur', function() {
+            this.style.borderColor = '#ccc';
+        });
+    }
+});
+</script>
+
+{% include 'core/footer.html' %}
+{% endblock %}

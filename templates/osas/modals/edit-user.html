@@ -1,0 +1,510 @@
+<div id="userEditModal" class="modal">
+  <div class="modal-overlay" onclick="closeEditModal()"></div>
+  <div class="modal-container">
+    <div class="modal-header">
+      <div class="header-content">
+        <h2>Edit User Account</h2>
+        <p class="header-description">Update the details for this user account</p>
+      </div>
+      <button class="modal-close" onclick="closeEditModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <form id="userEditForm" method="post" action="" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="user_id" id="editUserId">
+
+      <div class="form-body">
+        <div class="form-intro">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <p>Update the user information below. Fields marked with <span class="required-asterisk">*</span> are required.</p>
+        </div>
+
+        <div id="editFormResponse" class="form-response"></div>
+
+        <!-- USER ROLE SECTION - MOVED TO TOP -->
+        <div class="role-selection-section">
+          {% if request.user.is_superuser %}
+          <div class="form-group role-selection">
+              <label for="id_user_type">User Role <span class="required-asterisk">*</span></label>
+              <div class="role-options-grid">
+                  <div class="role-options-column">
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_admin" value="1" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_admin">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 0 0 8 11a4 4 0 1 1 8 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0 0 15.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 0 0 8 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path>
+                                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                              </svg>
+                              <span>OSAS</span>
+                              <small>Full system access</small>
+                          </label>
+                      </div>
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_nstp" value="2" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_nstp">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                                  <path d="M2 17l10 5 10-5"></path>
+                                  <path d="M2 12l10 5 10-5"></path>
+                              </svg>
+                              <span>NSTP</span>
+                              <small>National Service Training Program</small>
+                          </label>
+                      </div>
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_clinic" value="3" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_clinic">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                                  <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                                  <line x1="6" y1="1" x2="6" y2="4"></line>
+                                  <line x1="10" y1="1" x2="10" y2="4"></line>
+                                  <line x1="14" y1="1" x2="14" y2="4"></line>
+                              </svg>
+                              <span>Clinic</span>
+                              <small>Medical services</small>
+                          </label>
+                      </div>
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_alumni" value="4" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_alumni">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                  <circle cx="8.5" cy="7" r="4"></circle>
+                                  <path d="M18 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path>
+                                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                              </svg>
+                              <span>Alumni</span>
+                              <small>Alumni Content</small>
+                          </label>
+                      </div>
+                  </div>
+
+                  <div class="role-options-column">
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_scholarship" value="5" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_scholarship">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M12 3v18"></path>
+                                  <path d="M8 15l-4 4 4 4"></path>
+                                  <path d="M16 15l4 4-4 4"></path>
+                                  <path d="M18 6A6 6 0 0 0 6 6"></path>
+                              </svg>
+                              <span>Scholarship</span>
+                              <small>Scholarship Content</small>
+                          </label>
+                      </div>
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_culture_and_arts" value="6" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_culture_and_arts">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+                                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                  <line x1="12" y1="19" x2="12" y2="22"></line>
+                              </svg>
+                              <span>Culture and Arts</span>
+                              <small>Culture and Arts Content</small>
+                          </label>
+                      </div>
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_sports" value="7" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_sports">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                              </svg>
+                              <span>Sports Development</span>
+                              <small>Sports Content</small>
+                          </label>
+                      </div>
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_guidance_counseling" value="8" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_guidance_counseling">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <circle cx="12" cy="12" r="3"></circle>
+                                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                              </svg>
+                              <span>Guidance Counseling</span>
+                              <small>Guidance Counseling Content</small>
+                          </label>
+                      </div>
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_sws" value="9" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_sws">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                  <circle cx="9" cy="7" r="4"></circle>
+                                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                              </svg>
+                              <span>Student Welfare Services</span>
+                              <small>Student Welfare Services</small>
+                          </label>
+                      </div>
+                  </div>
+
+                  <div class="role-options-column">
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_sds" value="10" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_sds">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                  <circle cx="9" cy="7" r="4"></circle>
+                                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                              </svg>
+                              <span>Student Development Services</span>
+                              <small>Student Development Services</small>
+                          </label>
+                      </div>
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_misdeamenor" value="11" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_misdeamenor">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                  <path d="M12 8v4"></path>
+                                  <path d="M12 16h.01"></path>
+                              </svg>
+                              <span>Misdeamenor</span>
+                              <small>Student discipline and conduct</small>
+                          </label>
+                      </div>
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_admission" value="12" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_admission">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                  <circle cx="8.5" cy="7" r="4"></circle>
+                                  <polyline points="17 11 19 13 23 9"></polyline>
+                              </svg>
+                              <span>Admission</span>
+                              <small>Student admissions processing</small>
+                          </label>
+                      </div>
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_job_placement" value="13" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_job_placement">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                              </svg>
+                              <span>Job Placement</span>
+                              <small>Career and job placement services</small>
+                          </label>
+                      </div>
+                      <div class="role-option">
+                          <input type="radio" name="user_type" id="edit_user_type_student" value="14" onchange="toggleEditUserTypeFields()">
+                          <label for="edit_user_type_student">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                              </svg>
+                              <span>Student</span>
+                              <small>Student Content</small>
+                          </label>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="form-main-layout">
+          <!-- Basic Information Section -->
+          <div class="basic-information-section">
+            <div class="user-details-column">
+              <!-- Account Status Toggle -->
+              <div class="form-group">
+                <label>Account Status</label>
+                <div class="toggle-container">
+                  <label class="toggle-switch">
+                    <input type="checkbox" name="is_active" id="edit_is_active" class="toggle-checkbox">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label" data-on="Active" data-off="Inactive"></span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Profile Picture Upload -->
+              <div class="form-group profile-picture-group">
+                <label>Profile Picture</label>
+                <div class="profile-picture-upload">
+                  <div class="preview-container" onclick="document.getElementById('editProfilePictureInput').click()">
+                    <img id="editProfilePicturePreview" src="#" alt="Profile picture preview" class="preview-image" style="display: none;">
+                    <div class="placeholder">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5.52 19c.64-2.2 1.84-3 3.22-3h6.52c1.38 0 2.58.8 3.22 3"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                        <circle cx="12" cy="12" r="10"></circle>
+                      </svg>
+                      <span>Click to upload image</span>
+                    </div>
+                  </div>
+                  <input type="file" name="profile_picture" id="editProfilePictureInput" accept="image/*" style="display: none;">
+                  <button type="button" class="btn-remove-image" onclick="removeEditProfilePicture()" style="display: none;">Remove Image</button>
+                </div>
+                <input type="hidden" name="profile_picture-clear" id="editProfilePictureClear" value="false">
+              </div>
+
+              <!-- Personal Information - Context changes based on role -->
+              <div id="editPersonalInfoSection">
+                <div class="form-section-header">
+                  <h3 id="editPersonalInfoTitle">Personal Information</h3>
+                  <p id="editPersonalInfoDescription">Basic personal details</p>
+                </div>
+
+                <!-- Name Row -->
+                <div class="form-row">
+                  <div class="form-group form-group-half">
+                    <label for="edit_first_name" id="editFirstNameLabel">First Name <span class="required-asterisk">*</span></label>
+                    <input type="text" name="first_name" id="edit_first_name" class="form-input" required placeholder="Enter first name">
+                  </div>
+                  <div class="form-group form-group-half">
+                    <label for="edit_last_name" id="editLastNameLabel">Last Name <span class="required-asterisk">*</span></label>
+                    <input type="text" name="last_name" id="edit_last_name" class="form-input" required placeholder="Enter last name">
+                  </div>
+                </div>
+
+                <!-- Account Info Row -->
+                <div class="form-row">
+                  <div class="form-group form-group-half">
+                    <label for="edit_email">Email <span class="required-asterisk">*</span></label>
+                    <input type="email" name="email" id="edit_email" class="form-input" required placeholder="user@example.com">
+                  </div>
+                  <div class="form-group form-group-half">
+                    <label for="edit_username">Username <span class="required-asterisk">*</span></label>
+                    <input type="text" name="username" id="edit_username" class="form-input" required placeholder="Choose username">
+                  </div>
+                </div>
+
+                <!-- Password Row -->
+                <div class="form-row">
+                  <div class="form-group form-group-half">
+                    <label for="edit_password1">New Password</label>
+                    <input type="password" name="password1" id="edit_password1" class="form-input" placeholder="Leave blank to keep current">
+                    <div class="password-hint">Minimum 8 characters with letters and numbers</div>
+                  </div>
+                  <div class="form-group form-group-half">
+                    <label for="edit_password2">Confirm New Password</label>
+                    <input type="password" name="password2" id="edit_password2" class="form-input" placeholder="Re-enter new password">
+                  </div>
+                </div>
+
+                <!-- Personal Info Row -->
+                <div class="form-row">
+                  <div class="form-group form-group-half">
+                    <label for="edit_gender">Gender</label>
+                    <select name="gender" id="edit_gender" class="form-input">
+                      <option value="">Select Gender</option>
+                      <option value="M">Male</option>
+                      <option value="F">Female</option>
+                      <option value="O">Other</option>
+                      <option value="N">Prefer not to say</option>
+                    </select>
+                  </div>
+                  <div class="form-group form-group-half">
+                    <label for="edit_birth_date">Birth Date</label>
+                    <input type="date" name="birth_date" id="edit_birth_date" class="form-input">
+                  </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="form-group">
+                  <label for="edit_phone_number">Phone Number</label>
+                  <input type="tel" name="phone_number" id="edit_phone_number" class="form-input" placeholder="Enter phone number">
+                </div>
+
+                <div class="form-group">
+                  <label for="edit_address">Address</label>
+                  <textarea name="address" id="edit_address" class="form-input" rows="3" placeholder="Enter address"></textarea>
+                </div>
+              </div>
+
+              <!-- Student Specific Fields -->
+              <div id="editStudentFields" style="display: none;">
+                <div class="form-section-header">
+                  <h3>Student Information</h3>
+                  <p>Additional details required for student accounts</p>
+                </div>
+                <div class="form-row">
+                  <div class="form-group form-group-half">
+                    <label for="edit_student_number">Student Number</label>
+                    <input type="text" name="student_number" id="edit_student_number" class="form-input" placeholder="Enter student number">
+                  </div>
+                  <div class="form-group form-group-half">
+                    <label for="edit_course">Course</label>
+                    <select name="course" id="edit_course" class="form-input">
+                      <option value="">Select Course</option>
+                      <!-- Options will be populated by JavaScript -->
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group form-group-half">
+                    <label for="edit_year_level">Year Level</label>
+                    <input type="text" name="year_level" id="edit_year_level" class="form-input" placeholder="Enter year level">
+                  </div>
+                  <div class="form-group form-group-half">
+                    <label for="edit_section">Section</label>
+                    <input type="text" name="section" id="edit_section" class="form-input" placeholder="Enter section">
+                  </div>
+                </div>
+              </div>
+
+              <!-- OSAS Staff Specific Fields -->
+              <div id="editOsasFields" style="display: none;">
+                <div class="form-section-header">
+                  <h3>Staff Information</h3>
+                  <p>Additional details required for staff accounts</p>
+                </div>
+                <div class="form-row">
+                  <div class="form-group form-group-half">
+                    <label for="edit_department">Department</label>
+                    <input type="text" name="department" id="edit_department" class="form-input" placeholder="Enter department">
+                  </div>
+                  <div class="form-group form-group-half">
+                    <label for="edit_osas_position">Position</label>
+                    <select name="osas_position" id="edit_osas_position" class="form-input">
+                      <option value="">Select Position (Optional)</option>
+                      <option value="campus_admin">Campus Administrator</option>
+                      <option value="osas_head">OSAS Head</option>
+                      <option value="sws_head">Student Welfare Services Head</option>
+                      <option value="sds_head">Student Development Head</option>
+                      <option value="isps_head">Institutional Programs Head</option>
+                      <option value="admission_head">Admission Head</option>
+                      <option value="guidance_head">Guidance Head</option>
+                      <option value="job_placement_head">Job Placement Head</option>
+                      <option value="misdeamenor_head">Misdeamenor Head</option>
+                      <option value="csg_president">CSG President</option>
+                      <option value="sports_dev_head">Sports Development Head</option>
+                      <option value="culture_arts_head">Culture and Arts Head</option>
+                      <option value="nstp_head">NSTP Head</option>
+                      <option value="scholarship_head">Scholarship Head</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ID Photo Upload -->
+              <div class="form-group">
+                <label for="edit_id_photo">ID Photo (Optional)</label>
+                <div class="upload-card" onclick="document.getElementById('edit_id_photo').click()">
+                  <div class="upload-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                      <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                  </div>
+                  <div class="upload-title">Upload ID Photo</div>
+                  <div class="upload-description">JPG, PNG or PDF (Max 5MB)</div>
+                  <button type="button" class="upload-btn">Select File</button>
+                  <input type="file" name="id_photo" id="edit_id_photo" class="form-input" accept="image/*,.pdf" style="display: none;">
+                </div>
+
+                <!-- Preview Container -->
+                <div id="edit_id_photo_preview" class="preview-section">
+                  <div class="preview-title">Selected file:</div>
+                  <div class="preview-content">
+                    <img id="edit_id_photo_preview_img" class="preview-image" style="display: none;">
+                    <div class="preview-details">
+                      <div class="preview-filename"></div>
+                      <div class="preview-filesize"></div>
+                    </div>
+                    <button type="button" class="remove-btn">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- COR Photo Upload -->
+              <div class="form-group">
+                <label for="edit_cor_photo">Certificate of Registration (COR)</label>
+                <div class="upload-card" onclick="document.getElementById('edit_cor_photo').click()">
+                  <div class="upload-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                  </div>
+                  <div class="upload-title">Upload COR</div>
+                  <div class="upload-description">JPG, PNG or PDF (Max 10MB)</div>
+                  <button type="button" class="upload-btn">Select File</button>
+                  <input type="file" name="cor_photo" id="edit_cor_photo" class="form-input" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                </div>
+
+                <!-- Preview Container -->
+                <div id="edit_cor_photo_preview" class="preview-section">
+                  <div class="preview-title">Selected file:</div>
+                  <div class="preview-content">
+                    <img id="edit_cor_photo_preview_img" class="preview-image" style="display: none;">
+                    <div class="preview-details">
+                      <div class="preview-filename"></div>
+                      <div class="preview-filesize"></div>
+                    </div>
+                    <button type="button" class="remove-btn">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Permissions Section -->
+          <div class="permissions-section">
+            <label>Permissions</label>
+            <div class="permissions-container">
+              {% for app_model, perms in grouped_permissions.items %}
+              <div class="permission-group">
+                <div class="group-header">{{ app_model }}</div>
+                <div class="permission-items">
+                  {% for perm in perms %}
+                  <label class="permission-item">
+                    <input type="checkbox" name="permissions" value="{{ perm.id }}">
+                    <span class="permission-name">{{ perm.name }}</span>
+                  </label>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">
+          <span class="btn-text">Update User</span>
+          <span class="btn-loader">
+            <svg viewBox="0 0 50 50">
+              <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

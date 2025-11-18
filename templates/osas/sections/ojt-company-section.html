@@ -1,0 +1,223 @@
+{% block ojt-company-content %}
+<div class="section-header">
+    <div class="header-content">
+        <div class="title-section">
+            <h2 class="section-heading">OJT Company Management</h2>
+            <div class="divider"></div>
+        </div>
+
+        <!-- OJT Company Statistics Section -->
+        <div class="user-statistics">
+            <div class="stat-card">
+                <div class="stat-icon total-users">
+                    <i class='bx bx-building'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ total_companies }}</h3>
+                    <p>Total Companies</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon archived">
+                    <i class='bx bx-archive'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ archived_companies }}</h3>
+                    <p>Archived Companies</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon verified">
+                    <i class='bx bx-check-circle'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ available_for_ojt }}</h3>
+                    <p>Available for OJT</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon unverified">
+                    <i class='bx bx-x-circle'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ not_available_for_ojt }}</h3>
+                    <p>Not Available</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="company-search" placeholder="Search companies..." class="search-input" value="{{ request.GET.search|default:'' }}">
+            </div>
+
+            <!-- Availability Filter -->
+            <div class="status-sort">
+                <select id="availability-filter" class="styled-select">
+                    <option value="">All Companies</option>
+                    <option value="available">All Available</option>
+                    <option value="not_available">All Non Available</option>
+                    <option value="archived">Archived</option>
+                </select>
+            </div>
+
+            <!-- Student Count Filter -->
+            <div class="status-sort">
+                <select id="student-count-filter" class="styled-select">
+                    <option value="">All Student Counts</option>
+                    <option value="0">No Students</option>
+                    <option value="1-5">1-5 Students</option>
+                    <option value="6-10">6-10 Students</option>
+                    <option value="11+">11+ Students</option>
+                </select>
+            </div>
+
+            <!-- Sort Order -->
+            <div class="verified-sort">
+                <select id="sort-order" class="styled-select">
+                    <option value="name_asc">Sort: Name A-Z</option>
+                    <option value="name_desc">Sort: Name Z-A</option>
+                    <option value="available_asc">Sort: Available Slots (Low to High)</option>
+                    <option value="available_desc">Sort: Available Slots (High to Low)</option>
+                    <option value="students_asc">Sort: Students (Low to High)</option>
+                    <option value="students_desc">Sort: Students (High to Low)</option>
+                </select>
+            </div>
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+            <button class="primary-btn" onclick="openCompanyCreateModal()"><i class="ri-add-line"></i> Add Company</button>
+            <button class="primary-btn" id="export-company-btn" data-export-url="{% url 'export-ojt-companies' %}">
+                <i class='bx bx-export'></i> Export Data
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Initial server-rendered table for first load -->
+<table class="data-table" id="companies-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Company Name</th>
+            <th>Address</th>
+            <th>Contact Number</th>
+            <th>Available Slots</th>
+            <th>Student Count</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="companies-tbody">
+        {% if ojt_companies %}
+            {% for company in ojt_companies %}
+            <tr>
+                <td>{{ company.id }}</td>
+                <td>{{ company.name }}</td>
+                <td>{{ company.address|truncatewords:10 }}</td>
+                <td>{{ company.contact_number }}</td>
+                <td>
+                    <div class="slot-indicator">
+                        <span class="slot-count">{{ company.remaining_slots }}/{{ company.available_slots }}</span>
+                        <div class="slot-progress">
+                            <div class="slot-progress-bar" style="width: {{ company.utilization_rate }}%"></div>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ company.filled_slots }}</td>
+                <td>
+                    <span class="status-badge status-{{ company.status|lower }}">{{ company.status }}</span>
+                </td>
+                <td class="action-buttons">
+                    <!-- View button - always visible for all users -->
+                    <button class="btn-action view-btn" onclick="openCompanyViewModal({{ company.id }})" title="View">
+                        <i class='bx bx-show'></i>
+                    </button>
+
+                    <!-- Edit button - only for user type 1 and 13 -->
+                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                    <button class="btn-action edit-btn" onclick="openCompanyEditModal({{ company.id }})" title="Edit">
+                        <i class='bx bx-edit'></i>
+                    </button>
+                    {% endif %}
+
+                    <!-- Archive button - only for user type 1 and 13 -->
+                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                    <button class="btn-action archive-btn" onclick="openCompanyArchiveModal({{ company.id }})" title="Archive">
+                        <i class='bx bx-archive'></i>
+                    </button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr id="no-data-row">
+                <td colspan="8" style="text-align: center; padding: 20px; font-style: italic; color: #888;">
+                    No companies found
+                </td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<!-- Pagination Container -->
+<div class="pagination-container" id="company-pagination-container">
+    {% if ojt_companies.has_other_pages %}
+    <div class="pagination-info">
+        Showing {{ ojt_companies.start_index }} to {{ ojt_companies.end_index }} of {{ ojt_companies.paginator.count }} entries
+    </div>
+    <div class="pagination-controls">
+        {% if ojt_companies.has_previous %}
+            <a href="?company_page=1" class="pagination-btn first-page" title="First Page">
+                <i class='bx bx-chevrons-left'></i>
+            </a>
+            <a href="?company_page={{ ojt_companies.previous_page_number }}" class="pagination-btn prev-page" title="Previous Page">
+                <i class='bx bx-chevron-left'></i>
+            </a>
+        {% else %}
+            <span class="pagination-btn first-page disabled" title="First Page">
+                <i class='bx bx-chevrons-left'></i>
+            </span>
+            <span class="pagination-btn prev-page disabled" title="Previous Page">
+                <i class='bx bx-chevron-left'></i>
+            </span>
+        {% endif %}
+
+        <div class="page-numbers">
+            {% for num in ojt_companies.paginator.page_range %}
+                {% if ojt_companies.number == num %}
+                    <span class="pagination-btn current-page active">{{ num }}</span>
+                {% elif num > ojt_companies.number|add:'-3' and num < ojt_companies.number|add:'3' %}
+                    <a href="?company_page={{ num }}" class="pagination-btn page-number">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if ojt_companies.has_next %}
+            <a href="?company_page={{ ojt_companies.next_page_number }}" class="pagination-btn next-page" title="Next Page">
+                <i class='bx bx-chevron-right'></i>
+            </a>
+            <a href="?company_page={{ ojt_companies.paginator.num_pages }}" class="pagination-btn last-page" title="Last Page">
+                <i class='bx bx-chevrons-right'></i>
+            </a>
+        {% else %}
+            <span class="pagination-btn next-page disabled" title="Next Page">
+                <i class='bx bx-chevron-right'></i>
+            </span>
+            <span class="pagination-btn last-page disabled" title="Last Page">
+                <i class='bx bx-chevrons-right'></i>
+            </span>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="pagination-info">
+        Showing {{ ojt_companies.paginator.count }} entries
+    </div>
+    {% endif %}
+</div>
+
+{% endblock ojt-company-content %}

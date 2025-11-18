@@ -1,0 +1,94 @@
+<div id="exportAdmissionModal" class="modal">
+    <div class="export-modal-container">
+        <div class="export-modal-header">
+            <h3 class="export-modal-title">Export Admission Applications</h3>
+            <button type="button" class="export-modal-close">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+        <div class="export-modal-body">
+            <form id="exportAdmissionForm" method="post" action="{% url 'export_admissions' %}">
+                {% csrf_token %}
+                <div class="export-form-group">
+                    <label class="export-form-label">Export Options</label>
+                    <div class="export-radio-group">
+                        <label class="export-radio-label">
+                            <input type="radio" name="export_option" value="all" checked>
+                            <span class="export-radio-custom"></span>
+                            All Applications
+                        </label>
+                        <label class="export-radio-label">
+                            <input type="radio" name="export_option" value="filtered">
+                            <span class="export-radio-custom"></span>
+                            Filtered Data (Current View)
+                        </label>
+                        <label class="export-radio-label">
+                            <input type="radio" name="export_option" value="custom">
+                            <span class="export-radio-custom"></span>
+                            Custom Selection
+                        </label>
+                    </div>
+                </div>
+
+                <div id="customAdmissionOptions" class="export-form-group" style="display: none;">
+                    <div class="export-form-row">
+                        <div class="export-form-col">
+                            <label class="export-form-label">Student Type</label>
+                            <select name="student_type" class="export-form-select">
+                                <option value="">All Types</option>
+                                <option value="current_grade12">Current Grade 12</option>
+                                <option value="shs_graduate">SHS Graduate</option>
+                                <option value="transferee">Transferee</option>
+                            </select>
+                        </div>
+                        <div class="export-form-col">
+                            <label class="export-form-label">Status</label>
+                            <select name="status" class="export-form-select">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="incomplete">Incomplete Requirements</option>
+                                <option value="complete">Complete Requirements</option>
+                                <option value="done">Done Exam</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="export-form-group">
+                    <label class="export-form-label">Date Range (Optional)</label>
+                    <div class="export-form-row">
+                        <div class="export-form-col">
+                            <input type="date" name="start_date" class="export-form-input" placeholder="Start Date">
+                        </div>
+                        <div class="export-form-col">
+                            <input type="date" name="end_date" class="export-form-input" placeholder="End Date">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="export-form-group">
+                    <label class="export-form-label">File Format</label>
+                    <div class="export-radio-group">
+                        <label class="export-radio-label">
+                            <input type="radio" name="format" value="excel" checked>
+                            <span class="export-radio-custom"></span>
+                            Excel (.xlsx)
+                        </label>
+                        <label class="export-radio-label">
+                            <input type="radio" name="format" value="csv">
+                            <span class="export-radio-custom"></span>
+                            CSV (.csv)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="export-modal-footer">
+                    <button type="button" class="export-secondary-btn" id="cancelAdmissionExport">Cancel</button>
+                    <button type="button" class="export-primary-btn" id="confirmAdmissionExport">
+                        <i class='bx bx-download'></i> Export
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

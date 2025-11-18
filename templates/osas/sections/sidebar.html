@@ -1,0 +1,193 @@
+{% load static %}
+{% block sidebar-content %}
+<div class="left">
+    <a href="#" class="profile" onclick="showSection('profile')">
+         <div class="profile-photo">
+            {% if request.user.user_type == 15 %}
+                {# Organization user - use organization logo #}
+                {% if request.user.organization.organization_logo %}
+                    <img src="{{ request.user.organization.organization_logo.url }}" alt="Organization Logo" class="logo">
+                {% else %}
+                    <img src="{% static 'images/cvsu_logo.png' %}" alt="Default Organization Logo" class="logo">
+                {% endif %}
+            {% else %}
+                {# Regular user - use profile picture #}
+                {% if user.profile_picture and user.profile_picture.url != '/media/default.png' %}
+                    <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="logo">
+                {% else %}
+                    <img src="{% static 'images/cvsu-logo.png' %}" alt="Default Profile" class="logo">
+                {% endif %}
+            {% endif %}
+         </div>
+        <div class="handle">
+            <h4>
+                {% if request.user.user_type == 15 %}
+                    {{ request.user.organization.organization_name }}
+                {% else %}
+                    {{ user.first_name }} {{ user.last_name }}
+                {% endif %}
+            </h4>
+            <p class="text-muted">
+                {% if request.user.user_type == 15 %}
+                    Organization
+                {% else %}
+                    {{ user.get_user_type_display }}
+                {% endif %}
+            </p>
+        </div>
+    </a>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <!-- Dashboard Section -->
+        <div class="nav-section">
+            <div class="nav-label">Dashboard</div>
+            <a href="#" class="menu-item" onclick="showSection('home')">
+                <span><i class="ri-megaphone-fill"></i></span>
+                <h3>News Feed</h3>
+            </a>
+
+            {% if user_type != "Student" and request.user.user_type != 14 and request.user.user_type != 15 %}
+                <a href="#" class="menu-item" onclick="showSection('about')">
+                    <span><i class='bx bx-info-circle'></i></span>
+                    <h3>Pages</h3>
+                </a>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 %}
+                <a href="#" class="menu-item" onclick="showSection('dashboard')">
+                    <span><i class='bx bxs-data'></i></span>
+                    <h3>Activity Log</h3>
+                </a>
+            {% endif %}
+
+        </div>
+
+        <!-- Management Section for Super User -->
+        <div class="nav-section">
+            <div class="nav-label">Management</div>
+            {% if perms.osas.view_customuser %}
+            <a href="#" class="menu-item" onclick="showSection('user-management')">
+                <span><i class='bx bx-user'></i></span>
+                <h3>Users</h3>
+            </a>
+            {% endif %}
+            {% if perms.osas.view_downloadable %}
+            <a href="#" class="menu-item" onclick="showSection('downloadables')">
+                <span><i class='bx bxs-file'></i></span>
+                <h3>Templates</h3>
+            </a>
+            {% endif %}
+
+            {% if perms.osas.view_studentadmission %}
+            <a href="#" class="menu-item" onclick="showSection('admission-applications')">
+                <span><i class='bx bx-id-card'></i></span>
+                <h3>Admission</h3>
+            </a>
+            {% endif %}
+
+            {% if perms.osas.view_complaint %}
+            <div class="menu-item dropdown-toggle" data-dropdown="complaint">
+              <span><i class='bx bxs-info-square'></i></span>
+              <h3>Complaint <i class='bx bx-chevron-down'></i></h3>
+            </div>
+            <div class="dropdown-items hidden" data-content="complaint">
+              <a href="#" class="menu-item" onclick="showSection('under-review')">Under Review</a>
+              <a href="#" class="menu-item" onclick="showSection('resolved')">Resolved</a>
+            </div>
+            {% endif %}
+
+            {% if request.user.user_type == 1 or request.user.user_type == 13 or request.user.user_type == 14 and request.user.year_level == '4' %}
+            <div class="menu-item dropdown-toggle" data-dropdown="ojt">
+              <span><i class='bx bxs-briefcase'></i></span>
+              <h3>OJT <i class='bx bx-chevron-down'></i></h3>
+            </div>
+            <div class="dropdown-items hidden" data-content="ojt">
+              <a href="#" class="menu-item" onclick="showSection('ojt-company')">OJT Company</a>
+              <a href="#" class="menu-item" onclick="showSection('ojt-records')">OJT Records</a>
+              <a href="#" class="menu-item" onclick="showSection('ojt-reports')">OJT Reports</a>
+            </div>
+            {% endif %}
+
+            {% if request.user.user_type == 1 or request.user.user_type == 2 or request.user.user_type == 14%}
+            <div class="menu-item dropdown-toggle" data-dropdown="nstp">
+              <span><i class='bx bxs-flag'></i></span>
+              <h3>NSTP <i class='bx bx-chevron-down'></i></h3>
+            </div>
+            <div class="dropdown-items hidden" data-content="nstp">
+              <a href="#" class="menu-item" onclick="showSection('nstp-enlistment')">Enlistment</a>
+              {% if request.user.user_type == 1 or request.user.user_type == 2 %}
+              <a href="#" class="menu-item" onclick="showSection('nstp-files')">Files</a>
+              {% endif %}
+            </div>
+            {% endif %}
+
+            {% if request.user.user_type == 1 or request.user.user_type == 14 or request.user.user_type == 5%}
+            <div class="menu-item dropdown-toggle" data-dropdown="scholarship">
+              <span><i class='bx bx-bookmark-alt'></i></span>
+              <h3>Scholarships <i class='bx bx-chevron-down'></i></h3>
+            </div>
+            <div class="dropdown-items hidden" data-content="scholarship">
+              {% if perms.osas.view_scholarship %}
+              <a href="#" class="menu-item" onclick="showSection('scholarships')">
+                All Scholarships
+              </a>
+              {% endif %}
+              {% if perms.osas.view_scholarshipapplication %}
+              <a href="#" class="menu-item" onclick="showSection('scholarship-applications')">
+                Applications
+              </a>
+              {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Organization Dropdown Section -->
+            {% if perms.osas.view_organization or request.user.is_superuser  or request.user.user_type == 10 or request.user.user_type == 15 %}
+            <div class="menu-item dropdown-toggle" data-dropdown="organization">
+                <span><i class='bx bxs-group'></i></span>
+                <h3>Organization <i class='bx bx-chevron-down'></i></h3>
+            </div>
+            <div class="dropdown-items hidden" data-content="organization">
+                <a href="#" class="menu-item" onclick="showSection('organization-management')">
+                    Organization Management
+                </a>
+                <a href="#" class="menu-item" onclick="showSection('organization-certificates')">
+                    Certificates
+                </a>
+                <a href="#" class="menu-item" onclick="showSection('organization-accomplishment-reports')">
+                    Accomplishment Report
+                </a>
+            </div>
+            {% endif %}
+
+            {% if perms.osas.view_announcement %}
+            <a href="#" class="menu-item" onclick="showSection('announcements')">
+                <span><i class='bx bxs-megaphone'></i></span>
+                <h3>Announcements</h3>
+            </a>
+            {% endif %}
+
+            <a href="#" class="menu-item" onclick="showSection('archived')">
+                <span><i class='bx bxs-archive'></i></span>
+                <h3>Archived Data</h3>
+            </a>
+        </div>
+
+        <!-- Account Section -->
+        <div class="nav-section">
+            <div class="nav-label">Account</div>
+            {% if request.user.user_type != 15 %}
+            <a href="#" class="menu-item" onclick="showSection('profile')">
+                <span><i class='bx bxs-user-account'></i></span>
+                <h3>Profile</h3>
+            </a>
+            {% endif %}
+            <a href="#" class="menu-item" onclick="openLogoutModal()">
+                <span><i class='bx bx-log-out'></i></span>
+                <h3>Logout</h3>
+            </a>
+        </div>
+    </div>
+</div>
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+{% endblock sidebar-content %}

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Development Services - Organization</title>
+    <link rel="stylesheet" href="{% static 'css/core/sdsorganization.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="sds-body">
+
+    {% include 'core/navbar.html' %}
+
+    <!-- Hero Section -->
+    <section class="sds-hero">
+        <div class="sds-container">
+            <div class="sds-hero-content">
+                <div class="sds-hero-badge">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>{{ sds_content.hero_badge_text }}</span>
+                </div>
+                <h1 class="sds-hero-title">{{ sds_content.hero_title }}</h1>
+                <p class="sds-hero-subtitle">{{ sds_content.hero_subtitle }}</p>
+                <div class="sds-hero-actions">
+                    <a href="#organizations" class="sds-btn sds-btn-primary">
+                        <span>Explore Organizations</span>
+                        <i class="fas fa-arrow-down"></i>
+                    </a>
+                    <a href="#about" class="sds-btn sds-btn-secondary">
+                        <span>Learn More</span>
+                        <i class="fas fa-info-circle"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="sds-scroll-indicator">
+            <div class="sds-scroll-arrow"></div>
+        </div>
+    </section>
+
+    <!-- Overview Section -->
+    <section class="sds-overview" id="about">
+        <div class="sds-container">
+            <div class="sds-section-header">
+                <h2 class="sds-section-title">Quick Overview</h2>
+                <p class="sds-section-subtitle">{{ sds_content.section_subtitle }}</p>
+            </div>
+            <div class="sds-overview-content">
+                <div class="sds-overview-text">
+                    <div class="sds-text-block">
+                        <h3>{{ sds_content.mission_title }}</h3>
+                        <p>{{ sds_content.mission_content }}</p>
+                    </div>
+                    <div class="sds-text-block">
+                        <h3>{{ sds_content.what_we_do_title }}</h3>
+                        <p>{{ sds_content.what_we_do_content }}</p>
+                    </div>
+                    <div class="sds-features-list">
+                        {% for feature in sds_content.features %}
+                        <div class="sds-feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>{{ feature.text }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="sds-overview-visual">
+                    <div class="sds-stats-grid">
+                        <!-- Student Organizations Count -->
+                        <div class="sds-stat-card">
+                            <div class="sds-stat-icon">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <div class="sds-stat-content">
+                                <h3 data-count="{{ student_org_count }}">0</h3>
+                                <p>Student Organizations</p>
+                            </div>
+                        </div>
+                        <!-- Sociocultural Organizations Count -->
+                        <div class="sds-stat-card">
+                            <div class="sds-stat-icon">
+                                <i class="fas fa-globe-americas"></i>
+                            </div>
+                            <div class="sds-stat-content">
+                                <h3 data-count="{{ sociocultural_org_count }}">0</h3>
+                                <p>Sociocultural Organizations</p>
+                            </div>
+                        </div>
+                        <!-- Total Members Count -->
+                        <div class="sds-stat-card">
+                            <div class="sds-stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="sds-stat-content">
+                                <h3 data-count="{{ total_members }}">0</h3>
+                                <p>Total Members</p>
+                            </div>
+                        </div>
+                        <!-- Active Certificates Count -->
+                        <div class="sds-stat-card">
+                            <div class="sds-stat-icon">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <div class="sds-stat-content">
+                                <h3 data-count="{{ total_active_certificates }}">0</h3>
+                                <p>Active Certificates</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Organizations Section -->
+    <section class="sds-organizations" id="organizations">
+        <div class="sds-container">
+            <div class="sds-section-header">
+                <h2 class="sds-section-title">Student Organizations</h2>
+                <p class="sds-section-subtitle">{{ sds_content.section_subtitle }}</p>
+            </div>
+
+            <div class="sds-org-filter">
+                <button class="sds-filter-btn active" data-filter="all">All Organizations</button>
+                <button class="sds-filter-btn" data-filter="student">Student</button>
+                <button class="sds-filter-btn" data-filter="sociocultural">Sociocultural</button>
+            </div>
+
+            <div class="sds-org-grid">
+                {% for organization in organizations %}
+                <div class="sds-org-card" data-category="{{ organization.organization_type }}">
+                    <div class="sds-org-card-inner">
+                        <div class="sds-org-logo">
+                            {% if organization.organization_logo %}
+                                <img src="{{ organization.organization_logo.url }}" alt="{{ organization.organization_name }} Logo">
+                            {% else %}
+                                <img src="https://via.placeholder.com/120x120/003366/ffffff?text={{ organization.organization_acronym|slice:':2'|upper }}" alt="{{ organization.organization_name }} Logo">
+                            {% endif %}
+                            <div class="sds-org-badge">
+                                {{ organization.get_organization_type_display }}
+                            </div>
+                            <!-- Member Count Badge -->
+                            <div class="sds-member-badge">
+                                <i class="fas fa-users"></i>
+                                {{ organization.organization_member_count }}
+                            </div>
+                        </div>
+                        <div class="sds-org-content">
+                            <h3>{{ organization.organization_name }}</h3>
+                            <p>{{ organization.organization_description|truncatewords:20 }}</p>
+                            <div class="sds-org-meta">
+                                <span class="sds-meta-item">
+                                    <i class="fas fa-users"></i>
+                                    {{ organization.organization_member_count }} Members
+                                </span>
+                                <span class="sds-meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    Since {{ organization.organization_valid_from.year }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="sds-org-actions">
+                            <a href="{% url 'organization_detail' organization.id %}" class="sds-btn sds-view-btn">
+                                <span>View Details</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="sds-no-organizations">
+                    <i class="fas fa-users fa-3x"></i>
+                    <h3>No Organizations Available</h3>
+                    <p>Check back later for active student organizations.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if paginator.num_pages > 1 %}
+            <div class="sds-pagination-container">
+                <div class="sds-pagination">
+                    {% if organizations.has_previous %}
+                        <a href="?page=1" class="sds-pagination-btn sds-pagination-first">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="?page={{ organizations.previous_page_number }}" class="sds-pagination-btn sds-pagination-prev">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    {% endif %}
+
+                    <div class="sds-pagination-pages">
+                        {% for num in organizations.paginator.page_range %}
+                            {% if organizations.number == num %}
+                                <span class="sds-pagination-btn sds-pagination-active">{{ num }}</span>
+                            {% elif num > organizations.number|add:'-3' and num < organizations.number|add:'3' %}
+                                <a href="?page={{ num }}" class="sds-pagination-btn">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    {% if organizations.has_next %}
+                        <a href="?page={{ organizations.next_page_number }}" class="sds-pagination-btn sds-pagination-next">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="?page={{ organizations.paginator.num_pages }}" class="sds-pagination-btn sds-pagination-last">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="sds-pagination-info">
+                    Showing organizations {{ organizations.start_index }} - {{ organizations.end_index }} of {{ paginator.count }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- FAQs Section -->
+    <section class="sds-faqs" id="faqs">
+        <div class="sds-container">
+            <div class="sds-section-header">
+                <h2 class="sds-section-title">Frequently Asked Questions</h2>
+                <p class="sds-section-subtitle">Find answers to common questions about Student Development Services</p>
+            </div>
+            <div class="sds-faq-container">
+                {% for faq in sds_content.faqs %}
+                <div class="sds-faq-item">
+                    <div class="sds-faq-question">
+                        <div class="sds-question-content">
+                            <h3>{{ faq.question }}</h3>
+                            {% if faq.subtitle %}
+                            <p>{{ faq.subtitle }}</p>
+                            {% endif %}
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="sds-faq-answer">
+                        <p>{{ faq.answer }}</p>
+
+                        {% if faq.tips %}
+                        <div class="sds-answer-tips">
+                            <strong>Quick Tips:</strong>
+                            <ul>
+                                {% for tip in faq.tips %}
+                                <li>{{ tip }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        {% if faq.benefits %}
+                        <div class="sds-benefits-grid">
+                            {% for benefit in faq.benefits %}
+                            <div class="sds-benefit-item">
+                                <i class="{{ benefit.icon }}"></i>
+                                <span>{{ benefit.text }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if faq.steps %}
+                        <div class="sds-process-steps">
+                            {% for step in faq.steps %}
+                            <div class="sds-step">
+                                <span class="sds-step-number">{{ forloop.counter }}</span>
+                                <span class="sds-step-text">{{ step.text }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if faq.fee_info %}
+                        <div class="sds-fee-info">
+                            <div class="sds-fee-type">
+                                <h4>{{ faq.fee_info.title }}</h4>
+                                <ul>
+                                    {% for fee in faq.fee_info.fees %}
+                                    <li>{{ fee }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% if faq.fee_info.financial_aid %}
+                            <div class="sds-financial-aid">
+                                <h4>{{ faq.fee_info.financial_aid.title }}</h4>
+                                <p>{{ faq.fee_info.financial_aid.content }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if faq.recommendation %}
+                        <div class="sds-recommendation">
+                            <i class="fas fa-lightbulb"></i>
+                            <p><strong>{{ faq.recommendation.title }}:</strong> {{ faq.recommendation.content }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="sds-cta-section">
+        <div class="sds-container">
+            <div class="sds-cta-content">
+                <h2>{{ sds_content.cta_title }}</h2>
+                <p>{{ sds_content.cta_content }}</p>
+                <div class="sds-cta-actions">
+                    <a href="#organizations" class="sds-btn sds-btn-primary">
+                        <span>Browse Organizations</span>
+                        <i class="fas fa-search"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include 'core/footer.html' %}
+
+    <script src="{% static 'js/core/sdsorganization.js' %}"></script>
+
+</body>
+</html>

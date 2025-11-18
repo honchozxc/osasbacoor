@@ -1,0 +1,245 @@
+{% block edit-admission %}
+<div id="admissionEditModal" class="modal">
+    <div class="modal-overlay" onclick="closeAdmissionEditModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Edit Admission Application</h2>
+                <p class="header-description">Update all admission application details</p>
+            </div>
+            <button class="modal-close" onclick="closeAdmissionEditModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="admissionEditForm" method="post" action="" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="admission_id" id="editAdmissionId">
+
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"></path>
+                        <path d="M7 7h.01"></path>
+                    </svg>
+                    <p>Update all admission application information below. Fields marked with <span class="required-asterisk">*</span> are required.</p>
+                </div>
+
+                <div id="admissionEditFormResponse" class="form-response"></div>
+
+                <div class="form-section">
+                    <div class="section-header">
+                        <h3>Student Information</h3>
+                        <div class="divider"></div>
+                    </div>
+                    <div class="form-columns">
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label>First Name</label>
+                                <input type="text" id="editAdmissionFirstName" class="form-input" readonly>
+                            </div>
+                        </div>
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label>Last Name</label>
+                                <input type="text" id="editAdmissionLastName" class="form-input" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-columns">
+                    <!-- Left Column - Basic Information -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="editAdmissionControlNo">Control Number <span class="required-asterisk">*</span></label>
+                            <input type="text" name="control_no" id="editAdmissionControlNo" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editAdmissionStudentType">Student Type <span class="required-asterisk">*</span></label>
+                            <select name="student_type" id="editAdmissionStudentType" class="form-input" required>
+                                <option value="">Select student type</option>
+                                <option value="current_grade12">Current Grade 12 Student</option>
+                                <option value="shs_graduate">SHS Graduate</option>
+                                <option value="transferee">Transferee</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editAdmissionCourse">Course <span class="required-asterisk">*</span></label>
+                            <select name="course" id="editAdmissionCourse" class="form-input" required>
+                                <option value="">Select a course</option>
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editAdmissionStrand">Strand (if applicable)</label>
+                            <input type="text" name="strand" id="editAdmissionStrand" class="form-input">
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Status and Registration -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="editAdmissionStatus">Status <span class="required-asterisk">*</span></label>
+                            {% if request.user.user_type == 14 %}
+                                <!-- Organization users see a readonly status field -->
+                                <input type="text" id="editAdmissionStatusDisplay" class="form-input" readonly>
+                                <input type="hidden" name="status" id="editAdmissionStatus">
+                            {% else %}
+                                <!-- Other users see the normal dropdown -->
+                                <select name="status" id="editAdmissionStatus" class="form-input" required>
+                                    <option value="">Select status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="incomplete">Incomplete Requirements</option>
+                                    <option value="complete">Complete Requirements</option>
+                                    <option value="done">Done Exam</option>
+                                </select>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editAdmissionPortalRegistration">Portal Registration</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="admission_portal_registration" id="editAdmissionPortalRegistration" class="toggle-checkbox">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label-text">Completed</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editAdmissionDate">Application Date</label>
+                            <input type="date" name="date" id="editAdmissionDate" class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editAdmissionIsArchived">Archived Status</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="is_archived" id="editAdmissionIsArchived" class="toggle-checkbox">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label-text">Archived</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transferee Specific Fields (Conditional) -->
+                <div id="transfereeFields" class="form-section" style="display: none;">
+                    <div class="section-header">
+                        <h3>Transferee Information</h3>
+                        <div class="divider"></div>
+                    </div>
+
+                    <div class="form-columns">
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="editAdmissionCurriculumType">Curriculum Type</label>
+                                <select name="curriculum_type" id="editAdmissionCurriculumType" class="form-input">
+                                    <option value="">Select curriculum type</option>
+                                    <option value="new">New Curriculum (2019 up)</option>
+                                    <option value="old">Old Curriculum (2018 below)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label>Semester Completion Status</label>
+                                <div class="semester-status-grid">
+                                    <div class="semester-status-item">
+                                        <label>1st Year - 1st Semester</label>
+                                        <select name="first_year_first_semester" class="form-input">
+                                            <option value="">Select status</option>
+                                            <option value="not_finished">Not Finished</option>
+                                            <option value="finished">Finished</option>
+                                        </select>
+                                    </div>
+                                    <div class="semester-status-item">
+                                        <label>1st Year - 2nd Semester</label>
+                                        <select name="first_year_second_semester" class="form-input">
+                                            <option value="">Select status</option>
+                                            <option value="not_finished">Not Finished</option>
+                                            <option value="finished">Finished</option>
+                                        </select>
+                                    </div>
+                                    <div class="semester-status-item">
+                                        <label>2nd Year - 1st Semester</label>
+                                        <select name="second_year_first_semester" class="form-input">
+                                            <option value="">Select status</option>
+                                            <option value="not_finished">Not Finished</option>
+                                            <option value="finished">Finished</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editAdmissionOtherSemesterInfo">Other Semester Information</label>
+                        <textarea name="other_semester_info" id="editAdmissionOtherSemesterInfo" class="form-input" rows="2" placeholder="Enter other semester details if applicable"></textarea>
+                    </div>
+                </div>
+
+                <!-- Requirements Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h3>Requirements Management</h3>
+                        <div class="divider"></div>
+                    </div>
+
+                    <div id="requirementsContainer" class="requirements-container">
+                        <!-- Dynamic requirements will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="editAdmissionRemarks">Remarks</label>
+                    {% if request.user.user_type == 14 %}
+                        <textarea id="editAdmissionRemarksDisplay" class="form-input" rows="3" readonly placeholder="No remarks"></textarea>
+                        <input type="hidden" name="remarks" id="editAdmissionRemarks">
+                    {% else %}
+                        <textarea name="remarks" id="editAdmissionRemarks" class="form-input" rows="3" placeholder="Enter remarks (optional)"></textarea>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeAdmissionEditModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Update Application</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .semester-status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+    }
+
+    .semester-status-item {
+        margin-bottom: 8px;
+    }
+
+    .semester-status-item label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 13px;
+        color: var(--gray-600);
+    }
+</style>
+{% endblock edit-admission %}

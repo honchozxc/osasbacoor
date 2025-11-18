@@ -1,0 +1,171 @@
+{% block view-complaint %}
+<!-- View Complaint Modal -->
+<div id="viewComplaintModal" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Complaint Details</h2>
+                <p class="header-description">Reference #<span id="viewReferenceNumber"></span></p>
+            </div>
+            <button class="modal-close close-view-modal" aria-label="Close modal">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+
+        <div class="form-body" id="complaintDetailsContent">
+            <!-- Content will be loaded via AJAX -->
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn close-view-modal">
+                <span class="btn btn-cancel">Close</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Complaint Details Template (used by JavaScript) -->
+<template id="complaintDetailsTemplate">
+    <div class="complaint-details">
+        <div class="detail-section">
+            <div class="form-intro">
+                <i class='bx bx-info-circle'></i>
+                <p>Detailed view of complaint information</p>
+            </div>
+
+            <div class="detail-grid">
+                <div class="form-group">
+                    <label>Reference Number</label>
+                    <div class="form-input" id="complaintRefNumber"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <div class="form-input" id="complaintStatus"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h3 class="detail-heading">Complainant Information</h3>
+            <div class="detail-grid">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <div class="form-input" id="complainantName"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <div class="form-input" id="complainantEmail"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone</label>
+                    <div class="form-input" id="complainantPhone"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Address</label>
+                    <div class="form-input" id="complainantAddress"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h3 class="detail-heading">Respondent Information</h3>
+            <div class="detail-grid">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <div class="form-input" id="respondentName"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Type</label>
+                    <div class="form-input" id="respondentType"></div>
+                </div>
+
+                <div class="form-group" id="respondentCourseGroup">
+                    <label>Course</label>
+                    <div class="form-input" id="respondentCourse"></div>
+                </div>
+
+                <div class="form-group" id="respondentYearSectionGroup">
+                    <label>Year & Section</label>
+                    <div class="form-input" id="respondentYearSection"></div>
+                </div>
+
+                <div class="form-group" id="respondentDepartmentGroup">
+                    <label>Department</label>
+                    <div class="form-input" id="respondentDepartment"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h3 class="detail-heading">Complaint Details</h3>
+            <div class="detail-grid">
+                <div class="form-group">
+                    <label>Title</label>
+                    <div class="form-input" id="complaintTitle"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Incident Date</label>
+                    <div class="form-input" id="incidentDate"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Incident Time</label>
+                    <div class="form-input" id="incidentTime"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Location</label>
+                    <div class="form-input" id="incidentLocation"></div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Statement</label>
+                    <div class="form-input" id="complaintStatement" style="min-height: 100px;"></div>
+                </div>
+
+                <div class="form-group full-width" id="witnessesGroup">
+                    <label>Witnesses</label>
+                    <div class="form-input" id="complaintWitnesses"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section" id="resolutionDetailsSection">
+            <h3 class="detail-heading">Resolution Details</h3>
+            <div class="detail-grid">
+                <div class="form-group full-width">
+                    <label>Resolution Notes</label>
+                    <div class="form-input" id="resolutionNotes" style="min-height: 100px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Resolved At</label>
+                    <div class="form-input" id="resolvedAt"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section" id="supportingEvidenceSection">
+            <h3 class="detail-heading">Supporting Evidence</h3>
+            <div class="evidence-grid">
+                <div class="evidence-group" id="documentsGroup">
+                    <h4>Documents</h4>
+                    <div class="evidence-list" id="documentsList"></div>
+                </div>
+
+                <div class="evidence-group" id="imagesGroup">
+                    <h4>Images</h4>
+                    <div class="evidence-list" id="imagesList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock view-complaint %}

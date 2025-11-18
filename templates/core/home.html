@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | Office of Student Affairs and Services</title>
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link rel="stylesheet" href="{% static 'css/core/home.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    {% include 'core/navbar.html' %}
+    <div class="home-container">
+        <!-- University Header -->
+        <header class="university-header">
+            <div class="header-overlay"></div>
+            <div class="floating-shapes">
+                <div class="shape circle"></div>
+                <div class="shape triangle"></div>
+                <div class="shape square"></div>
+                <div class="shape triangletwo"></div>
+            </div>
+            <div class="header-content">
+                <div class="logo-container">
+                    {% if home_content.logo %}
+                    <img src="{{ home_content.logo.url }}" alt="{{ home_content.title }}" class="img-fluid mb-4" style="max-height: 100px;">
+                    {% endif %}
+                    <div class="logo-glow"></div>
+                    <div class="logo-particles"></div>
+                </div>
+                <div class="university-info" data-scroll="fadeIn">
+                    <div class="title-wrapper">
+                        <h1 class="university-name">{{ home_content.title }}</h1>
+                        <div class="title-underline"></div>
+                    </div>
+                    <p class="tagline">{{ home_content.tagline }}</p>
+
+                    <!-- Quick Stats -->
+                    <div class="stats-container" data-scroll="fadeIn">
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-number" data-count="{{ student_count }}">0</span>
+                                <span class="stat-label">Students</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-number" data-count="{{ courses_count }}">0</span>
+                                <span class="stat-label">Programs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Two-column layout for other sections -->
+            <div class="content-columns">
+                <!-- Left Column -->
+                <div class="content-left">
+                    <!-- Upcoming Events Section -->
+                    <section class="events-section" data-scroll="fadeIn">
+                        <h2 class="section-title">
+                            <i class="fas fa-calendar-alt"></i> Upcoming Events
+                            <a href="/all_announcements">View All</a>
+                        </h2>
+                        <div class="timeline">
+                            {% for event in upcoming_events %}
+                            <article class="timeline-item">
+                                <div class="timeline-date">
+                                    <span class="month">{{ event.event_date|date:"M" }}</span>
+                                    <span class="day">{{ event.event_date|date:"d" }}</span>
+                                </div>
+                                <div class="timeline-content">
+                                    <h3>{{ event.title }}</h3>
+                                    <p><i class="fas fa-map-marker-alt"></i> {{ event.location }}</p>
+                                    <div class="event-content">
+                                        {{ event.content|truncatewords_html:30|safe }}
+                                    </div>
+                                    <div class="event-meta">
+                                        <span class="event-time"><i class="far fa-clock"></i> {{ event.event_date|time }}</span>
+                                        <a href="{% url 'home_announcement_detail' event.id %}" class="event-link">View Details <i class="fas fa-chevron-right"></i></a>
+                                    </div>
+                                </div>
+                            </article>
+                            {% empty %}
+                            <div class="no-events">
+                                <i class="fas fa-calendar-plus"></i>
+                                <p>No upcoming events scheduled</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <!-- Latest Announcements Section -->
+                    <section class="announcements-section" data-scroll="fadeIn">
+                        <h2 class="section-title">
+                            <i class="fas fa-bullhorn"></i> Latest Announcements
+                            <a href="/all_announcements">View All</a>
+                        </h2>
+                        <div class="announcement-grid">
+                            {% for announcement in latest_announcements %}
+                            <article class="announcement-card">
+                                <div class="card-header">
+                                    <span class="category-badge {{ announcement.category|lower }}">{{ announcement.get_category_display }}</span>
+                                    <span class="post-time">{{ announcement.created_at|timesince }} ago</span>
+                                </div>
+                                {% if announcement.images.first %}
+                                <div class="announcement-image-container">
+                                    <div class="announcement-image" style="background-image: url('{{ announcement.images.first.image.url }}')"></div>
+                                </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <h3>{{ announcement.title }}</h3>
+                                    <div class="announcement-content">
+                                        {{ announcement.content|truncatewords_html:30|safe }}
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <span class="author"><i class="fas fa-user"></i> {{ announcement.author.get_full_name }}</span>
+                                    <a href="{% url 'home_announcement_detail' announcement.id %}" class="read-more">Read More <i class="fas fa-chevron-right"></i></a>
+                                </div>
+                            </article>
+                            {% endfor %}
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right Column (Sidebar) -->
+                <aside class="content-right" data-scroll="fadeInRight">
+                    <!-- Emergency Alert Section - Moved to Sidebar -->
+                    <section class="sidebar-section emergency-section">
+                        <h3 class="sidebar-title pulse">
+                            <i class="fas fa-exclamation-triangle"></i> Emergency Alerts
+                        </h3>
+                        <div class="alert-list">
+                            {% for announcement in emergency_announcements %}
+                            <article class="alert-item critical">
+                                <div class="alert-header">
+                                    <span class="alert-badge">URGENT</span>
+                                    <span class="alert-time">{{ announcement.created_at|timesince }} ago</span>
+                                </div>
+                                <h4 class="alert-title">{{ announcement.title }}</h4>
+                                <div class="alert-content">
+                                    {{ announcement.content|truncatewords_html:20|safe }}
+                                </div>
+                                <div class="alert-footer">
+                                    <a href="{% url 'home_announcement_detail' announcement.id %}" class="read-more">Read More <i class="fas fa-chevron-right"></i></a>
+                                </div>
+                            </article>
+                            {% empty %}
+                            <div class="no-alerts">
+                                <i class="fas fa-check-circle"></i>
+                                <p>No emergency announcements</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <!-- Quick Links Section -->
+                    <section class="sidebar-section quick-links">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-link"></i> Quick Links
+                        </h3>
+                        <ul>
+                            <li><a href="/clinic"><i class="fas fa-book"></i> Clinic</a></li>
+                            <li><a href="/scholarships"><i class="fas fa-file-alt"></i> Scholarship</a></li>
+                            <li><a href="/ojt"><i class="fas fa-calendar-check"></i> OJT Program</a></li>
+                            <li><a href="/sdsorganization"><i class="fa-solid fa-circle-info"></i> SDS Organization</a></li>
+                            <li><a href="/osas-org-chart"><i class="fa-solid fa-circle-info"></i>Organization Chart</a></li>
+                        </ul>
+                    </section>
+
+                    <!-- Class Suspension Section -->
+                    <section class="sidebar-section suspension-section">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-exclamation-circle"></i> Class Suspensions
+                        </h3>
+                        <div class="suspension-list">
+                            {% if suspension_notices %}
+                                {% for notice in suspension_notices %}
+                                <article class="suspension-item">
+                                    <div class="suspension-date">
+                                        <span class="date">{{ notice.suspension_date|date:"M d" }}</span>
+                                        {% if notice.until_suspension_date %}
+                                        <span class="to">to</span>
+                                        <span class="date">{{ notice.until_suspension_date|date:"M d" }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <h4>{{ notice.title }}</h4>
+                                    <div class="suspension-content">
+                                        {{ notice.content|truncatewords_html:15|safe }}
+                                    </div>
+                                    <a href="{% url 'home_announcement_detail' notice.id %}" class="read-more">Details <i class="fas fa-chevron-right"></i></a>
+                                </article>
+                                {% endfor %}
+                            {% else %}
+                                <div class="no-suspensions">
+                                    <i class="fas fa-check-circle"></i>
+                                    <p>No class suspensions announced</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </section>
+
+                    <!-- Enrollment Periods Section -->
+                    <section class="sidebar-section enrollment-section">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-user-graduate"></i> Enrollment Periods
+                        </h3>
+                        <div class="enrollment-list">
+                            {% if enrollment_periods %}
+                                {% for enrollment in enrollment_periods %}
+                                <article class="enrollment-item">
+                                    <div class="enrollment-dates">
+                                        <span class="start">{{ enrollment.enrollment_start|date:"M d" }}</span>
+                                        <span class="to">to</span>
+                                        <span class="end">{{ enrollment.enrollment_end|date:"M d" }}</span>
+                                    </div>
+                                    <h4>{{ enrollment.title }}</h4>
+                                    <div class="enrollment-content">
+                                        {{ enrollment.content|truncatewords_html:15|safe }}
+                                    </div>
+                                    <div class="courses">
+                                        {% for course in enrollment.get_unique_courses_display %}
+                                        <span class="course-badge">{{ course }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    <a href="{% url 'home_announcement_detail' enrollment.id %}" class="enrollment-link">View Details <i class="fas fa-chevron-right"></i></a>
+                                </article>
+                                {% endfor %}
+                            {% else %}
+                                <div class="no-enrollments">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <p>No active enrollment periods</p>
+                                    <small>Check back later for upcoming enrollment schedules</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </section>
+
+                    <!-- Office Hours Section -->
+                    <section class="sidebar-section office-hours">
+                        <h3 class="sidebar-title">
+                            <i class="far fa-clock"></i> Office Hours
+                        </h3>
+                        <div class="hours-list">
+                            <div class="hours-item">
+                                <span class="day">Monday - Friday</span>
+                                <span class="time">{{ home_content.weekdays_hours }}</span>
+                            </div>
+                            <div class="hours-item">
+                                <span class="day">Saturday</span>
+                                <span class="time">{{ home_content.saturday_hours }}</span>
+                            </div>
+                            <div class="hours-item">
+                                <span class="day">Sunday</span>
+                                <span class="time">{{ home_content.sunday_hours }}</span>
+                            </div>
+                        </div>
+                    </section>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    {% include 'core/footer.html' %}
+
+    <script src="{% static 'js/core/home.js' %}"></script>
+</body>
+</html>

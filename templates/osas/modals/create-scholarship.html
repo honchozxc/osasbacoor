@@ -1,0 +1,133 @@
+{% block create-scholarship %}
+<div id="scholarshipCreateModal" class="modal">
+    <div class="modal-overlay" onclick="closeScholarshipCreateModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Add New Scholarship</h2>
+                <p class="header-description">Create a new scholarship program</p>
+            </div>
+            <button class="modal-close" onclick="closeScholarshipCreateModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="scholarshipCreateForm" method="post" action="{% url 'scholarship_create' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                    </svg>
+                    <p>Please provide all required information to create a new scholarship. Fields marked with <span class="required-asterisk">*</span> are mandatory.</p>
+                </div>
+
+                <div id="scholarshipFormResponse" class="form-response"></div>
+
+                <div class="form-columns">
+                    <!-- Left Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="id_name">Scholarship Name <span class="required-asterisk">*</span></label>
+                            <input type="text" name="name" id="id_name" class="form-input" required placeholder="Enter scholarship name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_scholarship_type">Type <span class="required-asterisk">*</span></label>
+                            <select name="scholarship_type" id="id_scholarship_type" class="form-input" required>
+                                <option value="">Select scholarship type</option>
+                                <option value="public">Public Scholarship</option>
+                                <option value="private">Private Scholarship</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="id_slots_available">Available Slots</label>
+                            <input type="number" name="slots_available" id="id_slots_available" class="form-input" placeholder="Enter number of slots">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_description">Description <span class="required-asterisk">*</span></label>
+                    <textarea name="description" id="id_description" class="form-input" rows="3" required placeholder="Detailed description of the scholarship"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_benefits">Benefits <span class="required-asterisk">*</span></label>
+                    <textarea name="benefits" id="id_benefits" class="form-input" rows="3" required placeholder="What the scholarship provides"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_requirements">Requirements <span class="required-asterisk">*</span></label>
+                    <textarea name="requirements" id="id_requirements" class="form-input" rows="3" required placeholder="List of requirements for applicants"></textarea>
+                </div>
+
+                <div class="form-group file-upload-container">
+                    <label for="id_application_form">Application Form (PDF)</label>
+                    <div class="file-upload-wrapper">
+                        <label for="id_application_form" class="file-upload-label">
+                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <div class="upload-text">Upload Application Form</div>
+                            <div class="upload-hint">PDF only, maximum file size 10MB</div>
+                        </label>
+                        <input type="file" name="application_form" id="id_application_form" class="form-input file-upload-input" accept=".pdf">
+
+                        <!-- File preview container -->
+                        <div id="filePreviewContainer" class="file-preview-container" style="display: none;">
+                            <div class="file-preview-header">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                    <polyline points="13 2 13 9 20 9"></polyline>
+                                </svg>
+                                <span id="fileNamePreview" class="file-name"></span>
+                                <button type="button" class="file-remove-btn" onclick="removeUploadedFile()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="file-preview-footer">
+                                <span id="fileSizePreview" class="file-size"></span>
+                                <span class="file-status">Ready to upload</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" name="is_active" id="id_is_active" checked>
+                        <span class="checkmark"></span>
+                        Active Scholarship
+                    </label>
+                    <small class="form-hint">Uncheck to deactivate this scholarship</small>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeScholarshipCreateModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Create Scholarship</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock create-scholarship %}

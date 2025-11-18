@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .email-header {
+            background: linear-gradient(135deg, #1B5E20 0%, #388E3C 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .email-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><circle cx="50" cy="50" r="40" fill="white"/></svg>') repeat;
+            background-size: 60px 60px;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        .email-header h2 {
+            margin: 10px 0 0;
+            font-size: 18px;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+            opacity: 0.9;
+        }
+        .email-content {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .notification {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .email-footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 14px;
+            color: #718096;
+        }
+        .campus-logo {
+            margin-bottom: 15px;
+        }
+        .campus-logo img {
+            max-width: 150px;
+            height: auto;
+        }
+        @media only screen and (max-width: 600px) {
+            .email-container { padding: 10px; }
+            .email-content { padding: 20px; }
+            .email-header { padding: 20px 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <div class="campus-logo">
+                <div style="font-size: 32px; font-weight: bold;">CvSU</div>
+            </div>
+            <h1>Cavite State University - Bacoor City Campus</h1>
+            <h2>Office of Student Affairs and Services</h2>
+        </div>
+
+        <div class="email-content">
+            <p>Dear <strong>{{ student_name }}</strong>,</p>
+
+            <div class="notification">
+                <h3 style="margin-top: 0; color: #1B5E20;">OJT Application Status Update</h3>
+                <p style="color: #1B5E20; margin: 0;">
+                    Your OJT application for <strong>{{ company_name }}</strong> (Application ID: {{ application_id }})
+                    has been updated to <strong>{{ new_status }}</strong> status.
+                </p>
+            </div>
+
+            <p><strong>Reason:</strong> {{ reason }}</p>
+
+            <p>This means that the company has reached its maximum capacity for OJT students and cannot accept any more applications at this time.</p>
+
+            <p>You may consider applying to other companies that still have available slots, or check back later if this company opens up more slots in the future.</p>
+
+            <p>For assistance in finding alternative OJT opportunities, please contact the OSAS OJT Coordinator at <a href="mailto:cvsubacoorosas@gmail.com" style="color: #1B5E20; text-decoration: none; font-weight: 500;">cvsubacoorosas@gmail.com</a>.</p>
+
+            <p>Thank you for your understanding.</p>
+        </div>
+
+        <div class="email-footer">
+            <p style="color: #1B5E20; font-weight: 600; margin-bottom: 10px;">Cavite State University - Bacoor Campus</p>
+            <p>Molino Road, Soldiers Hills IV, Bacoor City, Cavite</p>
+            <p>© {% now "Y" %} Cavite State University - Bacoor Campus. All rights reserved.</p>
+            <p style="font-size: 12px; color: #a0aec0; margin-top: 20px;">
+                This is an automated message. Please do not reply to this email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

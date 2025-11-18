@@ -1,0 +1,205 @@
+{% load static %}
+
+{% block content %}
+<title>Admission Status</title>
+<link rel="stylesheet" href="{% static 'css/core/view-admission.css' %}">
+<link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<div class="container-fluid">
+    <!-- Left Side - Status Overview -->
+    <div class="left-side">
+        <div class="left-side-content">
+            <i class="fas fa-check-circle status-icon text-success"></i>
+            <h2>Application Submitted!</h2>
+            <p class="lead">Your admission application has been successfully processed.</p>
+
+            <div class="student-name">
+                {{ full_name }}
+            </div>
+
+            <div class="control-number">
+                {{ admission.control_no }}
+            </div>
+
+            <div class="status-badge mb-4">
+                <span class="badge
+                    {% if admission.status == 'complete' %}bg-success
+                    {% elif admission.status == 'incomplete' %}bg-warning text-dark
+                    {% elif admission.status == 'verified' %}bg-primary
+                    {% else %}bg-secondary{% endif %} fs-5">
+                    Status: {{ admission.get_status_display }}
+                </span>
+            </div>
+
+            <div class="program-info mb-4">
+                <h4>{{ admission.course.name }}</h4>
+                <p class="text-muted">
+                    {% if admission.strand %}
+                        {{ admission.strand }} •
+                    {% endif %}
+                    {{ admission.get_student_type_display }}
+                </p>
+            </div>
+
+            <a href="{% url 'dashboard' %}" class="btn btn-lg">
+                <i class="fas fa-tachometer-alt me-2"></i> Go to Dashboard
+            </a>
+            <a href="{% url 'home' %}" class="btn btn-lg">
+                <i class="fas fa-tachometer-alt me-2"></i> Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Right Side - Detailed Information -->
+    <div class="right-side">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i> Application Details</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    <dt class="col-sm-5">Student Name:</dt>
+                                    <dd class="col-sm-7">{{ full_name }}</dd>
+
+                                    <dt class="col-sm-5">Control Number:</dt>
+                                    <dd class="col-sm-7 font-monospace">{{ admission.control_no }}</dd>
+
+                                    <dt class="col-sm-5">Student Type:</dt>
+                                    <dd class="col-sm-7">
+                                        <span class="badge bg-info text-dark">
+                                            {{ admission.get_student_type_display }}
+                                        </span>
+                                    </dd>
+
+                                    <dt class="col-sm-5">Program:</dt>
+                                    <dd class="col-sm-7">{{ admission.course }}</dd>
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    {% if admission.strand %}
+                                    <dt class="col-sm-5">SHS Strand:</dt>
+                                    <dd class="col-sm-7">{{ admission.strand }}</dd>
+                                    {% endif %}
+
+                                    {% if admission.curriculum_type %}
+                                    <dt class="col-sm-5">Curriculum Type:</dt>
+                                    <dd class="col-sm-7">{{ admission.get_curriculum_type_display }}</dd>
+                                    {% endif %}
+
+                                    <dt class="col-sm-5">Submission Date:</dt>
+                                    <dd class="col-sm-7">{{ admission.created_at|date:"F j, Y H:i" }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-file-alt me-2"></i> Submitted Documents</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="document-grid">
+                            {% for doc in document_fields %}
+                                {% if doc.file or admission.student_type == 'current_grade12' and doc.name in 'grade11_report_card,certificate_of_enrollment' or admission.student_type == 'shs_graduate' and doc.name in 'grade12_report_card,form137' or admission.student_type == 'transferee' and doc.name in 'transcript_of_grades,good_moral_certificate,honorable_dismissal,nbi_police_clearance' %}
+                                <div class="document-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="card-title mb-1">{{ doc.display }}</h6>
+                                            {% if doc.file %}
+                                            <span class="badge bg-success rounded-pill">
+                                                <i class="fas fa-check me-1"></i> Submitted
+                                            </span>
+                                            {% else %}
+                                            <span class="badge bg-secondary rounded-pill">
+                                                <i class="fas fa-times me-1"></i> Not Submitted
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                        {% if doc.file %}
+                                        <a href="{{ doc.file.url }}" target="_blank" title="View" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if admission.remarks %}
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-comment-alt me-2"></i> Application Remarks</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-{% if admission.status == 'incomplete' %}warning{% else %}info{% endif %}">
+                            <div class="preformatted">{{ admission.remarks|linebreaks }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if admission.student_type == 'transferee' %}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-calendar-alt me-2"></i> Semester Completion Status</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% if admission.first_year_first_semester %}
+                            <div class="col-md-4 mb-3">
+                                <strong>1st Year - 1st Semester:</strong>
+                                <span class="badge bg-{% if admission.first_year_first_semester == 'finished' %}success{% else %}warning text-dark{% endif %}">
+                                    {{ admission.get_first_year_first_semester_display }}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            {% if admission.first_year_second_semester %}
+                            <div class="col-md-4 mb-3">
+                                <strong>1st Year - 2nd Semester:</strong>
+                                <span class="badge bg-{% if admission.first_year_second_semester == 'finished' %}success{% else %}warning text-dark{% endif %}">
+                                    {{ admission.get_first_year_second_semester_display }}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            {% if admission.second_year_first_semester %}
+                            <div class="col-md-4 mb-3">
+                                <strong>2nd Year - 1st Semester:</strong>
+                                <span class="badge bg-{% if admission.second_year_first_semester == 'finished' %}success{% else %}warning text-dark{% endif %}">
+                                    {{ admission.get_second_year_first_semester_display }}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            {% if admission.other_semester_info %}
+                            <div class="col-12 mt-2">
+                                <strong>Other Information:</strong>
+                                <p class="mb-0">{{ admission.other_semester_info }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+<div class="calendar-view-container">
+    <!-- View Tabs with Legend -->
+    <div class="tabs-container">
+        <div class="view-tabs">
+            <button class="view-tab active" data-view="month">Month</button>
+            <button class="view-tab" data-view="week">Week</button>
+            <button class="view-tab" data-view="year">Year</button>
+        </div>
+
+        <!-- Legend Container -->
+        <div class="calendar-legend">
+            <div class="legend-item">
+                <div class="legend-dot basic"></div>
+                <span>Basic</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot enrollment"></div>
+                <span>Enrollment</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot event"></div>
+                <span>Event</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot suspension"></div>
+                <span>Suspension</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot emergency"></div>
+                <span>Emergency</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot scholarship"></div>
+                <span>Scholarship</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Month View -->
+    <div id="month-view" class="calendar-view active-view">
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button id="prevMonth" class="calendar-nav"><i class="ri-arrow-left-s-line"></i></button>
+                <h2 id="currentMonthYear">Month Year</h2>
+                <button id="nextMonth" class="calendar-nav"><i class="ri-arrow-right-s-line"></i></button>
+            </div>
+
+            <div class="calendar-grid">
+                <div class="calendar-weekdays">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+                <div id="calendarDays" class="calendar-days"></div>
+            </div>
+
+            <div class="announcements-list">
+                <h3>Announcements for <span id="selectedDate"></span></h3>
+                <div id="dateAnnouncements"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Week View -->
+    <div id="week-view" class="calendar-view">
+        <div class="week-header">
+            <button id="prevWeek" class="calendar-nav"><i class="ri-arrow-left-s-line"></i></button>
+            <h2 id="currentWeekRange">Week of Month Day, Year</h2>
+            <button id="nextWeek" class="calendar-nav"><i class="ri-arrow-right-s-line"></i></button>
+        </div>
+
+        <div id="weekAnnouncements" class="week-announcements-container">
+        </div>
+    </div>
+
+    <!-- Year View -->
+    <div id="year-view" class="calendar-view">
+        <div class="year-header">
+            <button id="prevYear" class="calendar-nav"><i class="ri-arrow-left-s-line"></i></button>
+            <h2 id="currentYear">Year</h2>
+            <button id="nextYear" class="calendar-nav"><i class="ri-arrow-right-s-line"></i></button>
+        </div>
+
+        <div id="yearAnnouncements" class="year-announcements-container"></div>
+    </div>
+</div>

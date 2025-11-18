@@ -1,0 +1,130 @@
+{% block edit-company %}
+<div id="companyEditModal" class="modal">
+    <div class="modal-overlay" onclick="closeCompanyEditModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Edit Company</h2>
+                <p class="header-description">Update company information and OJT capacity</p>
+            </div>
+            <button class="modal-close" onclick="closeCompanyEditModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="companyEditForm" method="post" action="">
+            {% csrf_token %}
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                        <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                        <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                    <p>Update the company information below. Fields marked with <span class="required-asterisk">*</span> are required.</p>
+                </div>
+
+                <div id="companyEditFormResponse" class="form-response"></div>
+                <input type="hidden" name="company_id" id="editCompanyId">
+
+                <div class="form-columns">
+                    <!-- Left Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="editCompanyName">Company Name <span class="required-asterisk">*</span></label>
+                            <input type="text" name="name" id="editCompanyName" class="form-input" required placeholder="Enter company name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editCompanyContactNumber">Contact Number <span class="required-asterisk">*</span></label>
+                            <input type="text" name="contact_number" id="editCompanyContactNumber" class="form-input" required placeholder="Enter contact number (numbers and hyphens only)">
+                            <small class="help-text">Only numbers and hyphens are allowed (e.g., 123-456-7890)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editCompanyEmail">Email Address</label>
+                            <input type="email" name="email" id="editCompanyEmail" class="form-input" placeholder="company@example.com">
+                            <small class="help-text">Official company email address</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editCompanyAvailableSlots">Available Slots <span class="required-asterisk">*</span></label>
+                            <input type="number" name="available_slots" id="editCompanyAvailableSlots" class="form-input" required min="1" placeholder="Available slots">
+                            <small class="help-text">Number of currently available OJT positions</small>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="editCompanyAddress">Address <span class="required-asterisk">*</span></label>
+                            <textarea name="address" id="editCompanyAddress" class="form-input" rows="4" required placeholder="Enter company address"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editCompanyDescription">Company Description</label>
+                            <textarea name="description" id="editCompanyDescription" class="form-input" rows="4" placeholder="Enter company description, services, or industry focus"></textarea>
+                            <small class="help-text">Brief description of the company and its services</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editCompanyWebsite">Website</label>
+                            <input type="url" name="website" id="editCompanyWebsite" class="form-input" placeholder="https://example.com">
+                            <small class="help-text">Company website URL</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Status Display -->
+                <div class="form-group">
+                    <label>Current Status</label>
+                    <div class="current-status">
+                        <span id="editCompanyCurrentStatus" class="status-badge">-</span>
+                        <small class="help-text">Status is automatically calculated based on available slots and current students</small>
+                    </div>
+                </div>
+
+                <!-- Capacity Statistics -->
+                <div class="capacity-stats-edit">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Total Slots</div>
+                            <div class="stat-value" id="editCompanyTotalSlots">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Filled Slots</div>
+                            <div class="stat-value" id="editCompanyFilledSlots">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Available Slots</div>
+                            <div class="stat-value" id="editCompanyRemainingSlots">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Utilization</div>
+                            <div class="stat-value" id="editCompanyUtilizationRate">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeCompanyEditModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Update Company</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock edit-company %}

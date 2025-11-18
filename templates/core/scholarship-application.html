@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scholarship Application</title>
+    <link rel="stylesheet" href="{% static 'css/core/scholarship-application.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    {% include 'core/navbar.html' %}
+
+    <div class="form-container">
+        <div class="glass-card">
+            <div class="form-header">
+                <div class="header-glow"></div>
+                <h1 class="form-title"><i class="fas fa-graduation-cap"></i> Scholarship Application</h1>
+                <p class="form-subtitle">Complete all steps to submit your scholarship application</p>
+            </div>
+
+            <!-- Step Progress Bar -->
+            <div class="step-progress">
+                <div class="progress-bar"></div>
+                <div class="step active" id="step1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Basic Info</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Scholarship</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Documents</div>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Review</div>
+                </div>
+            </div>
+
+            <form id="scholarshipForm" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Step 1: Basic Information -->
+                <div class="form-step active" id="form-step1">
+                    <div class="step-heading">
+                        <i class="fas fa-user-circle"></i>
+                        <h2>Basic Information</h2>
+                    </div>
+
+                    <div class="warning-note">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Please verify your information before proceeding. Contact the administrator/Update your information at your Profile if any details are incorrect.</p>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Personal Information</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Name:</strong> {{ user.get_full_name }}</p>
+                                    <p><strong>Student Number:</strong> {{ user.student_number }}</p>
+                                    <p><strong>Email:</strong> {{ user.email }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Academic Information</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Course:</strong> {{ user.course }}</p>
+                                    <p><strong>Year Level:</strong> {{ user.year_level }}</p>
+                                    <p><strong>Section:</strong> {{ user.section }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="btn-nav">
+                        <button type="button" class="btn btn-outline-primary" disabled>
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button type="button" class="btn btn-primary next-step">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Scholarship Selection -->
+                <div class="form-step" id="form-step2">
+                    <div class="step-heading">
+                        <i class="fas fa-award"></i>
+                        <h2>Scholarship Selection</h2>
+                    </div>
+
+                    {% if not active_scholarships %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        There are currently no available scholarship programs for application.
+                        This could be because:
+                        <ul class="mt-2">
+                            <li>There are no active scholarship programs at this time</li>
+                            <li>All scholarships have reached their application limits</li>
+                            <li>The application period has not started or has ended</li>
+                        </ul>
+                        Please check back later or contact the scholarship office for more information.
+                    </div>
+                    {% else %}
+                    <div class="form-group">
+                        <label for="scholarship" class="form-label">Available Scholarship Programs <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-graduation-cap input-icon"></i>
+                            <select class="form-control" id="scholarship" name="scholarship" required>
+                                <option value="" selected disabled>Select from available scholarships</option>
+                                {% for scholarship in active_scholarships %}
+                                    <option value="{{ scholarship.id }}"
+                                        data-description="{{ scholarship.description }}"
+                                        data-benefits="{{ scholarship.benefits }}"
+                                        data-requirements="{{ scholarship.requirements }}"
+                                        data-type="{{ scholarship.get_scholarship_type_display }}"
+                                        data-slots="{% if scholarship.slots_available %}{{ scholarship.slots_available }} slots available{% else %}No slot limit{% endif %}"
+                                        {% if scholarship.id in existing_scholarship_ids %}data-existing="true"{% endif %}>
+                                        {{ scholarship.name }} ({{ scholarship.get_scholarship_type_display }})
+                                        {% if scholarship.slots_available %} - {{ scholarship.slots_available }} slots left{% endif %}
+                                        {% if scholarship.id in existing_scholarship_ids %} (Already Applied){% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <small class="form-text text-muted">
+                            Only active and available scholarships are shown here.
+                        </small>
+                    </div>
+
+                    <!-- Scholarship Information -->
+                    <div id="scholarshipInfo" class="card mt-3" style="display: none;">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0" id="scholarshipName"></h3>
+                            <span class="badge badge-success">Currently Accepting Applications</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Type:</strong> <span id="scholarshipType"></span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Availability:</strong> <span id="scholarshipSlots"></span></p>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <h5><i class="fas fa-align-left"></i> Description</h5>
+                                <p id="scholarshipDescription" class="pl-3"></p>
+                            </div>
+                            <div class="mt-3">
+                                <h5><i class="fas fa-gift"></i> Benefits</h5>
+                                <p id="scholarshipBenefits" class="pl-3"></p>
+                            </div>
+                            <div class="mt-3">
+                                <h5><i class="fas fa-clipboard-check"></i> Requirements</h5>
+                                <p id="scholarshipRequirements" class="pl-3"></p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="btn-nav mt-4">
+                        <button type="button" class="btn btn-outline-primary prev-step">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button type="button" class="btn btn-primary next-step" {% if not active_scholarships %}disabled{% endif %}>
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Documents Upload -->
+                <div class="form-step" id="form-step3">
+                    <div class="step-heading">
+                        <i class="fas fa-file-upload"></i>
+                        <h2>Required Documents</h2>
+                    </div>
+
+                    <div class="warning-note">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>All documents must be clear, legible, and in PDF or image format (max 5MB each).</p>
+                    </div>
+
+                    <div class="document-grid">
+                        <!-- Application Form Upload -->
+                        <div class="document-card">
+                            <div class="document-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <h3 class="document-title">Completed Application Form</h3>
+                            <div class="file-upload-wrapper">
+                                <input type="file" id="application_form" name="application_form" required>
+                                <label for="application_form" class="file-upload-label">
+                                    <i class="fas fa-upload"></i> Upload File
+                                </label>
+                            </div>
+                            <p class="form-text">Download the application form, fill it out completely, and upload it here.</p>
+                            <div id="application_formPreview" class="file-preview-container"></div>
+                        </div>
+
+                        <!-- Certificate of Grades -->
+                        <div class="document-card">
+                            <div class="document-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h3 class="document-title">Certificate of Grades</h3>
+                            <div class="file-upload-wrapper">
+                                <input type="file" id="cog" name="cog" required>
+                                <label for="cog" class="file-upload-label">
+                                    <i class="fas fa-upload"></i> Upload File
+                                </label>
+                            </div>
+                            <p class="form-text">Upload your most recent certificate of grades (official copy).</p>
+                            <div id="cogPreview" class="file-preview-container"></div>
+                        </div>
+
+                        <!-- Certificate of Registration -->
+                        <div class="document-card">
+                            <div class="document-icon">
+                                <i class="fas fa-file-signature"></i>
+                            </div>
+                            <h3 class="document-title">Certificate of Registration</h3>
+                            <div class="file-upload-wrapper">
+                                <input type="file" id="cor" name="cor" required>
+                                <label for="cor" class="file-upload-label">
+                                    <i class="fas fa-upload"></i> Upload File
+                                </label>
+                            </div>
+                            <p class="form-text">Upload your current certificate of registration.</p>
+                            <div id="corPreview" class="file-preview-container"></div>
+                        </div>
+
+                        <!-- ID Photo -->
+                        <div class="document-card">
+                            <div class="document-icon">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                            <h3 class="document-title">ID Photo</h3>
+                            <div class="file-upload-wrapper">
+                                <input type="file" id="id_photo" name="id_photo" accept="image/*" required>
+                                <label for="id_photo" class="file-upload-label">
+                                    <i class="fas fa-upload"></i> Upload File
+                                </label>
+                            </div>
+                            <p class="form-text">Upload a clear photo of your valid school ID (front side only).</p>
+                            <div id="id_photoPreview" class="file-preview-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- Other Documents -->
+                    <div class="form-group">
+                        <label for="other_documents" class="form-label">Other Supporting Documents</label>
+                        <div class="file-upload-wrapper">
+                            <input type="file" id="other_documents" name="other_documents" multiple>
+                            <label for="other_documents" class="file-upload-label">
+                                <i class="fas fa-upload"></i> Upload Additional Files (Optional)
+                            </label>
+                        </div>
+                        <p class="form-text">Upload any additional documents that support your application (optional).</p>
+                        <div id="other_documentsPreview" class="file-preview-container"></div>
+                    </div>
+
+                    <div class="btn-nav">
+                        <button type="button" class="btn btn-outline-primary prev-step">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button type="button" class="btn btn-primary next-step">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Review and Submit -->
+                <div class="form-step" id="form-step4">
+                    <div class="step-heading">
+                        <i class="fas fa-check-circle"></i>
+                        <h2>Review Your Application</h2>
+                    </div>
+
+                    <div class="warning-note">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Please review all information before submitting. You won't be able to make changes after submission.</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-user"></i> Applicant Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <p><strong>Name:</strong> {{ user.get_full_name }}</p>
+                                    <p><strong>Student Number:</strong> {{ user.student_number }}</p>
+                                </div>
+                                <div class="form-group">
+                                    <p><strong>Course:</strong> {{ user.course }}</p>
+                                    <p><strong>Year & Section:</strong> {{ user.year_level }} - {{ user.section }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-award"></i> Scholarship Details</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="reviewScholarship">
+                                <p class="text-center text-muted">Please select a scholarship in Step 2</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-file-alt"></i> Documents to be Submitted</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul id="reviewDocuments" class="document-list">
+                                <li>Application Form: <span class="text-muted">Not uploaded yet</span></li>
+                                <li>Certificate of Grades: <span class="text-muted">Not uploaded yet</span></li>
+                                <li>Certificate of Registration: <span class="text-muted">Not uploaded yet</span></li>
+                                <li>ID Photo: <span class="text-muted">Not uploaded yet</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="form-group">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="terms" name="terms" required>
+                            <label for="terms">
+                                I certify that all information provided is true and correct. I understand that any false information may result in the rejection of my application.
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="btn-nav">
+                        <button type="button" class="btn btn-outline-primary prev-step">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Submit Application
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'js/core/scholarship-application.js' %}"></script>
+</body>
+</html>

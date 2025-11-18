@@ -1,0 +1,179 @@
+{% extends 'osas/dashboard.html' %}
+{% load static %}
+
+{% block section-content %}
+<div class="admission-edit-container">
+    <h2>Edit Admission Page Content</h2>
+    <form method="post" id="admissionPageForm">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label>Hero Title</label>
+            {{ form.hero_title }}
+        </div>
+
+        <div class="form-group">
+            <label>Hero Tagline</label>
+            {{ form.hero_tagline }}
+        </div>
+
+        <div class="form-group">
+            <label>CTA Text</label>
+            {{ form.cta_text }}
+        </div>
+
+        <div class="form-group">
+            <label>CTA Description</label>
+            {{ form.cta_description }}
+        </div>
+
+        <div class="form-group">
+            <label>Admission Requirements</label>
+            <div id="requirementsContainer">
+                <!-- Requirements will be added here by JavaScript -->
+            </div>
+            {{ form.requirements }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'dashboard' %}">Cancel</a>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize requirements
+    const requirements = JSON.parse('{{ requirements_json|escapejs }}') || {
+        "shs_graduate": {
+            "title": "Requirements for 1st Year (SHS Graduate)",
+            "items": [
+                "Accomplished Admission Portal registration (Online)",
+                "Completed Grade 12 Report Card",
+                "Certificate of non-issuance of Form 137"
+            ],
+            "note": "This certification shall provide that the applicant has never been enrolled in another university/college.<br><br><strong>\"ALIGNMENT OF STRANDS WITH THE RESPECTIVE PROGRAMS IS STRICTLY OBSERVED AND FOLLOWED S.Y 2025-2026\"</strong>"
+        },
+        "current_grade12": {
+            "title": "Requirements for 1st Year (Current G12 Students)",
+            "items": [
+                "Accomplished Admission Portal registration (Online)",
+                "Grade 11 Report Card",
+                "Certificate from the Principal or Adviser indicating current enrollment as Grade 12 student with STRAND indicated"
+            ],
+            "note": "The certificate must be originally signed. E-signature is NOT ALLOWED.<br><br><strong>\"ALIGNMENT OF STRANDS WITH THE RESPECTIVE PROGRAMS IS STRICTLY OBSERVED AND FOLLOWED S.Y 2025-2026\"</strong>"
+        },
+        "transferee": {
+            "title": "Requirements for Transferees",
+            "items": [
+                "Accomplished Admission Portal registration (Online)",
+                "Transcript of Grades or Certificate of Grades",
+                "Certificate of Good Moral Character",
+                "Honorable Dismissal",
+                "NBI or Police Clearance"
+            ],
+            "note": "<strong>\"With Retention Policy/Grades Evaluation Only\"</strong><br><br>For S.Y 2025-2026 1st SEMESTER"
+        }
+    };
+
+    const requirementsContainer = document.getElementById('requirementsContainer');
+    const requirementsInput = document.getElementById('id_requirements');
+
+    // Render requirements
+    function renderRequirements() {
+        requirementsContainer.innerHTML = '';
+
+        // SHS Graduate section
+        requirementsContainer.appendChild(createRequirementSection('shs_graduate', 'SHS Graduate'));
+
+        // Current Grade 12 section
+        requirementsContainer.appendChild(createRequirementSection('current_grade12', 'Current Grade 12'));
+
+        // Transferee section
+        requirementsContainer.appendChild(createRequirementSection('transferee', 'Transferee'));
+
+        requirementsInput.value = JSON.stringify(requirements);
+    }
+
+    function createRequirementSection(key, label) {
+        const section = document.createElement('div');
+        section.className = 'requirement-section mb-4 p-3 border';
+        section.innerHTML = `
+            <h4>${label} Requirements</h4>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" class="form-control requirement-title" value="${requirements[key].title}" data-key="${key}">
+            </div>
+            <div class="form-group">
+                <label>Requirements Items</label>
+                <div class="items-container" data-key="${key}">
+                    ${requirements[key].items.map((item, index) => `
+                        <div class="input-group mb-2">
+                            <input type="text" class="form-control requirement-item" value="${item}" data-key="${key}" data-index="${index}">
+                            <button type="button" class="btn btn-danger remove-item" data-key="${key}" data-index="${index}">Remove</button>
+                        </div>
+                    `).join('')}
+                </div>
+                <button type="button" class="btn btn-sm btn-primary add-item" data-key="${key}">Add Item</button>
+            </div>
+            <div class="form-group">
+                <label>Note/Additional Information</label>
+                <textarea class="form-control requirement-note" data-key="${key}">${requirements[key].note}</textarea>
+            </div>
+        `;
+        return section;
+    }
+
+    // Add new item
+    requirementsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('add-item')) {
+            const key = e.target.dataset.key;
+            requirements[key].items.push("");
+            renderRequirements();
+        }
+    });
+
+    // Remove item
+    requirementsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-item')) {
+            const key = e.target.dataset.key;
+            const index = e.target.dataset.index;
+            requirements[key].items.splice(index, 1);
+            renderRequirements();
+        }
+    });
+
+    // Update requirements when changed
+    requirementsContainer.addEventListener('input', function(e) {
+        if (e.target.classList.contains('requirement-title')) {
+            const key = e.target.dataset.key;
+            requirements[key].title = e.target.value;
+            requirementsInput.value = JSON.stringify(requirements);
+        }
+        if (e.target.classList.contains('requirement-item')) {
+            const key = e.target.dataset.key;
+            const index = e.target.dataset.index;
+            requirements[key].items[index] = e.target.value;
+            requirementsInput.value = JSON.stringify(requirements);
+        }
+        if (e.target.classList.contains('requirement-note')) {
+            const key = e.target.dataset.key;
+            requirements[key].note = e.target.value;
+            requirementsInput.value = JSON.stringify(requirements);
+        }
+    });
+
+    // Initial render
+    renderRequirements();
+});
+</script>
+
+<style>
+.requirement-section {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+.items-container {
+    margin-bottom: 10px;
+}
+</style>
+{% endblock %}

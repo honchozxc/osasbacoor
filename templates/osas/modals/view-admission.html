@@ -1,0 +1,194 @@
+{% block view-admission %}
+<div id="admissionViewModal" class="modal">
+    <div class="modal-overlay" onclick="closeAdmissionViewModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Admission Application Details</h2>
+                <p class="header-description">View application information</p>
+            </div>
+            <button class="modal-close" onclick="closeAdmissionViewModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="form-body">
+            <div class="admission-header">
+                <h3 id="admissionControlNo" class="admission-control-no"></h3>
+                <div class="student-name-section">
+                    <h4 id="studentFullName"></h4>
+                    <div class="student-name-details">
+                        <span id="studentFirstName"></span>
+                        <span id="studentLastName"></span>
+                    </div>
+                </div>
+                <div class="admission-meta">
+                    <span id="admissionStatus" class="status-badge"></span>
+                    <span id="admissionType" class="type-tag"></span>
+                    <span id="admissionCourse"></span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Basic Information Section -->
+            <div class="detail-group">
+                <h4 class="detail-label">Basic Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Student Type</span>
+                        <span id="admissionStudentType" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Course</span>
+                        <span id="admissionCourseDetail" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item" id="admissionStrandContainer">
+                        <span class="detail-sub-label">Strand</span>
+                        <span id="admissionStrand" class="detail-value"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Information -->
+            <div class="detail-group">
+                <h4 class="detail-label">Application Status</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Status</span>
+                        <span id="admissionStatusDetail" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Date Submitted</span>
+                        <span id="admissionCreatedAt" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-sub-label">Last Updated</span>
+                        <span id="admissionUpdatedAt" class="detail-value"></span>
+                    </div>
+                </div>
+                <div class="detail-item full-width">
+                    <span class="detail-sub-label">Remarks</span>
+                    <div id="admissionRemarks" class="detail-content"></div>
+                </div>
+            </div>
+
+            <!-- Requirements Section (Dynamic based on student type) -->
+            <div class="detail-group">
+                <h4 class="detail-label">Submitted Requirements</h4>
+                <div id="commonRequirements">
+                    <div class="requirement-item">
+                        <i id="portalRegIcon" class='bx bx-check-circle'></i>
+                        <span>Admission Portal Registration</span>
+                    </div>
+                </div>
+                
+                <!-- Current Grade 12 Requirements -->
+                <div id="grade12Requirements" class="requirements-section">
+                    <h5 class="requirements-heading">Current Grade 12 Requirements</h5>
+                    <div class="requirement-item">
+                        <i id="grade11ReportIcon" class='bx bx-check-circle'></i>
+                        <span>Grade 11 Report Card</span>
+                        <a id="grade11ReportLink" class="file-link" target="_blank" style="display: none;">
+                            <i class='bx bx-link-external'></i> View
+                        </a>
+                    </div>
+                    <div class="requirement-item">
+                        <i id="enrollmentCertIcon" class='bx bx-check-circle'></i>
+                        <span>Certificate of Enrollment</span>
+                        <a id="enrollmentCertLink" class="file-link" target="_blank" style="display: none;">
+                            <i class='bx bx-link-external'></i> View
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- SHS Graduate Requirements -->
+                <div id="shsGraduateRequirements" class="requirements-section">
+                    <h5 class="requirements-heading">SHS Graduate Requirements</h5>
+                    <div class="requirement-item">
+                        <i id="grade12ReportIcon" class='bx bx-check-circle'></i>
+                        <span>Grade 12 Report Card</span>
+                        <a id="grade12ReportLink" class="file-link" target="_blank" style="display: none;">
+                            <i class='bx bx-link-external'></i> View
+                        </a>
+                    </div>
+                    <div class="requirement-item">
+                        <i id="form137Icon" class='bx bx-check-circle'></i>
+                        <span>Form 137</span>
+                        <a id="form137Link" class="file-link" target="_blank" style="display: none;">
+                            <i class='bx bx-link-external'></i> View
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Transferee Requirements -->
+                <div id="transfereeRequirements" class="requirements-section">
+                    <h5 class="requirements-heading">Transferee Requirements</h5>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-sub-label">Curriculum Type</span>
+                            <span id="admissionCurriculumType" class="detail-value"></span>
+                        </div>
+                    </div>
+                    <div class="requirement-item">
+                        <i id="transcriptIcon" class='bx bx-check-circle'></i>
+                        <span>Transcript of Grades</span>
+                        <a id="transcriptLink" class="file-link" target="_blank" style="display: none;">
+                            <i class='bx bx-link-external'></i> View
+                        </a>
+                    </div>
+                    <div class="requirement-item">
+                        <i id="moralCertIcon" class='bx bx-check-circle'></i>
+                        <span>Certificate of Good Moral</span>
+                        <a id="moralCertLink" class="file-link" target="_blank" style="display: none;">
+                            <i class='bx bx-link-external'></i> View
+                        </a>
+                    </div>
+                    <div class="requirement-item">
+                        <i id="dismissalIcon" class='bx bx-check-circle'></i>
+                        <span>Honorable Dismissal</span>
+                        <a id="dismissalLink" class="file-link" target="_blank" style="display: none;">
+                            <i class='bx bx-link-external'></i> View
+                        </a>
+                    </div>
+                    <div class="requirement-item">
+                        <i id="clearanceIcon" class='bx bx-check-circle'></i>
+                        <span>NBI/Police Clearance</span>
+                        <a id="clearanceLink" class="file-link" target="_blank" style="display: none;">
+                            <i class='bx bx-link-external'></i> View
+                        </a>
+                    </div>
+                    
+                    <!-- Semester Status -->
+                    <h5 class="requirements-heading">Semester Completion Status</h5>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-sub-label">1st Year - 1st Semester</span>
+                            <span id="firstYearFirstSem" class="detail-value"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-sub-label">1st Year - 2nd Semester</span>
+                            <span id="firstYearSecondSem" class="detail-value"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-sub-label">2nd Year - 1st Semester</span>
+                            <span id="secondYearFirstSem" class="detail-value"></span>
+                        </div>
+                        <div class="detail-item full-width">
+                            <span class="detail-sub-label">Other Information</span>
+                            <span id="otherSemesterInfo" class="detail-value"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeAdmissionViewModal()">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock view-admission %}

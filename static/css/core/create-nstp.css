@@ -1,0 +1,336 @@
+:root {
+    --primary-blue: #003366;
+    --secondary-gold: #FFD700;
+    --white: #ffffff;
+    --dark-blue: #001a33;
+    --light-blue: #0066cc;
+    --gray: #f0f2f5;
+    --dark-gray: #333;
+    --error-red: #dc3545;
+}
+
+/* Base Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color);
+    background-color: var(--white);
+    line-height: 1.6;
+}
+
+body::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+    overflow: hidden;
+}
+
+.form-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+.form-header {
+    background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+    color: var(--white);
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+}
+
+.form-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    position: relative;
+    z-index: 2;
+}
+
+.glowing-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 215, 0, 0.3),
+        transparent);
+    animation: glow 3s infinite;
+    z-index: 1;
+}
+
+@keyframes glow {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.header-decoration {
+    height: 4px;
+    background: var(--secondary-gold);
+    margin-top: 1rem;
+    position: relative;
+}
+
+.header-decoration::before,
+.header-decoration::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--secondary-gold);
+    top: -3px;
+    border-radius: 50%;
+}
+
+.header-decoration::before {
+    left: 20%;
+}
+
+.header-decoration::after {
+    right: 20%;
+}
+
+.futuristic-form {
+    padding: 2rem;
+}
+
+.form-section {
+    border: 1px solid rgba(0, 51, 102, 0.1);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    background: var(--white);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.form-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.section-title {
+    font-size: 1.2rem;
+    color: var(--primary-blue);
+    padding: 0 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+/* Floating label adjustments */
+.floating-input {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.floating-input input,
+.floating-input select {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid rgba(0, 51, 102, 0.2);
+    border-radius: 4px;
+    background: var(--white);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    color: var(--dark-gray);
+    z-index: 1;
+}
+
+.floating-input input:focus,
+.floating-input select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.2);
+}
+
+.floating-input label {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: #999;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    background: transparent;
+    padding: 0;
+    z-index: 0;
+}
+
+/* Active state - label moves up */
+.floating-input input:focus + label,
+.floating-input input:not(:placeholder-shown) + label,
+.floating-input select:focus + label,
+.floating-input select:not([value=""]) + label,
+.floating-input label.active {
+    top: -0.5rem;
+    left: 0.8rem;
+    font-size: 0.75rem;
+    color: var(--primary-blue);
+    background: var(--white);
+    padding: 0 0.3rem;
+    z-index: 1;
+}
+
+/* Error states */
+.floating-input.is-invalid input,
+.floating-input.is-invalid select {
+    border-color: var(--error-red) !important;
+}
+
+.floating-input.is-invalid label {
+    color: var(--error-red) !important;
+}
+
+.floating-input.is-invalid input:focus + label,
+.floating-input.is-invalid select:focus + label,
+.floating-input.is-invalid label.active {
+    color: var(--error-red) !important;
+}
+
+.error-message {
+    color: var(--error-red);
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    display: block;
+}
+
+.error-message {
+    color: var(--error-red);
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    display: block;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.submit-btn {
+    background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+    color: var(--white);
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 51, 102, 0.1);
+}
+
+.submit-btn:hover {
+    background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 51, 102, 0.15);
+}
+
+.cancel-btn {
+    background: transparent;
+    color: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+    padding: 0.8rem 2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background: rgba(0, 51, 102, 0.05);
+}
+
+.btn-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.submit-btn:hover .btn-icon {
+    transform: translateX(3px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .submit-btn, .cancel-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Error message styling */
+.error-message {
+    color: var(--error-red);
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    display: block;
+}
+
+/* Non-field error styling */
+.non-field-errors {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #dc3545;
+}
+
+/* Form group error state */
+.form-group.is-invalid input,
+.form-group.is-invalid select {
+    border-color: var(--error-red) !important;
+}
+
+.form-group.is-invalid label {
+    color: var(--error-red) !important;
+}
+
+.existing-applications-warning {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+}
+.existing-applications-warning h4 {
+    margin-top: 0;
+    color: #856404;
+}
+.existing-applications-warning ul {
+    padding-left: 1.5rem;
+}
+.warning-text {
+    font-weight: 500;
+    color: #856404;
+    margin-bottom: 0;
+}

@@ -1,0 +1,100 @@
+<!-- Export Complaint Modal -->
+<div id="exportComplaintModal" class="modal">
+    <div class="export-modal-container">
+        <div class="export-modal-header">
+            <h3 class="export-modal-title">Export Complaint Data</h3>
+            <button type="button" class="export-modal-close">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+        <div class="export-modal-body">
+            <form id="exportComplaintForm" method="post" action="{% url 'export_complaints' %}">
+                {% csrf_token %}
+                <input type="hidden" name="source_section" id="exportSourceSection" value="under_review">
+
+                <div class="export-form-group">
+                    <label class="export-form-label">Export Options</label>
+                    <div class="export-radio-group">
+                        <label class="export-radio-label">
+                            <input type="radio" name="export_option" value="all_statuses" checked>
+                            <span class="export-radio-custom"></span>
+                            All Complaints (All Statuses)
+                        </label>
+                        <label class="export-radio-label">
+                            <input type="radio" name="export_option" value="by_status">
+                            <span class="export-radio-custom"></span>
+                            By Specific Status
+                        </label>
+                        <label class="export-radio-label">
+                            <input type="radio" name="export_option" value="by_respondent">
+                            <span class="export-radio-custom"></span>
+                            By Respondent Type
+                        </label>
+                    </div>
+                </div>
+
+                <div id="statusOptions" class="export-form-group" style="display: none;">
+                    <div class="export-form-row">
+                        <div class="export-form-col">
+                            <label class="export-form-label">Status</label>
+                            <select name="status" class="export-form-select">
+                                <option value="all">All Statuses</option>
+                                <option value="under_review">Under Review</option>
+                                <option value="resolved">Resolved</option>
+                                <option value="canceled">Canceled</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="respondentOptions" class="export-form-group" style="display: none;">
+                    <div class="export-form-row">
+                        <div class="export-form-col">
+                            <label class="export-form-label">Respondent Type</label>
+                            <select name="respondent_type" class="export-form-select">
+                                <option value="all">All Types</option>
+                                <option value="student">Student</option>
+                                <option value="faculty_staff">Faculty/Staff</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="export-form-group">
+                    <label class="export-form-label">Date Range (Optional)</label>
+                    <div class="export-form-row">
+                        <div class="export-form-col">
+                            <input type="date" name="start_date" class="export-form-input" placeholder="Start Date">
+                        </div>
+                        <div class="export-form-col">
+                            <input type="date" name="end_date" class="export-form-input" placeholder="End Date">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="export-form-group">
+                    <label class="export-form-label">File Format</label>
+                    <div class="export-radio-group">
+                        <label class="export-radio-label">
+                            <input type="radio" name="format" value="excel" checked>
+                            <span class="export-radio-custom"></span>
+                            Excel (.xlsx)
+                        </label>
+                        <label class="export-radio-label">
+                            <input type="radio" name="format" value="csv">
+                            <span class="export-radio-custom"></span>
+                            CSV (.csv)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="export-modal-footer">
+                    <button type="button" class="export-secondary-btn" id="cancelComplaintExport">Cancel</button>
+                    <button type="button" class="export-primary-btn" id="confirmComplaintExport">
+                        <i class='bx bx-download'></i> Export
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

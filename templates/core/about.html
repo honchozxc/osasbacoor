@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSAS Bacoor City Campus - Cavite State University</title>
+    <link rel="stylesheet" href="{% static 'css/core/about.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+{% include 'core/navbar.html' %}
+    <header class="osas-main-header">
+        <div class="osas-container">
+            <h1 class="osas-main-title">{{ about_content.title|default:"OSAS Bacoor Campus" }}</h1>
+            <p class="osas-tagline">{{ about_content.tagline|default:"Shaping Future Leaders with Character and Excellence" }}</p>
+        </div>
+    </header>
+
+    <section class="osas-about-section">
+        <div class="osas-container">
+            <article class="osas-about-card" data-scroll="fadeIn" data-scroll-delay="100">
+                <h2 class="osas-section-title">About OSAS</h2>
+                <p class="osas-about-text">{{ about_content.about_text|default:"The Office of Student Affairs and Services (OSAS) at Cavite State University supports students' personal and academic growth..." }}</p>
+            </article>
+
+            <div class="osas-grid-container">
+                <article class="osas-mission-vision" data-scroll="fadeInLeft" data-scroll-delay="20">
+                    <div class="osas-icon-title">
+                        <h3 class="osas-subtitle">Mission</h3>
+                    </div>
+                    <p>{{ about_content.mission|default:"Cavite State University shall provide excellent, equitable and relevant educational opportunities..." }}</p>
+                </article>
+
+                <article class="osas-mission-vision" data-scroll="fadeInRight" data-scroll-delay="200">
+                    <div class="osas-icon-title">
+                        <h3 class="osas-subtitle">Vision</h3>
+                    </div>
+                    <p>{{ about_content.vision|default:"The premier university in historic Cavite recognized for excellence in character development..." }}</p>
+                </article>
+            </div>
+
+            <article class="osas-goals-card" data-scroll="fadeIn" data-scroll-delay="300">
+                <div class="osas-goals-header">
+                    <svg class="osas-goals-icon" viewBox="0 0 24 24"><path d="M9 22l-4-4 1.4-1.4 2.6 2.6 7.6-7.6L19 13l-10 9zm3-20a10 10 0 00-9 5.5 10 10 0 019 5.5 10 10 0 009-5.5A10 10 0 0012 2z"/></svg>
+                    <h3 class="osas-subtitle">OSAS Goals</h3>
+                </div>
+                <p class="osas-goals-text">{{ about_content.goals|default:"To look after the educational, vocational, and personal development needs of students..." }}</p>
+
+                <div class="osas-objectives-card" data-scroll="fadeIn" data-scroll-delay="400">
+                    <div class="osas-objectives-header">
+                        <svg class="osas-objectives-icon" viewBox="0 0 24 24"><path d="M14 2l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2h8m4 18V9h-5V4H6v16h12m-3-5l-3 3-2-2-1 1 3 3 4-4-1-1z"/></svg>
+                        <h4 class="osas-objectives-title">OSAS Objectives</h4>
+                    </div>
+                    <ul class="osas-objectives-list">
+                        {% for objective in about_content.objectives %}
+                        <li class="osas-objective-item">{{ objective }}</li>
+                        {% empty %}
+                        <li>No objectives defined yet</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="osas-courses-section" data-scroll="fadeIn">
+        <div class="osas-container">
+            <h2 class="osas-section-title">Courses Offered</h2>
+            <div class="osas-courses-grid">
+                {% for course in courses %}
+                <article class="course-card">
+                    <div class="course-logo-container">
+                        {% if course.logo %}
+                            <img src="{{ course.logo.url }}" alt="{{ course.name }} Logo" class="course-logo">
+                        {% else %}
+                            <div class="no-logo">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <h3>{{ course.name }}</h3>
+                    {% if course.subtext %}
+                    <p class="subtext">{{ course.subtext }}</p>
+                    {% endif %}
+                </article>
+                {% empty %}
+                <p>No courses available</p>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    {% include 'core/footer.html' %}
+
+    <script src="{% static 'js/core/about.js' %}"></script>
+</body>
+</html>

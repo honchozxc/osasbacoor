@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Announcements</title>
+  <link rel="stylesheet" href="{% static 'css/core/all_announcements.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+{% include 'core/navbar.html' %}
+
+<div class="announcements-container">
+  <div class="header-section">
+    <h1 class="page-title"><span class="highlight">All</span> Announcements</h1>
+  </div>
+
+  <div class="control-panel">
+    <!-- Category Tabs -->
+    <div class="category-tabs">
+      <button class="tab-btn active" data-category="all">All</button>
+      {% for value, label in all_categories.items %}
+        <button class="tab-btn" data-category="{{ value|lower }}">{{ label }}</button>
+      {% endfor %}
+    </div>
+
+    <!-- Sorting and Filtering Controls -->
+    <div class="sort-filter-controls">
+      <div class="sort-control">
+        <label for="sort-by"><i class="fas fa-sort"></i> Sort by:</label>
+        <select id="sort-by" class="sort-select">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="title-asc">Title (A-Z)</option>
+          <option value="title-desc">Title (Z-A)</option>
+        </select>
+      </div>
+
+      <div class="filter-control">
+        <label for="filter-unit"><i class="fas fa-filter"></i> Filter by Unit:</label>
+        <select id="filter-unit" class="filter-select">
+          <option value="all">All Units</option>
+          {% for value, label in user_units.items %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="announcement-search" placeholder="Search announcements...">
+      </div>
+    </div>
+  </div>
+
+  {% if announcements_count > 0 %}
+    <!-- Loading container positioned correctly -->
+    <div class="loading-container" id="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading announcements...</p>
+    </div>
+
+    <!-- Announcements will be loaded here by JavaScript -->
+    <div class="announcements-grid" id="announcements-container">
+      <!-- Initial server-side rendering fallback -->
+      {% for announcement in announcements %}
+      <div class="announcement-card">
+        <div class="card-header">
+          <div class="category-tag {{ announcement.category|lower }}">
+            <span>{{ announcement.get_category_display }}</span>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <h3 class="announcement-title">{{ announcement.title }}</h3>
+          <p class="announcement-date">
+            <i class="far fa-calendar-alt"></i>
+            {{ announcement.publish_date|date:"M d, Y" }}
+            <span class="time">{{ announcement.publish_date|time:"H:i" }}</span>
+          </p>
+
+          <div class="announcement-body">
+            <div class="announcement-content">
+              {{ announcement.content|safe|truncatewords_html:30 }}
+            </div>
+          </div>
+
+          {% if announcement.get_first_image %}
+          <div class="announcement-image">
+            <img src="{{ announcement.get_first_image.image.url }}"
+                 alt="{{ announcement.get_first_image.caption|default:announcement.title }}"
+                 class="hover-zoom">
+            {% if announcement.get_first_image.caption %}
+              <p class="image-caption">{{ announcement.get_first_image.caption }}</p>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          <!-- Dynamic details based on category -->
+          <div class="dynamic-details">
+            {% if announcement.category == 'ENROLLMENT' %}
+              <div class="detail-item">
+                <i class="fas fa-book"></i>
+                <span>{{ announcement.get_unique_courses_display|join:", " }}</span>
+              </div>
+              <div class="detail-item">
+                <i class="fas fa-calendar-day"></i>
+                <span>{{ announcement.enrollment_start|date:"M d" }} - {{ announcement.enrollment_end|date:"M d, Y" }}</span>
+              </div>
+            {% elif announcement.category == 'EVENT' %}
+              <div class="detail-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ announcement.location }}</span>
+              </div>
+              <div class="detail-item">
+                <i class="fas fa-clock"></i>
+                <span>{{ announcement.event_date|date:"M d, Y H:i" }}</span>
+              </div>
+            {% elif announcement.category == 'SUSPENSION' %}
+              <div class="detail-item">
+                <i class="fas fa-ban"></i>
+                <span>
+                  {{ announcement.suspension_date|date:"M d" }}
+                  {% if announcement.until_suspension_date %}
+                    - {{ announcement.until_suspension_date|date:"M d, Y" }}
+                  {% endif %}
+                </span>
+              </div>
+            {% elif announcement.category == 'EMERGENCY' %}
+              <div class="detail-item">
+                <i class="fas fa-phone-alt"></i>
+                <span>{{ announcement.contact_info }}</span>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="author-info">
+            <div class="author-avatar">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <span class="author-name">{{ announcement.author.get_full_name }}</span>
+          </div>
+
+          <div class="action-buttons">
+            <a href="{% url 'home_announcement_detail' announcement.id %}" class="action-btn view-details-btn" title="View Details">
+              <i class="fas fa-eye"></i>
+            </a>
+            {% if announcement.link %}
+            <a href="{{ announcement.link }}" class="action-btn" target="_blank" title="External Link">
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  <!-- Pagination Controls -->
+<div class="pagination-container glass-card">
+    <div class="pagination-info">
+        Showing {{ announcements.start_index }} - {{ announcements.end_index }} of {{ announcements.paginator.count }} items
+    </div>
+
+    <div class="pagination-controls">
+        {% if announcements.has_previous %}
+            <a href="?page=1" class="pagination-btn first-page" title="First Page">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+            <a href="?page={{ announcements.previous_page_number }}" class="pagination-btn prev-page" title="Previous Page">
+                <i class="fas fa-angle-left"></i>
+            </a>
+        {% else %}
+            <span class="pagination-btn disabled first-page" title="First Page">
+                <i class="fas fa-angle-double-left"></i>
+            </span>
+            <span class="pagination-btn disabled prev-page" title="Previous Page">
+                <i class="fas fa-angle-left"></i>
+            </span>
+        {% endif %}
+
+        <div class="page-numbers">
+            {% for num in announcements.paginator.page_range %}
+                {% if announcements.number == num %}
+                    <span class="pagination-btn active">{{ num }}</span>
+                {% elif num > announcements.number|add:'-3' and num < announcements.number|add:'3' %}
+                    <a href="?page={{ num }}" class="pagination-btn">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if announcements.has_next %}
+            <a href="?page={{ announcements.next_page_number }}" class="pagination-btn next-page" title="Next Page">
+                <i class="fas fa-angle-right"></i>
+            </a>
+            <a href="?page={{ announcements.paginator.num_pages }}" class="pagination-btn last-page" title="Last Page">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+        {% else %}
+            <span class="pagination-btn disabled next-page" title="Next Page">
+                <i class="fas fa-angle-right"></i>
+            </span>
+            <span class="pagination-btn disabled last-page" title="Last Page">
+                <i class="fas fa-angle-double-right"></i>
+            </span>
+        {% endif %}
+    </div>
+</div>
+
+    <!-- Template for announcement cards (used by JavaScript) -->
+    <template id="announcement-template">
+      <div class="announcement-card">
+        <div class="card-header">
+          <div class="category-tag">
+            <span class="category-text"></span>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <h3 class="announcement-title"></h3>
+          <p class="announcement-date">
+            <i class="far fa-calendar-alt"></i>
+            <span class="date-text"></span>
+            <span class="time"></span>
+          </p>
+
+          <div class="announcement-body">
+            <div class="announcement-content"></div>
+          </div>
+
+          <div class="announcement-image" style="display: none;">
+            <img src="" alt="" class="hover-zoom">
+            <p class="image-caption" style="display: none;"></p>
+          </div>
+
+          <div class="dynamic-details"></div>
+        </div>
+
+        <div class="card-footer">
+          <div class="author-info">
+            <div class="author-avatar">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <span class="author-name"></span>
+          </div>
+
+          <div class="action-buttons">
+            <a href="#" class="action-btn view-details-btn" title="View Details">
+              <i class="fas fa-eye"></i>
+            </a>
+            <a href="#" class="action-btn external-link" target="_blank" style="display: none;" title="External Link">
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </template>
+  {% else %}
+    <div class="empty-state">
+      <img src="{% static 'images/no-announcements.svg' %}" alt="No announcements">
+      <h3>No Announcements Found</h3>
+      <p>There are currently no announcements to display.</p>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  // Initialize the announcements data for JavaScript
+  window.announcementsData = JSON.parse('{{ announcements_json|escapejs }}');
+  window.currentDateTime = new Date('{{ now|date:"c" }}');
+</script>
+
+<script src="{% static 'js/core/all_announcements.js' %}"></script>
+
+{% include 'core/footer.html' %}
+</body>
+</html>

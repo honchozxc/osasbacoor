@@ -1,0 +1,104 @@
+<!-- Export Applications Modal -->
+<div id="exportApplicationsModal" class="modal">
+    <div class="export-modal-container">
+        <div class="export-modal-header">
+            <h3 class="export-modal-title">Export Scholarship Applications</h3>
+            <button type="button" class="export-modal-close" onclick="closeExportApplicationsModal()">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+        <div class="export-modal-body">
+            <form id="exportApplicationsForm" class="export-form">
+                {% csrf_token %}
+
+                <div class="export-form-group">
+                    <label class="export-form-label">Export Options</label>
+                    <div class="export-radio-group">
+                        <label class="export-radio-label">
+                            <input type="radio" name="exportOption" value="all" checked>
+                            <span class="export-radio-custom"></span>
+                            All Applications
+                        </label>
+                        <label class="export-radio-label">
+                            <input type="radio" name="exportOption" value="scholarship">
+                            <span class="export-radio-custom"></span>
+                            By Scholarship
+                        </label>
+                        <label class="export-radio-label">
+                            <input type="radio" name="exportOption" value="scholarship-status">
+                            <span class="export-radio-custom"></span>
+                            By Scholarship and Status
+                        </label>
+                    </div>
+                </div>
+
+                <div id="scholarshipOptions" class="export-form-group" style="display: none;">
+                    <label class="export-form-label">Select Scholarship</label>
+                    <select name="scholarship" class="export-form-select">
+                        <option value="">All Scholarships</option>
+                        {% for scholarship in all_scholarships %}
+                        <option value="{{ scholarship.id }}">{{ scholarship.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="scholarshipStatusOptions" class="export-form-group" style="display: none;">
+                    <div class="export-form-row">
+                        <div class="export-form-col">
+                            <label class="export-form-label">Select Scholarship</label>
+                            <select name="scholarship_status" class="export-form-select">
+                                {% for scholarship in all_scholarships %}
+                                <option value="{{ scholarship.id }}">{{ scholarship.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="export-form-col">
+                            <label class="export-form-label">Select Status</label>
+                            <select name="status_scholarship" class="export-form-select">
+                                <option value="all">All Statuses</option>
+                                <option value="approved">Approved</option>
+                                <option value="pending">Pending</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="export-form-group">
+                    <label class="export-form-label">Date Range (Optional)</label>
+                    <div class="export-form-row">
+                        <div class="export-form-col">
+                            <input type="date" name="start_date" class="export-form-input" placeholder="Start Date">
+                        </div>
+                        <div class="export-form-col">
+                            <input type="date" name="end_date" class="export-form-input" placeholder="End Date">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="export-form-group">
+                    <label class="export-form-label">File Format</label>
+                    <div class="export-radio-group">
+                        <label class="export-radio-label">
+                            <input type="radio" name="format" value="excel" checked>
+                            <span class="export-radio-custom"></span>
+                            Excel (.xlsx)
+                        </label>
+                        <label class="export-radio-label">
+                            <input type="radio" name="format" value="csv">
+                            <span class="export-radio-custom"></span>
+                            CSV (.csv)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="export-modal-footer">
+                    <button type="button" class="export-secondary-btn" onclick="closeExportApplicationsModal()">Cancel</button>
+                    <button type="submit" class="export-primary-btn">
+                        <i class='bx bx-download'></i> Export
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

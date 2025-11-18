@@ -1,0 +1,366 @@
+{% block home-content %}
+<div class="announcement-layout" id="home">
+    <!-- Main Feed Column -->
+    <div class="announcement-feed-container">
+        <div class="feed-header">
+            <div class="header-left">
+                <h2 class="section-heading"><i class="ri-megaphone-fill"></i> News Feed</h2>
+            </div>
+            <div class="feed-controls">
+                <div class="search-box">
+                    <i class="ri-search-line"></i>
+                    <input type="text" id="feed-search" placeholder="Search announcements..." onkeyup="searchAnnouncements()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter/Sort Controls - Sticky Header -->
+        <div class="feed-filters sticky-filters">
+            <div class="filter-group">
+                <label for="category-filter"><i class="ri-filter-line"></i> Category:</label>
+                <select id="category-filter" class="filter-select" onchange="filterAnnouncements()">
+                    <option value="all">All Categories</option>
+                    <option value="BASIC">Basic</option>
+                    <option value="ENROLLMENT">Enrollment</option>
+                    <option value="EVENT">Events</option>
+                    <option value="SUSPENSION">Suspensions</option>
+                    <option value="EMERGENCY">Emergency</option>
+                    <option value="SCHOLARSHIP">Scholarship</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="sort-by"><i class="ri-sort-desc"></i> Sort:</label>
+                <select id="sort-by" class="filter-select" onchange="sortAnnouncements()">
+                    <option value="all">All Announcements</option>
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Announcement Feed -->
+        <div class="announcement-feed" id="announcementFeed">
+            {% for announcement in published_announcements %}
+                {% if announcement.is_published %}
+            <div class="announcement-card" data-id="announcement-{{ announcement.id }}" data-category="{{ announcement.category }}" data-date="{{ announcement.created_at|date:'U' }}">
+                <div class="card-header">
+                    <div class="profile-section">
+                        {% if announcement.author.profile_picture %}
+                        <img src="{{ announcement.author.profile_picture.url }}" alt="{{ announcement.author.get_full_name }}" class="author-avatar">
+                        {% else %}
+                        <div class="author-avatar default-avatar">
+                            {{ announcement.author.first_name|first }}{{ announcement.author.last_name|first }}
+                        </div>
+                        {% endif %}
+                        <div class="name-time">
+                            <span class="author-name">{{ announcement.author.get_full_name }}</span>
+                            <span class="post-time">{{ announcement.created_at|timesince }} ago</span>
+                        </div>
+                    </div>
+                    <div class="card-category {{ announcement.category|lower }}">
+                        {{ announcement.get_category_display }}
+                    </div>
+                </div>
+
+                <div class="card-content">
+                    <h3 class="announcement-title">{{ announcement.title }}</h3>
+                    <div class="announcement-text">
+                        <div class="truncated-content">
+                            {{ announcement.content|truncatewords_html:30|safe }}
+                        </div>
+                        <div class="full-content" style="display: none;">
+                            {{ announcement.content|safe }}
+                        </div>
+                        {% if announcement.content|striptags|wordcount > 30 %}
+                            <button class="toggle-content-btn">Show More</button>
+                        {% endif %}
+                    </div>
+                    {% if announcement.link %}
+                    <div class="announcement-link">
+                        <a href="{{ announcement.link }}" target="_blank" rel="noopener noreferrer">
+                            <i class="ri-links-line"></i> {{ announcement.link|truncatechars:40 }}
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Category-specific content -->
+                    {% if announcement.category == 'ENROLLMENT' and announcement.courses %}
+                    <div class="category-details">
+                        <div class="detail-item">
+                            <label><i class="ri-book-2-line"></i> Courses:</label>
+                            <span>{{ announcement.get_unique_courses_display|join:"<br>" }}</span>
+                        </div>
+                        {% if announcement.enrollment_start and announcement.enrollment_end %}
+                        <div class="detail-item">
+                            <span><i class="ri-calendar-event-line"></i> Enrollment: {{ announcement.enrollment_start|date:"M d, Y H:i" }} to {{ announcement.enrollment_end|date:"M d, Y H:i" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if announcement.category == 'EVENT' %}
+                    <div class="category-details">
+                        {% if announcement.event_date %}
+                        <div class="detail-item">
+                            <span><i class="ri-time-line"></i> Event Date: {{ announcement.event_date|date:"M d, Y H:i" }}</span>
+                        </div>
+                        {% endif %}
+                        {% if announcement.location %}
+                        <div class="detail-item">
+                            <span><i class="ri-map-pin-line"></i> Location: {{ announcement.location }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if announcement.category == 'SUSPENSION' %}
+                    <div class="category-details">
+                        {% if announcement.suspension_date %}
+                        <div class="detail-item">
+                            <span><i class="ri-calendar-close-line"></i> Suspension Date: {{ announcement.suspension_date|date:"M d, Y" }}</span>
+                        </div>
+                        {% endif %}
+                        {% if announcement.until_suspension_date %}
+                        <div class="detail-item">
+                            <span><i class="ri-calendar-close-line"></i> Until: {{ announcement.until_suspension_date|date:"M d, Y" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if announcement.category == 'EMERGENCY' and announcement.contact_info %}
+                    <div class="category-details emergency">
+                        <div class="detail-item">
+                            <span><i class="ri-alert-line"></i> Emergency Contact: <br>{{ announcement.contact_info|linebreaksbr }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if announcement.category == 'SCHOLARSHIP' %}
+                    <div class="category-details scholarship">
+                        {% if announcement.application_start and announcement.application_end %}
+                        <div class="detail-item">
+                            <span><i class="ri-timer-flash-line"></i> Application Period:
+                                {{ announcement.application_start|date:"M d, Y" }} to {{ announcement.application_end|date:"M d, Y" }}
+                            </span>
+                            <span class="time-remaining" data-deadline="{{ announcement.application_end|date:'U' }}">
+                                ({{ announcement.application_end|timeuntil }} remaining)
+                            </span>
+                        </div>
+                        {% endif %}
+                        {% if announcement.scholarship %}
+                        <div class="detail-item">
+                            <span><i class="ri-information-line"></i> Scholarship: {{ announcement.scholarship.name }}</span>
+                        </div>
+                        {% endif %}
+                        {% if announcement.benefits %}
+                        <div class="detail-item">
+                            <span><i class="ri-money-dollar-circle-line"></i> Benefits: {{ announcement.benefits }}</span>
+                        </div>
+                        {% endif %}
+                        {% if announcement.requirements %}
+                        <div class="detail-item">
+                            <span><i class="ri-file-list-line"></i> Requirements: {{ announcement.requirements }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Images Gallery -->
+                {% if announcement.images.all %}
+                <div class="card-gallery">
+                    <!-- Show only the first image -->
+                    {% with first_image=announcement.images.first %}
+                    <div class="gallery-preview"
+                         onclick="openImageViewer(this, 0, {{ announcement.images.count }})"
+                         data-image-url="{{ first_image.image.url }}"
+                         {% if first_image.caption %}data-caption="{{ first_image.caption }}"{% endif %}>
+                        <img src="{{ first_image.image.url }}" alt="Announcement image" loading="lazy">
+                        {% if first_image.caption %}
+                        <div class="image-caption">{{ first_image.caption }}</div>
+                        {% endif %}
+
+                        <!-- Show indicator if more than one image -->
+                        {% if announcement.images.count > 1 %}
+                        <div class="image-count-indicator">
+                            <i class="ri-gallery-line"></i> +{{ announcement.images.count|add:"-1" }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endwith %}
+
+                    <!-- Hidden container with all images for the viewer -->
+                    <div class="gallery-full" style="display: none;">
+                        {% for image in announcement.images.all %}
+                        <div class="gallery-item"
+                             data-image-url="{{ image.image.url }}"
+                             {% if image.caption %}data-caption="{{ image.caption }}"{% endif %}>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% empty %}
+            <div class="empty-feed">
+                <div class="empty-icon">
+                    <i class="ri-inbox-line"></i>
+                </div>
+                <h3>No announcements found</h3>
+                <p>Check back later or create a new announcement</p>
+                {% if perms.announcements.add_announcement %}
+                <button class="btn btn-primary" onclick="openAnnouncementCreateModal()">
+                    <i class="ri-add-line"></i> Create Announcement
+                </button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Right Sidebar - Enhanced with more valuable content -->
+    <div class="announcement-sidebar">
+        <!-- Important Announcements Section -->
+        <div class="sidebar-section important-announcements">
+            <h3 class="sidebar-title">
+                <i class="ri-alert-line"></i> Emergency Notices
+            </h3>
+            <div class="important-list">
+                <!-- Debug information -->
+                <div style="display: none;">
+                    Current time: {{ timezone.now }}<br>
+                    24 hours ago: {{ twenty_four_hours_ago }}<br>
+                    Emergency announcements count: {{ emergency_announcements|length }}<br>
+                    Emergency announcements:
+                    {% for a in emergency_announcements %}
+                        {{ a.title }} ({{ a.created_at }}) - Published: {{ a.is_published }}<br>
+                    {% endfor %}
+                </div>
+
+                {% for announcement in emergency_announcements %}
+                    <div class="important-item emergency-alert" onclick="viewAnnouncement({{ announcement.id }})">
+                        <div class="important-badge emergency">
+                            <i class="ri-alarm-warning-fill"></i>
+                        </div>
+                        <div class="important-content">
+                            <h4>{{ announcement.title }}</h4>
+                            <div class="important-meta">
+                                <span class="important-time">{{ announcement.created_at|timesince }} ago</span>
+                                <span class="emergency-tag">URGENT</span>
+                            </div>
+                            <span class="emergency-expiry" data-expiry-time="{% with expiry=announcement.created_at|add:time_delta %}{{ expiry|date:'M j, Y H:i' }}{% endwith %}">
+                                <i class="ri-time-line"></i>Expires in {% with expiry=announcement.created_at|add:time_delta %}{{ expiry|timeuntil }}{% endwith %}
+                            </span>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="no-important">
+                        <i class="ri-information-line"></i>
+                        <p>No recent emergency announcements</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="sidebar-section quick-actions">
+            <h3 class="sidebar-title">
+                <i class="ri-flashlight-line"></i> Quick Actions
+            </h3>
+            <div class="actions-grid">
+                {% if perms.osas.view_announcement %}
+                <button class="action-card" onclick="showSection('announcements')">
+                    <div class="action-icon">
+                        <i class="ri-megaphone-line"></i>
+                    </div>
+                    <span>All Announcements</span>
+                </button>
+                {% endif %}
+                {% if perms.osas.add_announcement %}
+                <button class="action-card" onclick="openAnnouncementCreateModal()">
+                    <div class="action-icon">
+                        <i class="ri-add-circle-line"></i>
+                    </div>
+                    <span>Create New</span>
+                </button>
+                {% endif %}
+                <button class="action-card" onclick="showSection('calendar')">
+                    <div class="action-icon">
+                        <i class="ri-calendar-line"></i>
+                    </div>
+                    <span>Calendar</span>
+                </button>
+                {% if request.user.user_type != 15 %}
+                <a href="{% url 'complaint-create' %}" class="action-card">
+                    <div class="action-icon">
+                        <i class="ri-add-circle-line"></i>
+                    </div>
+                    <span>Create Complaint</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="sidebar-section upcoming-event">
+            <h3 class="sidebar-title"><i class="ri-calendar-2-line"></i> Upcoming Events</h3>
+            <div class="upcoming-events-list">
+                {% for event in upcoming_events %}
+                <div class="event-alert" onclick="viewAnnouncement({{ event.id }})">
+                    <div class="event-badge upcoming">
+                        <i class='bx bxs-calendar-event'></i>
+                    </div>
+                    <div class="important-content">
+                        <h4>{{ event.title }}</h4>
+                        <div class="important-meta">
+                            <span class="important-date">{{ event.event_date|date:"M d, Y H:i" }}</span>
+                            <span class="event-tag">EVENT</span>
+                            <span class="time-until">(in {{ event.event_date|timeuntil }})</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-upcoming-events">
+                    <i class="ri-calendar-line"></i>
+                    <p>No upcoming events scheduled</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="sidebar-section quick-links">
+            <h3 class="sidebar-title">
+                <i class="ri-links-line"></i> Quick Links
+            </h3>
+            <div class="links-grid">
+                <a href="https://maps.app.goo.gl/rQm5ay9QgDkmeqhW9" target="_blank" class="link-item">
+                    <i class="ri-building-line"></i> Campus Map
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Viewer Modal -->
+<div id="imageViewerModal" class="image-viewer-modal">
+    <span class="close-btn" onclick="closeImageViewer()">&times;</span>
+    <div class="modal-content">
+        <img id="viewerImage" class="viewer-image">
+        <div class="image-caption-container">
+            <p id="viewerCaption" class="viewer-caption"></p>
+            <p id="imageCounter" class="image-counter"></p>
+        </div>
+    </div>
+    <a class="nav-arrow prev" onclick="navigateImageViewer(-1)">&#10094;</a>
+    <a class="nav-arrow next" onclick="navigateImageViewer(1)">&#10095;</a>
+</div>
+
+<!-- Hidden element for infinite scroll data -->
+<div id="infiniteScrollData"
+     data-has-next="{{ has_next_home_page|yesno:'true,false' }}"
+     data-next-page="{{ next_home_page|default:2 }}"
+     style="display: none;">
+</div>
+{% endblock home-content %}

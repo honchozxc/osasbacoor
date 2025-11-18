@@ -1,0 +1,300 @@
+{% block ojt-records-content %}
+<div class="section-header">
+    <div class="header-content">
+        <div class="title-section">
+            <h2 class="section-heading">OJT Applications Management</h2>
+            <div class="divider"></div>
+        </div>
+
+        <!-- OJT Applications Statistics Section - Only for Admin/Staff -->
+        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+        <div class="user-statistics">
+            <div class="stat-card">
+                <div class="stat-icon total-users">
+                    <i class='bx bx-file'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ total_ojt_applications|default:0 }}</h3>
+                    <p>Total Applications</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon verified">
+                    <i class='bx bx-check-circle'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ approved_applications|default:0 }}</h3>
+                    <p>Approved</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon unverified">
+                    <i class='bx bx-send'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ submitted_applications|default:0 }}</h3>
+                    <p>Submitted</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon archived">
+                    <i class='bx bx-x-circle'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ rejected_applications|default:0 }}</h3>
+                    <p>Rejected</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon draft">
+                    <i class='bx bx-edit'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ draft_applications|default:0 }}</h3>
+                    <p>Draft</p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Student Statistics - Show only their own stats -->
+        <div class="user-statistics">
+            <div class="stat-card">
+                <div class="stat-icon total-users">
+                    <i class='bx bx-file'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ user_total_applications|default:0 }}</h3>
+                    <p>My Applications</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon verified">
+                    <i class='bx bx-check-circle'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ user_approved_applications|default:0 }}</h3>
+                    <p>Approved</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon unverified">
+                    <i class='bx bx-send'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ user_submitted_applications|default:0 }}</h3>
+                    <p>Submitted</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon archived">
+                    <i class='bx bx-x-circle'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ user_rejected_applications|default:0 }}</h3>
+                    <p>Rejected</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon draft">
+                    <i class='bx bx-edit'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ user_draft_applications|default:0 }}</h3>
+                    <p>Draft</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="controls">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="ojt-application-search" placeholder="Search applications..." class="search-input" value="">
+            </div>
+
+            <!-- Status Filter -->
+            <div class="status-sort">
+                <select id="status-filter" class="styled-select">
+                    <option value="">All Status</option>
+                    <option value="draft">Draft</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="under_review">Under Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+
+            <!-- Company Filter -->
+            <div class="status-sort">
+                <select id="company-filter" class="styled-select">
+                    <option value="">All Companies</option>
+                    {% for company in ojt_companies %}
+                    <option value="{{ company.id }}">{{ company.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 or request.user.user_type == 14 %}
+            <a href="{% url 'add-ojt-application' %}" class="primary-btn" style="text-decoration: none; display: inline-block;">
+                <i class="ri-add-line"></i> New Application
+            </a>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+            <button class="primary-btn" id="export-ojt-application-btn" data-export-url="{% url 'export-ojt-applications' %}">
+                <i class='bx bx-export'></i> Export Data
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Simplified table with only important columns -->
+<table class="data-table" id="ojt-applications-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+            <th>Student Name</th>
+            {% endif %}
+            <th>Course & Section</th>
+            <th>Company</th>
+            <th>Proposed Period</th>
+            <th>Requirements</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="ojt-applications-tbody">
+        {% if ojt_applications %}
+            {% for application in ojt_applications %}
+            <tr>
+                <td>{{ application.id }}</td>
+                {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                <td>
+                    <div class="student-info">
+                        <strong>{{ application.student.get_full_name }}</strong>
+                        <small>ID: {{ application.student.username }}</small>
+                    </div>
+                </td>
+                {% endif %}
+                <td>
+                    <div class="course-info">
+                        <strong>{{ application.student_course }}</strong>
+                        <small>Section {{ application.student_section }}</small>
+                    </div>
+                </td>
+                <td>
+                    <div class="company-info">
+                        <strong>{{ application.company.name }}</strong>
+                        {% if application.company.can_accept_more_students %}
+                        <small class="active-badge">Slots Available</small>
+                        {% else %}
+                        <small class="inactive-badge">Full</small>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div class="duration-info">
+                        <strong>{{ application.duration_days }} days</strong>
+                        <small>{{ application.proposed_start_date|date:"M d" }} - {{ application.proposed_end_date|date:"M d, Y" }}</small>
+                    </div>
+                </td>
+                <td>
+                    <div class="requirements-info">
+                        <span class="requirements-count">{{ application.requirements_submitted }}/{{ application.total_requirements }}</span>
+                        {% if application.requirements_complete %}
+                        <i class='bx bx-check requirements-check' title="All requirements submitted"></i>
+                        {% else %}
+                        <i class='bx bx-x requirements-missing' title="Requirements incomplete"></i>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <span class="status-badge status-{{ application.status }}">{{ application.get_status_display }}</span>
+                </td>
+                <td class="action-buttons">
+                    <button class="btn-action view-btn" onclick="openOJTApplicationViewModal({{ application.id }})" title="View Details">
+                        <i class='bx bx-show'></i>
+                    </button>
+
+                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                        <!-- Admin/Staff users can ALWAYS see View, Edit, Archive regardless of status -->
+                        <button class="btn-action edit-btn" onclick="openOJTApplicationEditModal({{ application.id }})" title="Edit">
+                            <i class='bx bx-edit'></i>
+                        </button>
+                        <button class="btn-action archive-btn" onclick="openOJTApplicationArchiveModal({{ application.id }})" title="Archive">
+                            <i class='bx bx-archive'></i>
+                        </button>
+                        {% if application.status == 'submitted' or application.status == 'under_review' %}
+                        <button class="btn-action approve-btn" onclick="openOJTApplicationApproveModal({{ application.id }})" title="Review">
+                            <i class='bx bx-check'></i>
+                        </button>
+                        {% endif %}
+                    {% elif request.user.user_type == 14 and application.student.id == request.user.id %}
+                        <!-- Students can only view their own applications -->
+                        <!-- Edit and Archive buttons disappear once approved -->
+                        {% if application.status != 'approved' %}
+                        <button class="btn-action edit-btn" onclick="openOJTApplicationEditModal({{ application.id }})" title="Edit">
+                            <i class='bx bx-edit'></i>
+                        </button>
+                        <button class="btn-action archive-btn" onclick="openOJTApplicationArchiveModal({{ application.id }})" title="Archive">
+                            <i class='bx bx-archive'></i>
+                        </button>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr id="no-data-row">
+                <td colspan="{% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}8{% else %}7{% endif %}" style="text-align: center; padding: 20px; font-style: italic; color: #888;">
+                    No OJT applications found in initial load
+                </td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<!-- Pagination Container -->
+<div class="pagination-container" id="ojt-application-pagination-container">
+    {% if ojt_applications.has_other_pages %}
+    <div class="pagination-info">
+        Showing {{ ojt_applications.start_index }} to {{ ojt_applications.end_index }} of {{ ojt_applications.paginator.count }} entries
+    </div>
+    <div class="pagination-controls">
+        {% if ojt_applications.has_previous %}
+            <button class="pagination-btn" onclick="loadOJTApplicationsPage({{ ojt_applications.previous_page_number }})">
+                <i class='bx bx-chevron-left'></i> Previous
+            </button>
+        {% endif %}
+
+        {% for page_num in ojt_applications.paginator.page_range %}
+            {% if page_num == ojt_applications.number %}
+                <button class="pagination-btn active">{{ page_num }}</button>
+            {% else %}
+                <button class="pagination-btn" onclick="loadOJTApplicationsPage({{ page_num }})">{{ page_num }}</button>
+            {% endif %}
+        {% endfor %}
+
+        {% if ojt_applications.has_next %}
+            <button class="pagination-btn" onclick="loadOJTApplicationsPage({{ ojt_applications.next_page_number }})">
+                Next <i class='bx bx-chevron-right'></i>
+            </button>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="pagination-info">
+        Showing {{ ojt_applications.paginator.count }} entries
+    </div>
+    {% endif %}
+</div>
+{% endblock ojt-records-content %}

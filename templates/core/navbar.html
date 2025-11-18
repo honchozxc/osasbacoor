@@ -1,0 +1,74 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/core/navbar.css' %}">
+<nav class="navbar">
+    <div class="container">
+        <a href="/" class="brand">
+            <img src="{% static 'images/cvsu-logo.png' %}" alt="CvSU Logo" class="logo">
+            <div class="brand-text">
+                <span class="university">Office of Student Affairs and Services</span>
+                <span class="campus">Bacoor City Campus</span>
+            </div>
+        </a>
+        <div class="nav-container" aria-expanded="false">
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a></li>
+                <li><a href="/about" class="nav-link {% if request.path == '/about/' %}active{% endif %}">About</a></li>
+                <li><a href="/all_announcements" class="nav-link {% if request.path == '/all_announcements' %}active{% endif %}">Announcements</a></li>
+                <li><a href="/downloadables" class="nav-link {% if request.path == '/downloadables/' %}active{% endif %}">Downloadable Forms</a></li>
+
+                <!-- More Dropdown -->
+                <li class="dropdown">
+                    <a href="#" class="nav-link {% if '/student-organization' in request.path %}active{% endif %}" aria-haspopup="true" aria-expanded="false">
+                        More
+                        <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                    <ul class="dropdown-menu" aria-label="More menu">
+                        <li><a href="/student-discipline-unit" class="dropdown-link {% if request.path == '/student-discipline-unit/' %}active{% endif %}">Student Discipline Unit</a></li>
+                        <li><a href="/ojt" class="dropdown-link {% if request.path == '/ojt' %}active{% endif %}">OJT Program</a></li>
+                        <li><a href="/scholarships" class="dropdown-link {% if request.path == '/scholarships/' %}active{% endif %}">Scholarship</a></li>
+                        <li><a href="/admission" class="dropdown-link {% if request.path == '/admission/' %}active{% endif %}">Admission</a></li>
+                        <li><a href="/nstp" class="dropdown-link {% if request.path == '/nstp/' %}active{% endif %}">NSTP</a></li>
+                        <li><a href="/clinic" class="dropdown-link {% if request.path == '/clinic/' %}active{% endif %}">Clinic</a></li>
+                        <li><a href="{% url 'sdsorganization' %}" class="dropdown-link {% if request.path == '/student-organization/' %}active{% endif %}">Student Development Services</a></li>
+                        <li><a href="/osas-org-chart" class="dropdown-link {% if request.path == '/osas-org-chart/' %}active{% endif %}">Organization Chart</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <div class="nav-buttons">
+                {% if user.is_authenticated %}
+                    <a href="/dashboard" class="dashboard-button">
+                        <span>Dashboard</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3H3V10H10V3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M21 3H14V10H21V3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M21 14H14V21H21V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 14H3V21H10V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                {% else %}
+                    <button class="nav-button">
+                        <span>Login</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8.91016 19.9201L15.4302 13.4001C16.2002 12.6301 16.2002 11.3701 15.4302 10.6001L8.91016 4.08008" stroke="currentColor" stroke-width="2.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        <button class="hamburger" aria-label="Mobile menu">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+    </div>
+</nav>
+
+{% if not user.is_authenticated %}
+    {% include 'osas/login.html' %}
+{% endif %}
+
+<script src="{% static 'js/core/navbar.js' %}"></script>
+<script src="{% static 'js/core/login.js' %}"></script>

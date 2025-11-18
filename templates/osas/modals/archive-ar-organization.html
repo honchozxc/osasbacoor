@@ -1,0 +1,195 @@
+{% block archive-accomplishment-report %}
+<div id="accomplishmentArchiveModal" class="modal">
+    <div class="modal-overlay" onclick="closeAccomplishmentArchiveModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Archive Accomplishment Report</h2>
+                <p class="header-description" id="accomplishmentArchiveDescription">Are you sure you want to archive this accomplishment report?</p>
+            </div>
+            <button class="modal-close" onclick="closeAccomplishmentArchiveModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="accomplishmentArchiveForm" method="post" action="">
+            {% csrf_token %}
+            <input type="hidden" name="accomplishment_id" id="archiveAccomplishmentId">
+
+            <div class="form-body">
+                <!-- Warning Introduction -->
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p>Archiving will hide this accomplishment report from regular views but keep it in the system for record-keeping purposes.</p>
+                </div>
+
+                <!-- Report Details Preview -->
+                <div class="report-preview-section">
+                    <div class="section-title">
+                        <i class='bx bx-file'></i>
+                        <span>Report Details Preview</span>
+                    </div>
+                    <div class="report-preview-card">
+                        <div class="preview-header">
+                            <h4 id="archiveAccomplishmentTitle" class="preview-title">-</h4>
+                            <div class="preview-badges">
+                                <span class="type-badge" id="archiveAccomplishmentType">-</span>
+                                <span class="semester-badge" id="archiveAccomplishmentSemester">-</span>
+                            </div>
+                        </div>
+
+                        <div class="preview-details-grid">
+                            <div class="preview-column">
+                                <div class="preview-item">
+                                    <span class="preview-label">Submitted By:</span>
+                                    <span class="preview-value" id="archiveAccomplishmentSubmitter">-</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">Organization:</span>
+                                    <span class="preview-value" id="archiveAccomplishmentOrganization">-</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">Date Conducted:</span>
+                                    <span class="preview-value" id="archiveAccomplishmentDate">-</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">Venue:</span>
+                                    <span class="preview-value" id="archiveAccomplishmentVenue">-</span>
+                                </div>
+                            </div>
+                            <div class="preview-column">
+                                <div class="preview-item">
+                                    <span class="preview-label">Participants:</span>
+                                    <span class="preview-value" id="archiveAccomplishmentParticipants">-</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">Duration:</span>
+                                    <span class="preview-value" id="archiveAccomplishmentDuration">-</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">Budget:</span>
+                                    <span class="preview-value" id="archiveAccomplishmentBudget">-</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">Submitted On:</span>
+                                    <span class="preview-value" id="archiveAccomplishmentSubmittedAt">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Academic Information -->
+                        <div class="academic-info-section">
+                            <div class="preview-item full-width">
+                                <span class="preview-label">Academic Period:</span>
+                                <span class="preview-value" id="archiveAccomplishmentPeriod">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Removed Description Preview Section -->
+
+                        <!-- Files Information -->
+                        <div class="files-preview-section">
+                            <div class="files-grid">
+                                <div class="file-info-item">
+                                    <span class="preview-label">Main Report:</span>
+                                    <span class="preview-value file-value" id="archiveAccomplishmentMainReport">-</span>
+                                </div>
+                                <div class="file-info-item">
+                                    <span class="preview-label">Supporting Files:</span>
+                                    <span class="preview-value file-value" id="archiveAccomplishmentSupportingFiles">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Archive Reason Field -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class='bx bx-edit'></i>
+                        <span>Archive Details</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="archiveReason" class="form-label">
+                            Archive Reason
+                            <span class="label-optional">Optional</span>
+                        </label>
+                        <textarea
+                            id="archiveReason"
+                            name="archive_reason"
+                            class="form-textarea"
+                            placeholder="Enter reason for archiving this report (e.g., 'Completed academic year', 'Data cleanup', etc.)"
+                            rows="3"
+                            maxlength="500"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Archive Impact Warning -->
+                <div class="archive-impact-section">
+                    <div class="section-title warning-title">
+                        <i class='bx bx-error-circle'></i>
+                        <span>Archive Impact</span>
+                    </div>
+                    <div class="impact-warning-card">
+                        <div class="warning-content">
+                            <p class="impact-summary"><strong>This action will:</strong></p>
+                            <ul class="impact-list">
+                                <li>
+                                    <i class='bx bx-hide'></i>
+                                    Hide this accomplishment report from regular views and searches
+                                </li>
+                                <li>
+                                    <i class='bx bx-archive'></i>
+                                    Preserve all report data, files, and attachments
+                                </li>
+                                <li>
+                                    <i class='bx bx-shield'></i>
+                                    Keep the report accessible to administrators in archived records
+                                </li>
+                                <li>
+                                    <i class='bx bx-lock'></i>
+                                    Prevent further edits to this report
+                                </li>
+                                <li>
+                                    <i class='bx bx-history'></i>
+                                    Maintain the report in organizational history and statistics
+                                </li>
+                            </ul>
+                            <div class="organization-impact" id="organizationImpact">
+                                <div class="impact-notice">
+                                    <i class='bx bx-info-circle'></i>
+                                    <div class="impact-notice-content">
+                                        <strong>Organization Impact:</strong> This report will remain part of the organization's accomplishment history but will be marked as archived.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="accomplishmentArchiveFormResponse" class="form-response"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeAccomplishmentArchiveModal()">Cancel</button>
+                <button type="submit" class="btn btn-warning" id="archiveAccomplishmentSubmitBtn">
+                    <span class="btn-text">Archive Report</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock archive-accomplishment-report %}

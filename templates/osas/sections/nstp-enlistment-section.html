@@ -1,0 +1,205 @@
+{% block content %}
+<div class="section-header">
+    <div class="header-content">
+        <div class="title-section">
+            <h2 class="section-heading">NSTP Enlistments</h2>
+            <div class="divider"></div>
+        </div>
+        <div class="controls">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="nstp-search" placeholder="Search enlistments..." class="search-input">
+            </div>
+            <div class="semester-sort">
+                <select id="semester-sort" class="styled-select">
+                    <option value="">Sort by Semester</option>
+                    <option value="1st Sem">1st Semester</option>
+                    <option value="2nd Sem">2nd Semester</option>
+                </select>
+            </div>
+            <div class="action-buttons">
+                <button class="primary-btn" onclick="window.location.href='{% url 'nstp_register' %}'" {% if not perms.osas.add_nstpstudentinfo %}style="display: none;"{% endif %}>
+                    <i class='bx bx-plus'></i> Add NSTP Enlistment
+                </button>
+                {% if request.user.is_superuser or request.user_user_type == 1 or request.user.user_type == 2 %}
+                <button class="export-btn-nstp" onclick="openNSTPExportModal()">
+                    <i class='bx bx-export'></i> Export Data
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NSTP Statistics Section - Minimalist Design -->
+<div class="stats-minimal">
+    <div class="stat-item">
+        <div class="stat-value">{{ total_nstp_enlistments }}</div>
+        <div class="stat-label">Total Enlistments</div>
+    </div>
+
+    <div class="stat-divider"></div>
+
+    <div class="stat-item">
+        <div class="stat-value">{{ first_sem_count }}</div>
+        <div class="stat-label">1st Semester</div>
+    </div>
+
+    <div class="stat-divider"></div>
+
+    <div class="stat-item">
+        <div class="stat-value">{{ second_sem_count }}</div>
+        <div class="stat-label">2nd Semester</div>
+    </div>
+
+    <div class="stat-divider"></div>
+
+    <div class="stat-item">
+        <div class="stat-value">{{ pending_nstp_count }}</div>
+        <div class="stat-label">Pending</div>
+    </div>
+
+    <div class="stat-divider"></div>
+
+    <div class="stat-item">
+        <div class="stat-value">{{ approved_nstp_count }}</div>
+        <div class="stat-label">Approved</div>
+    </div>
+
+    <div class="stat-divider"></div>
+
+    <div class="stat-item">
+        <div class="stat-value">{{ rejected_nstp_count }}</div>
+        <div class="stat-label">Rejected</div>
+    </div>
+</div>
+
+<div id="nstp-enlistments-container" class="nstp-container">
+    <div class="nstp-loading" id="nstp-loading" style="display: none;">
+        <div class="nstp-loading-spinner">
+            <i class='bx bx-loader-alt bx-spin'></i>
+            <p>Loading NSTP data...</p>
+        </div>
+    </div>
+
+    <table class="data-table" id="nstp-table">
+        <thead>
+            <tr>
+                <th data-sort="student_number">Student Number <i class='bx bx-sort'></i></th>
+                <th data-sort="last_name">Name <i class='bx bx-sort'></i></th>
+                <th data-sort="program">Program <i class='bx bx-sort'></i></th>
+                <th data-sort="semester">Semester <i class='bx bx-sort'></i></th>
+                <th data-sort="approval_status">Status <i class='bx bx-sort'></i></th>
+                <th data-sort="created_at">Enlistment Date <i class='bx bx-sort'></i></th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for enlistment in nstp_enlistments %}
+            <tr>
+                <td>{{ enlistment.student_number }}</td>
+                <td>{{ enlistment.last_name }}, {{ enlistment.first_name }}</td>
+                <td>{{ enlistment.program }}</td>
+                <td>{{ enlistment.semester }}</td>
+                <td>
+                    <span class="status-badge
+                        {% if enlistment.approval_status == 'approved' %}status-approved
+                        {% elif enlistment.approval_status == 'rejected' %}status-rejected
+                        {% else %}status-pending{% endif %}"
+                        data-status="{{ enlistment.approval_status }}">
+                        {{ enlistment.get_approval_status_display }}
+                    </span>
+                </td>
+                <td>{{ enlistment.created_at|date:"Y-m-d" }}</td>
+                <td class="actions">
+                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 2 %}
+                        {% if enlistment.approval_status != 'approved' %}
+                            <button class="btn-action approve-enlistment btn-icon" title="Approve" onclick="openApproveNSTPEnlistmentModal('{{ enlistment.id }}', 'approve')">
+                                <i class='bx bx-check'></i>
+                            </button>
+                        {% endif %}
+                    {% endif %}
+
+                    <button class="btn-icon view view-nstp-student" title="View" data-student-id="{{ enlistment.id }}">
+                        <i class="ri-eye-fill"></i>
+                    </button>
+
+                    {% if enlistment.approval_status == 'pending' or request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 2 %}
+                    <button class="btn-icon edit-enlistment" title="Edit" data-student-id="{{ enlistment.id }}">
+                        <i class='bx bx-edit'></i>
+                    </button>
+                    {% endif %}
+
+                    {% if enlistment.approval_status == 'pending' or request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 2 %}
+                    <button class="btn-icon archive-enlistment" title="Archive" onclick="openArchiveNSTPEnlistmentModal('{{ enlistment.id }}')">
+                        <i class='bx bxs-archive'></i>
+                    </button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="empty-table">
+                    <div class="empty-state">
+                        <i class='bx bx-user'></i>
+                        <p>No NSTP enlistments found</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination for NSTP Enlistments -->
+    {% if nstp_enlistments %}
+    <div class="pagination-container">
+        <div class="pagination-info">
+            Showing {{ nstp_enlistments.start_index }} to {{ nstp_enlistments.end_index }} of {{ nstp_enlistments.paginator.count }} entries
+        </div>
+        <div class="pagination-controls">
+            {% if nstp_enlistments.has_previous %}
+                <a href="?nstp_page=1" class="pagination-btn first-page" title="First Page">
+                    <i class='bx bx-chevrons-left'></i>
+                </a>
+                <a href="?nstp_page={{ nstp_enlistments.previous_page_number }}" class="pagination-btn prev-page" title="Previous Page">
+                    <i class='bx bx-chevron-left'></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn first-page disabled" title="First Page">
+                    <i class='bx bx-chevrons-left'></i>
+                </span>
+                <span class="pagination-btn prev-page disabled" title="Previous Page">
+                    <i class='bx bx-chevron-left'></i>
+                </span>
+            {% endif %}
+
+            <div class="page-numbers">
+                {% for num in nstp_enlistments.paginator.page_range %}
+                    {% if nstp_enlistments.number == num %}
+                        <span class="pagination-btn current-page active">{{ num }}</span>
+                    {% elif num > nstp_enlistments.number|add:'-3' and num < nstp_enlistments.number|add:'3' %}
+                        <a href="?nstp_page={{ num }}" class="pagination-btn page-number">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if nstp_enlistments.has_next %}
+                <a href="?nstp_page={{ nstp_enlistments.next_page_number }}" class="pagination-btn next-page" title="Next Page">
+                    <i class='bx bx-chevron-right'></i>
+                </a>
+                <a href="?nstp_page={{ nstp_enlistments.paginator.num_pages }}" class="pagination-btn last-page" title="Last Page">
+                    <i class='bx bx-chevrons-right'></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn next-page disabled" title="Next Page">
+                    <i class='bx bx-chevron-right'></i>
+                </span>
+                <span class="pagination-btn last-page disabled" title="Last Page">
+                    <i class='bx bx-chevrons-right'></i>
+                </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

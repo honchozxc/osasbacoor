@@ -1,0 +1,119 @@
+{% load static %}
+{% block view-user %}
+<div id="userViewModal" class="modal">
+  <div class="modal-overlay" onclick="closeViewModal()"></div>
+  <div class="modal-container">
+    <div class="modal-header">
+      <div class="header-content">
+        <h2>User Details</h2>
+        <p class="header-description">View user account information</p>
+      </div>
+      <button class="modal-close" onclick="closeViewModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="form-body">
+      <div class="user-profile-section">
+        <div class="profile-picture-view">
+          <img id="viewProfilePicture" src="{% static 'images/default-profile.png' %}" alt="Profile Picture">
+        </div>
+        <div class="user-basic-info">
+          <h3 id="viewUserName"></h3>
+          <p class="text-muted" id="viewUserRole"></p>
+        </div>
+      </div>
+
+      <div class="user-details-grid">
+        <div class="detail-item">
+          <span class="detail-label">First Name</span>
+          <span class="detail-value" id="viewFirstName"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Last Name</span>
+          <span class="detail-value" id="viewLastName"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Username</span>
+          <span class="detail-value" id="viewUsername"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Email</span>
+          <span class="detail-value" id="viewEmail"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Account Status</span>
+          <span class="detail-value" id="viewStatus"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Date Joined</span>
+          <span class="detail-value" id="viewDateJoined"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Last Login</span>
+          <span class="detail-value" id="viewLastLogin"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Gender</span>
+          <span class="detail-value" id="viewGender"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Birth Date</span>
+          <span class="detail-value" id="viewBirthDate"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Phone Number</span>
+          <span class="detail-value" id="viewPhoneNumber"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Address</span>
+          <span class="detail-value" id="viewAddress"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Student Number</span>
+          <span class="detail-value" id="viewStudentNumber"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Course</span>
+          <span class="detail-value" id="viewCourse"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Year Level</span>
+          <span class="detail-value" id="viewYearLevel"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Section</span>
+          <span class="detail-value" id="viewSection"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Department</span>
+          <span class="detail-value" id="viewDepartment"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Position</span>
+          <span class="detail-value" id="viewPosition"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Verified</span>
+          <span class="detail-value" id="viewIsVerified"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Student</span>
+          <span class="detail-value" id="viewIsStudent"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">OSAS Unit</span>
+          <span class="detail-value" id="viewIsOsasUnit"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-cancel" onclick="closeViewModal()">Close</button>
+    </div>
+  </div>
+</div>
+{% endblock view-user %}

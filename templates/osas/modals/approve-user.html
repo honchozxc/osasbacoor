@@ -1,0 +1,74 @@
+<div id="approveUserModal" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2>Confirm Approval</h2>
+            <button class="modal-close modal-close-btn">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+        <div class="form-body">
+            <div class="user-info-container">
+                <div class="user-details">
+                    <h3 id="approveUserName"></h3>
+                    <div class="user-meta">
+                        <span id="approveUserUnit"></span>
+                        <span id="approveUserStatus" class="status-badge unverified">Unverified</span>
+                    </div>
+                    <div class="user-additional-info">
+                        <div><strong>Username:</strong> <span id="approveUserUsername"></span></div>
+                        <div><strong>ID:</strong> <span id="approveUserId"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verification Documents Section -->
+            <div class="verification-documents">
+                <h4>Verification Documents</h4>
+                <div class="documents-grid">
+                    <div class="document-item">
+                        <h5>ID Photo</h5>
+                        <div class="document-preview" id="idPhotoPreview">
+                            <p class="no-document">No ID photo uploaded</p>
+                        </div>
+                    </div>
+                    <div class="document-item">
+                        <h5>Certificate of Registration</h5>
+                        <div class="document-preview" id="corPhotoPreview">
+                            <p class="no-document">No COR uploaded</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="confirmation-text">Are you sure you want to approve this user?</p>
+
+            <div id="approveLoading" class="loading-indicator" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Processing approval...</p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary modal-close-btn">Cancel</button>
+            <button class="btn btn-primary" id="confirmApprove">
+                <span class="btn-text">Approve</span>
+                <span class="loading-spinner-btn" style="display: none;"></span>
+            </button>
+        </div>
+
+        <div id="documentViewerModal" class="modal">
+            <div class="modal-overlay document-viewer-overlay"></div>
+            <div class="modal-container document-viewer-container">
+                <div class="modal-header">
+                    <h2 id="documentViewerTitle">Document Viewer</h2>
+                    <button class="modal-close modal-close-btn">
+                        <i class='bx bx-x'></i>
+                    </button>
+                </div>
+                <div class="document-viewer-body">
+                    <img id="documentViewerImage" src="" alt="Document Preview" class="document-viewer-img">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

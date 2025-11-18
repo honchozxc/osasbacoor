@@ -1,0 +1,390 @@
+{% extends 'osas/dashboard.html' %}
+{% load static %}
+
+{% block section-content %}
+<div class="clinic-edit-container">
+    <h2>Edit Clinic Page Content</h2>
+    <form method="post" id="clinicPageForm" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Hero Section -->
+        <div class="form-section">
+            <h3>Hero Section</h3>
+            <div class="form-group">
+                <label>Hero Title</label>
+                {{ form.hero_title }}
+            </div>
+            <div class="form-group">
+                <label>Hero Description</label>
+                {{ form.hero_description }}
+            </div>
+        </div>
+
+        <!-- Services Section -->
+        <div class="form-section">
+            <h3>Services</h3>
+            <div id="servicesContainer">
+                {% for service in clinic_content.services %}
+                <div class="service-item mb-3 p-3 border">
+                    <input type="hidden" name="service_counters[]" value="{{ forloop.counter0 }}">
+
+                    <div class="form-group">
+                        <label>Service Icon (Emoji)</label>
+                        <input type="text" name="service_icon_{{ forloop.counter0 }}"
+                               value="{{ service.icon }}" class="form-control"
+                               placeholder="⚕️ 🩹 💊 🩺">
+                        <small class="form-text text-muted">Use emojis like ⚕️ 🩹 💊 🩺 ↗️ 📚 🎓</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Service Title *</label>
+                        <input type="text" name="service_title_{{ forloop.counter0 }}"
+                               value="{{ service.title }}" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Service Description *</label>
+                        <textarea name="service_description_{{ forloop.counter0 }}"
+                                  class="form-control" rows="3" required>{{ service.description }}</textarea>
+                    </div>
+
+                    <button type="button" class="btn btn-danger remove-service">Remove Service</button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="addServiceBtn" class="btn btn-success">Add New Service</button>
+        </div>
+
+        <!-- Gallery Section -->
+        <div class="form-section">
+            <h3>Gallery Images</h3>
+            <div id="galleryContainer">
+                {% for image in clinic_content.gallery_images %}
+                <div class="gallery-item mb-3 p-3 border">
+                    <input type="hidden" name="gallery_counters[]" value="{{ forloop.counter0 }}">
+                    <input type="hidden" name="existing_gallery_image_{{ forloop.counter0 }}"
+                           value="{{ image.image }}">
+
+                    <div class="form-group">
+                        <label>Current Image</label>
+                        <div class="current-image-preview mb-2">
+                            {% if image.image %}
+                                <img src="/{{ image.image }}" alt="{{ image.alt }}"
+                                     style="max-height: 150px; max-width: 200px;" class="border rounded p-1">
+                                <p class="small text-muted mt-1">{{ image.image }}</p>
+                            {% else %}
+                                <p class="text-muted">No image set</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Replace Image (Optional)</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" name="gallery_image_{{ forloop.counter0 }}"
+                                   class="file-input-hidden" accept="image/*">
+                            <button type="button" class="file-input-button">
+                                <i class="fas fa-upload"></i> Choose New Image
+                            </button>
+                            <span class="file-name">No file chosen</span>
+                        </div>
+                        <small class="form-text text-muted">
+                            Click the button above to choose a new image. Leave empty to keep current image.
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Image Description *</label>
+                        <input type="text" name="gallery_alt_{{ forloop.counter0 }}"
+                               value="{{ image.alt }}" class="form-control" required
+                               placeholder="Describe what this image shows">
+                    </div>
+
+                    <button type="button" class="btn btn-danger remove-gallery">Remove Image</button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="addGalleryBtn" class="btn btn-success">Add New Image</button>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="form-section">
+            <h3>FAQs</h3>
+            <div id="faqsContainer">
+                {% for faq in clinic_content.faqs %}
+                <div class="faq-item mb-3 p-3 border">
+                    <input type="hidden" name="faq_counters[]" value="{{ forloop.counter0 }}">
+
+                    <div class="form-group">
+                        <label>Question *</label>
+                        <input type="text" name="faq_question_{{ forloop.counter0 }}"
+                               value="{{ faq.question }}" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Answer *</label>
+                        <textarea name="faq_answer_{{ forloop.counter0 }}"
+                                  class="form-control" rows="3" required>{{ faq.answer }}</textarea>
+                    </div>
+
+                    <button type="button" class="btn btn-danger remove-faq">Remove FAQ</button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="addFaqBtn" class="btn btn-success">Add New FAQ</button>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="form-section">
+            <h3>Contact Information</h3>
+            <div class="form-group">
+                <label>Phone Number</label>
+                {{ form.phone }}
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                {{ form.email }}
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                {{ form.address }}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let serviceCounter = {{ clinic_content.services|length|default:0 }};
+    let galleryCounter = {{ clinic_content.gallery_images|length|default:0 }};
+    let faqCounter = {{ clinic_content.faqs|length|default:0 }};
+
+    // Enhanced File Input Functionality
+    function initializeFileInputs() {
+        document.querySelectorAll('.file-input-wrapper').forEach(wrapper => {
+            const fileInput = wrapper.querySelector('.file-input-hidden');
+            const button = wrapper.querySelector('.file-input-button');
+            const fileName = wrapper.querySelector('.file-name');
+
+            // Button click triggers file input
+            button.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            // Update display when file is selected
+            fileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    fileName.textContent = 'Selected: ' + this.files[0].name;
+                    button.style.background = '#28a745';
+                    button.innerHTML = '<i class="fas fa-check"></i> File Selected';
+                } else {
+                    fileName.textContent = 'No file chosen';
+                    button.style.background = '';
+                    button.innerHTML = '<i class="fas fa-upload"></i> Choose New Image';
+                }
+            });
+        });
+    }
+
+    // Add Service
+    document.getElementById('addServiceBtn').addEventListener('click', function() {
+        const container = document.getElementById('servicesContainer');
+        const div = document.createElement('div');
+        div.className = 'service-item mb-3 p-3 border';
+        div.innerHTML = `
+            <input type="hidden" name="service_counters[]" value="${serviceCounter}">
+            <div class="form-group">
+                <label>Service Icon (Emoji)</label>
+                <input type="text" name="service_icon_${serviceCounter}" class="form-control" placeholder="⚕️ 🩹 💊 🩺">
+                <small class="form-text text-muted">Use emojis like ⚕️ 🩹 💊 🩺 ↗️ 📚 🎓</small>
+            </div>
+            <div class="form-group">
+                <label>Service Title *</label>
+                <input type="text" name="service_title_${serviceCounter}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Service Description *</label>
+                <textarea name="service_description_${serviceCounter}" class="form-control" rows="3" required></textarea>
+            </div>
+            <button type="button" class="btn btn-danger remove-service">Remove Service</button>
+        `;
+        container.appendChild(div);
+        serviceCounter++;
+    });
+
+    // Add Gallery Image
+    document.getElementById('addGalleryBtn').addEventListener('click', function() {
+        const container = document.getElementById('galleryContainer');
+        const div = document.createElement('div');
+        div.className = 'gallery-item mb-3 p-3 border';
+        div.innerHTML = `
+            <input type="hidden" name="gallery_counters[]" value="${galleryCounter}">
+            <input type="hidden" name="existing_gallery_image_${galleryCounter}" value="">
+            <div class="form-group">
+                <label>Current Image</label>
+                <div class="current-image-preview mb-2">
+                    <p class="text-muted">No image set yet</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Upload Image *</label>
+                <div class="file-input-wrapper">
+                    <input type="file" name="gallery_image_${galleryCounter}"
+                           class="file-input-hidden" accept="image/*" required>
+                    <button type="button" class="file-input-button">
+                        <i class="fas fa-upload"></i> Choose Image
+                    </button>
+                    <span class="file-name">No file chosen</span>
+                </div>
+                <small class="form-text text-muted">Required for new images</small>
+            </div>
+            <div class="form-group">
+                <label>Image Description *</label>
+                <input type="text" name="gallery_alt_${galleryCounter}" class="form-control" required
+                       placeholder="Describe what this image shows">
+            </div>
+            <button type="button" class="btn btn-danger remove-gallery">Remove Image</button>
+        `;
+        container.appendChild(div);
+        galleryCounter++;
+        initializeFileInputs(); // Initialize for new element
+    });
+
+    // Add FAQ
+    document.getElementById('addFaqBtn').addEventListener('click', function() {
+        const container = document.getElementById('faqsContainer');
+        const div = document.createElement('div');
+        div.className = 'faq-item mb-3 p-3 border';
+        div.innerHTML = `
+            <input type="hidden" name="faq_counters[]" value="${faqCounter}">
+            <div class="form-group">
+                <label>Question *</label>
+                <input type="text" name="faq_question_${faqCounter}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Answer *</label>
+                <textarea name="faq_answer_${faqCounter}" class="form-control" rows="3" required></textarea>
+            </div>
+            <button type="button" class="btn btn-danger remove-faq">Remove FAQ</button>
+        `;
+        container.appendChild(div);
+        faqCounter++;
+    });
+
+    // Remove handlers
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-service')) {
+            e.target.closest('.service-item').remove();
+        }
+        if (e.target.classList.contains('remove-gallery')) {
+            e.target.closest('.gallery-item').remove();
+        }
+        if (e.target.classList.contains('remove-faq')) {
+            e.target.closest('.faq-item').remove();
+        }
+    });
+
+    // Initialize file inputs
+    initializeFileInputs();
+});
+</script>
+
+<style>
+.clinic-edit-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.form-section {
+    background: #f8f9fa;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+.form-section h3 {
+    color: #007bff;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 10px;
+}
+.service-item, .gallery-item, .faq-item {
+    background: white;
+    border-radius: 5px;
+}
+.btn {
+    margin-right: 10px;
+}
+.current-image-preview {
+    text-align: center;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+/* FIXED FILE INPUT STYLES */
+.file-input-wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.file-input-hidden {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.file-input-button {
+    display: block;
+    width: 100%;
+    padding: 12px 15px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.file-input-button:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.file-input-button:active {
+    transform: translateY(0);
+}
+
+.file-name {
+    display: block;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 3px;
+    font-size: 0.875rem;
+    color: #495057;
+    border: 1px solid #dee2e6;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Font Awesome Icons */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+</style>
+{% endblock %}

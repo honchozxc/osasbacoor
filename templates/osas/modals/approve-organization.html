@@ -1,0 +1,108 @@
+<div id="organizationApproveModal" class="modal">
+    <div class="modal-container simple-modal">
+        <div class="modal-header">
+            <h3>Approve Organization Registration</h3>
+            <button type="button" class="modal-close" onclick="closeOrganizationApproveModal()">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div id="organizationApproveFormResponse"></div>
+
+            <!-- Organization Preview -->
+            <div class="org-preview">
+                <div class="org-logo">
+                    <i class='bx bxs-group'></i>
+                </div>
+                <div class="org-info">
+                    <h4 id="approveOrganizationName">Organization Name</h4>
+                    <p id="approveOrganizationAcronym">Acronym</p>
+                    <p id="approveOrganizationType" class="org-meta"></p>
+                </div>
+            </div>
+
+            <!-- Organization Details -->
+            <div class="approval-details">
+                <h4>Organization Details</h4>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <label>Adviser:</label>
+                        <span id="approveAdviserName">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Department:</label>
+                        <span id="approveAdviserDepartment">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Valid From:</label>
+                        <span id="approveValidFrom">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Valid Until:</label>
+                        <span id="approveValidUntil">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Member Count:</label>
+                        <span id="approveMemberCount">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>School Year:</label>
+                        <span id="approveSchoolYear">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificate Options -->
+            <form id="organizationApproveForm">
+                {% csrf_token %}
+                <input type="hidden" id="approveOrganizationId" name="organization_id">
+
+                <div class="form-section">
+                    <h4>Certificate Generation</h4>
+
+                    <div class="form-group">
+                        <div class="checkbox-simple">
+                            <input type="checkbox" id="generateCertificate" name="generate_certificate" checked>
+                            <label for="generateCertificate">Generate Certificate of Recognition</label>
+                        </div>
+                    </div>
+
+                    <!-- Certificate Details -->
+                    <div id="certificateOptions" class="certificate-options">
+                        <div class="form-group">
+                            <label for="certificateDate">Certificate Date:</label>
+                            <input type="date" id="certificateDate" name="certificate_date" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="certificateVenue">Venue:</label>
+                            <input type="text" id="certificateVenue" name="certificate_venue"
+                                   value="Cavite State University - Bacoor City Campus Gymnasium"
+                                   class="form-control">
+                        </div>
+
+                        <div class="certificate-preview">
+                            <h5>Certificate Preview:</h5>
+                            <div class="preview-content">
+                                <p><strong>Organization:</strong> <span id="previewOrgName">-</span></p>
+                                <p><strong>Valid Period:</strong> <span id="previewValidPeriod">-</span></p>
+                                <p><strong>Approval Date:</strong> <span id="previewApprovalDate">-</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="button" class="btn-cancel" onclick="closeOrganizationApproveModal()">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn-approve" onclick="submitOrganizationApproval()">
+                        <i class='bx bx-check'></i>
+                        Approve & Generate Certificate
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

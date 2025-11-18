@@ -1,0 +1,136 @@
+{% block edit-nstp-file %}
+<div id="nstpFileEditModal" class="modal">
+    <div class="modal-overlay" onclick="closeNSTPFileEditModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Edit NSTP File</h2>
+                <p class="header-description">Update the file information</p>
+            </div>
+            <button class="modal-close" onclick="closeNSTPFileEditModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="nstpFileEditForm" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="file_id" id="editNstpFileId">
+
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    <p>Update the file information below. Fields marked with <span class="required-asterisk">*</span> are required.</p>
+                </div>
+
+                <div id="nstpFileEditFormResponse" class="form-response"></div>
+
+                <div class="form-columns">
+                    <!-- Left Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="editNstpTitle">Title <span class="required-asterisk">*</span></label>
+                            <input type="text" name="title" id="editNstpTitle" class="form-input" required placeholder="Enter file title">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editNstpCategory">Category <span class="required-asterisk">*</span></label>
+                            <select name="category" id="editNstpCategory" class="form-input" required>
+                                <option value="">Select category</option>
+                                <option value="accomplishment_reports">Accomplishment Reports</option>
+                                <option value="communication_letters">Communication Letters</option>
+                                <option value="financial_plan">Financial Plan</option>
+                                <option value="letters">Letters</option>
+                                <option value="moa">MOA</option>
+                                <option value="nstp_files">NSTP Files</option>
+                                <option value="recommendation">Recommendation</option>
+                                <option value="schedule">Schedule</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="editNstpSemester">Semester <span class="required-asterisk">*</span></label>
+                            <select name="semester" id="editNstpSemester" class="form-input" required>
+                                <option value="">Select semester</option>
+                                <option value="1st_semester">1st Semester</option>
+                                <option value="2nd_semester">2nd Semester</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editNstpSchoolYear">School Year <span class="required-asterisk">*</span></label>
+                            <input type="text" name="school_year" id="editNstpSchoolYear" class="form-input" required
+                                   placeholder="YYYY-YYYY" pattern="\d{4}-\d{4}"
+                                   title="Format: YYYY-YYYY (e.g., 2023-2024)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="editNstpDescription">Description</label>
+                    <textarea name="description" id="editNstpDescription" class="form-input" rows="3" placeholder="Brief description of the file contents"></textarea>
+                </div>
+
+                <div class="form-group file-upload-container">
+                    <label for="editNstpFile">File</label>
+                    <div class="file-upload-wrapper">
+                        <label for="editNstpFile" class="file-upload-label">
+                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <div class="upload-text">Upload New File (Optional)</div>
+                            <div class="upload-hint">PDF, DOC, XLS, PPT, JPG, PNG (max 10MB)</div>
+                        </label>
+                        <input type="file" name="file" id="editNstpFile" class="form-input file-upload-input"
+                               accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png">
+
+                        <!-- File preview container -->
+                        <div id="editNstpFilePreviewContainer" class="file-preview-container" style="display: none;">
+                            <div class="file-preview-header">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                    <polyline points="13 2 13 9 20 9"></polyline>
+                                </svg>
+                                <span id="editNstpFileNamePreview" class="file-name"></span>
+                                <button type="button" class="file-remove-btn" onclick="removeNSTPEditUploadedFile()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="file-preview-footer">
+                                <span id="editNstpFileSizePreview" class="file-size"></span>
+                                <span class="file-status">Will replace current file</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="form-hint">Leave blank to keep the current file</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeNSTPFileEditModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Update File</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock edit-nstp-file %}

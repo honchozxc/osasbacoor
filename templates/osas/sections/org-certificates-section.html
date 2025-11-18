@@ -1,0 +1,268 @@
+<!-- Certificates Section -->
+<div class="certificates-section" id="certificatesSection">
+    <div class="certificates-header">
+        <div class="certificates-header-content">
+            <h2>
+                <i class='bx bx-images'></i>
+                Certificate Gallery
+            </h2>
+            <p>Browse organization recognition certificates</p>
+        </div>
+    </div>
+
+    <!-- Certificate Statistics -->
+    <div class="certificates-stats-grid">
+        <div class="certificates-stat-card">
+            <div class="certificates-stat-icon certificates-stat-primary">
+                <i class='bx bx-images'></i>
+            </div>
+            <div class="certificates-stat-content">
+                <h3>{{ total_certificates_count }}</h3>
+                <p>Total Certificates</p>
+            </div>
+        </div>
+        <div class="certificates-stat-card">
+            <div class="certificates-stat-icon certificates-stat-success">
+                <i class='bx bx-group'></i>
+            </div>
+            <div class="certificates-stat-content">
+                <h3>{{ student_org_certificates }}</h3>
+                <p>Student Orgs</p>
+            </div>
+        </div>
+        <div class="certificates-stat-card">
+            <div class="certificates-stat-icon certificates-stat-info">
+                <i class='bx bx-building'></i>
+            </div>
+            <div class="certificates-stat-content">
+                <h3>{{ sociocultural_org_certificates }}</h3>
+                <p>Sociocultural</p>
+            </div>
+        </div>
+        <div class="certificates-stat-card">
+            <div class="certificates-stat-icon certificates-stat-warning">
+                <i class='bx bx-time'></i>
+            </div>
+            <div class="certificates-stat-content">
+                <h3>{{ recent_certificates }}</h3>
+                <p>Recent (30 days)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Controls -->
+    <div class="certificates-controls">
+        <div class="certificates-search-filter">
+            <!-- Search Box -->
+            <div class="certificates-search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="certificateSearch" placeholder="Search by organization name, acronym, venue, or adviser..."
+                       onkeyup="filterCertificates()">
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="certificates-filter-controls">
+                <!-- Organization Filter -->
+                <div class="filter-group">
+                    <label for="organizationFilter">Organization:</label>
+                    <select id="organizationFilter" onchange="filterCertificates()">
+                        <option value="all">All Organizations</option>
+                        {% for org in all_organizations %}
+                        <option value="{{ org.id }}">{{ org.organization_name }} ({{ org.organization_acronym }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Date Filter -->
+                <div class="filter-group">
+                    <label for="dateFilter">Sort by:</label>
+                    <select id="dateFilter" onchange="filterCertificates()">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="recently_updated">Recently Updated</option>
+                        <option value="recently_created">Recently Created</option>
+                    </select>
+                </div>
+
+                <!-- Type Filter -->
+                <div class="filter-group">
+                    <label for="typeFilter">Organization Type:</label>
+                    <select id="typeFilter" onchange="filterCertificates()">
+                        <option value="all">All Types</option>
+                        <option value="student">Student Organization</option>
+                        <option value="sociocultural">Sociocultural Organization</option>
+                    </select>
+                </div>
+
+                <!-- Reset Filters -->
+                <button class="certificates-btn certificates-btn-secondary" onclick="resetCertificateFilters()">
+                    <i class='bx bx-reset'></i>
+                    Reset Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Count -->
+        <div class="certificates-results-info">
+            <span id="certificatesResultsCount">Showing {{ certificates.paginator.count }} certificates</span>
+        </div>
+    </div>
+
+    <!-- Certificate Photo Gallery -->
+    <div class="certificates-gallery" id="certificatesGallery">
+        <div class="certificates-gallery-grid" id="certificatesGrid">
+            {% for certificate in certificates %}
+            <div class="certificates-photo-card" onclick="openCertificateModal({{ certificate.id }})">
+                <div class="certificates-photo-container">
+                    {% if certificate.certificate_file %}
+                        {% if certificate.certificate_file.url|lower|slice:'-4:' == '.pdf' %}
+                        <!-- PDF Preview -->
+                        <div class="certificates-pdf-preview">
+                            <div class="certificates-pdf-icon">
+                                <i class='bx bxs-file-pdf'></i>
+                            </div>
+                            <span class="certificates-file-label">PDF Document</span>
+                        </div>
+                        {% else %}
+                        <!-- Image Display -->
+                        <img src="{{ certificate.certificate_file.url }}"
+                             alt="Certificate for {{ certificate.organization.organization_name }}"
+                             class="certificates-image"
+                             loading="lazy">
+                        {% endif %}
+                    {% else %}
+                        <!-- Placeholder for missing image -->
+                        <div class="certificates-image-placeholder">
+                            <i class='bx bx-image-alt'></i>
+                            <span>No Image</span>
+                        </div>
+                    {% endif %}
+
+                    <!-- Overlay on hover -->
+                    <div class="certificates-photo-overlay">
+                        <div class="certificates-overlay-content">
+                            <div class="certificates-org-badge {{ certificate.organization.organization_type }}">
+                                {{ certificate.organization.get_organization_type_display }}
+                            </div>
+                            <div class="certificates-action-buttons">
+                                <button class="certificates-overlay-btn"
+                                        onclick="event.stopPropagation(); downloadCertificate({{ certificate.id }})"
+                                        title="Download">
+                                    <i class='bx bx-download'></i>
+                                </button>
+                                <button class="certificates-overlay-btn"
+                                        onclick="event.stopPropagation(); viewCertificateDetails({{ certificate.id }})"
+                                        title="View Details">
+                                    <i class='bx bx-expand'></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Photo Info -->
+                <div class="certificates-photo-info">
+                    <h4 class="certificates-photo-title">{{ certificate.organization.organization_name }}</h4>
+                    <p class="certificates-photo-subtitle">{{ certificate.organization.organization_acronym }}</p>
+                    <div class="certificates-photo-meta">
+                        <span class="certificates-meta-item">
+                            <i class='bx bx-calendar'></i>
+                            {{ certificate.issue_date|date:"M d, Y" }}
+                        </span>
+                        <span class="certificates-meta-item">
+                            <i class='bx bx-map'></i>
+                            {{ certificate.venue|truncatechars:20 }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="certificates-empty-gallery">
+                <div class="certificates-empty-content">
+                    <i class='bx bx-images certificates-empty-icon'></i>
+                    <h3>No Certificates Available</h3>
+                    <p>There are no certificates to display in the gallery.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        <div class="certificates-pagination-container" id="certificatesPagination">
+            {% if certificates.has_other_pages %}
+            <div class="certificates-pagination">
+                {% if certificates.has_previous %}
+                <a href="?certificate_page={{ certificates.previous_page_number }}#organization-certificates" class="certificates-pagination-btn">
+                    <i class='bx bx-chevron-left'></i>
+                </a>
+                {% endif %}
+
+                {% for num in certificates.paginator.page_range %}
+                    {% if certificates.number == num %}
+                    <span class="certificates-pagination-btn active">{{ num }}</span>
+                    {% else %}
+                    <a href="?certificate_page={{ num }}#organization-certificates" class="certificates-pagination-btn">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if certificates.has_next %}
+                <a href="?certificate_page={{ certificates.next_page_number }}#organization-certificates" class="certificates-pagination-btn">
+                    <i class='bx bx-chevron-right'></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Certificate Modal -->
+<div id="certificateModal" class="certificates-modal">
+    <div class="certificates-modal-overlay" onclick="closeCertificateModal()"></div>
+    <div class="certificates-modal-container certificates-large-modal">
+        <div class="certificates-modal-header">
+            <div class="certificates-modal-header-content">
+                <h3 id="modalCertificateTitle">Certificate Details</h3>
+            </div>
+            <button class="certificates-modal-close" onclick="closeCertificateModal()">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+        <div class="certificates-modal-body">
+            <div class="certificates-modal-content">
+                <div class="certificates-modal-image-container">
+                    <img id="modalCertificateImage" src="" alt="Certificate" class="certificates-modal-image">
+                </div>
+                <div class="certificates-modal-details-container">
+                    <h4 id="modalOrgName"></h4>
+                    <div class="certificates-detail-grid">
+                        <div class="certificates-detail-item">
+                            <label>Organization Type:</label>
+                            <span id="modalOrgType"></span>
+                        </div>
+                        <div class="certificates-detail-item">
+                            <label>Issue Date:</label>
+                            <span id="modalIssueDate"></span>
+                        </div>
+                        <div class="certificates-detail-item">
+                            <label>Venue:</label>
+                            <span id="modalVenue"></span>
+                        </div>
+                        <div class="certificates-detail-item">
+                            <label>Generated By:</label>
+                            <span id="modalGeneratedBy"></span>
+                        </div>
+                        <div class="certificates-detail-item">
+                            <label>Created:</label>
+                            <span id="modalCreatedAt"></span>
+                        </div>
+                    </div>
+                    <div class="certificates-modal-actions">
+                        <button class="certificates-btn certificates-btn-secondary" onclick="closeCertificateModal()">Close</button>
+                        <button class="certificates-btn certificates-btn-primary" onclick="downloadCurrentCertificate()">Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

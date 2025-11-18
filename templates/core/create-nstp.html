@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/core/create-nstp.css' %}">
+</head>
+<body>
+    {% include 'core/navbar.html' %}
+    <div class="form-container">
+        <div class="form-header">
+            <div class="glowing-border"></div>
+            <h2>{{ title }}</h2>
+            <div class="header-decoration"></div>
+        </div>
+
+        <form method="post" novalidate class="futuristic-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="error-message">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% if existing_applications %}
+            <div class="existing-applications-warning">
+                <h4>Your Existing Applications:</h4>
+                <ul>
+                    {% for app in existing_applications %}
+                    <li>{{ app.semester }} - {{ app.academic_year }}</li>
+                    {% endfor %}
+                </ul>
+                <p class="warning-text">You can only submit one application per semester and academic year.</p>
+            </div>
+            {% endif %}
+
+            <!-- Personal Information Section -->
+            <fieldset class="form-section">
+                <legend class="section-title">Personal Information</legend>
+                <div class="form-grid">
+                    <div class="form-group floating-input">
+                        {{ form.student_number }}
+                        <label for="{{ form.student_number.id_for_label }}">Student Number</label>
+                        {{ form.student_number.errors }}
+                    </div>
+                    <div class="form-group floating-input">
+                        {{ form.program }}
+                        <label for="{{ form.program.id_for_label }}">Program</label>
+                        {{ form.program.errors }}
+                    </div>
+                    <div class="form-group floating-input">
+                        {{ form.last_name }}
+                        <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+                        {{ form.last_name.errors }}
+                    </div>
+                    <div class="form-group floating-input">
+                        {{ form.first_name }}
+                        <label for="{{ form.first_name.id_for_label }}">First Name</label>
+                        {{ form.first_name.errors }}
+                    </div>
+                    <div class="form-group floating-input">
+                        {{ form.middle_name }}
+                        <label for="{{ form.middle_name.id_for_label }}">Middle Name (Optional)</label>
+                        {{ form.middle_name.errors }}
+                    </div>
+                    <div class="form-group floating-input">
+                        {{ form.gender }}
+                        <label for="{{ form.gender.id_for_label }}">Gender</label>
+                        {{ form.gender.errors }}
+                    </div>
+                    <div class="form-group floating-input">
+                        {{ form.birth_date }}
+                        <label for="{{ form.birth_date.id_for_label }}">Birth Date</label>
+                        {{ form.birth_date.errors }}
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Contact Information Section -->
+            <fieldset class="form-section">
+                <legend class="section-title">Contact Information</legend>
+                <div class="form-grid">
+                    <div class="form-group floating-input">
+                        {{ form.contact_number }}
+                        <label for="{{ form.contact_number.id_for_label }}">Contact Number</label>
+                        {{ form.contact_number.errors }}
+                    </div>
+                    <div class="form-group floating-input">
+                        {{ form.email_address }}
+                        <label for="{{ form.email_address.id_for_label }}">Email Address</label>
+                        {{ form.email_address.errors }}
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Address Information Section -->
+            <fieldset class="form-section">
+                <legend class="section-title">Address Information</legend>
+                <div class="form-grid">
+                    <div class="form-group floating-input">
+                        {{ form.street_or_barangay }}
+                        <label for="{{ form.street_or_barangay.id_for_label }}">Street/Barangay</label>
+                        {{ form.street_or_barangay.errors }}
+                    </div>
+                    <div class="form-group floating-input">
+                        {{ form.municipality_or_city }}
+                        <label for="{{ form.municipality_or_city.id_for_label }}">Municipality/City</label>
+                        {{ form.municipality_or_city.errors }}
+                    </div>
+                    <div class="form-group floating-input">
+                        {{ form.province }}
+                        <label for="{{ form.province.id_for_label }}">Province</label>
+                        {{ form.province.errors }}
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Academic Information Section -->
+            <fieldset class="form-section">
+                <legend class="section-title">Academic Information</legend>
+                <div class="form-grid">
+                    <div class="form-group floating-input">
+                        {{ form.semester }}
+                        <label for="{{ form.semester.id_for_label }}">Semester</label>
+                        {{ form.semester.errors }}
+                    </div>
+                    <div class="form-group floating-input">
+                        {{ form.academic_year }}
+                        <label for="{{ form.academic_year.id_for_label }}">Academic Year(ex. 2024-2025)</label>
+                        {{ form.academic_year.errors }}
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">
+                    <span class="btn-text">Submit Information</span>
+                    <span class="btn-icon">→</span>
+                </button>
+                <a href="{% url 'dashboard' %}" class="cancel-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="{% static 'js/core/create-nstp.js' %}"></script>
+</body>
+</html>

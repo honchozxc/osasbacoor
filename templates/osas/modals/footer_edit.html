@@ -1,0 +1,226 @@
+{% extends 'osas/dashboard.html' %}
+{% load static %}
+{% block section-content %}
+<link rel="stylesheet" href="{% static 'css/dashboard/footer-edit.css' %}">
+
+<div class="footer-edit-container">
+    <h2>Edit Footer Content</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-md-6">
+                <h3>University Information</h3>
+                <div class="form-group">
+                    <div class="file-input-container">
+                        <input type="file" name="logo" id="logoInput" accept="image/*" style="display: none;">
+                        <label for="logoInput" class="file-input-label">
+                            <span class="file-input-custom">
+                                <i class="fas fa-cloud-upload-alt"></i> Choose Logo File
+                            </span>
+                        </label>
+                    </div>
+                    <div class="logo-preview-section">
+                        {% if form.instance.logo %}
+                            <div class="logo-preview-container">
+                                <img src="{{ form.instance.logo.url }}" class="logo-preview" id="logoPreview">
+                                <div class="logo-preview-actions">
+                                    <button type="button" class="remove-btn" onclick="clearLogo()">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                            <input type="hidden" name="logo-clear" id="logoClear" value="false">
+                        {% else %}
+                            <p class="no-logo-message">No logo uploaded!</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Campus Name</label>
+                    {{ form.campus_name }}
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    {{ form.description }}
+                </div>
+
+                <h3>Social Media Links</h3>
+                <div class="form-group">
+                    <label>Facebook URL</label>
+                    <div class="input-with-icon">
+                        <i class="fab fa-facebook-f"></i>
+                        {{ form.facebook_url }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Twitter URL</label>
+                    <div class="input-with-icon">
+                        <i class="fab fa-twitter"></i>
+                        {{ form.twitter_url }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Instagram URL</label>
+                    <div class="input-with-icon">
+                        <i class="fab fa-instagram"></i>
+                        {{ form.instagram_url }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>YouTube URL</label>
+                    <div class="input-with-icon">
+                        <i class="fab fa-youtube"></i>
+                        {{ form.youtube_url }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <h3>Contact Information</h3>
+                <div class="form-group">
+                    <label>Address</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                        {{ form.address }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-phone"></i>
+                        {{ form.phone }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        {{ form.email }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Working Hours</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-clock"></i>
+                        {{ form.working_hours }}
+                    </div>
+                </div>
+
+                <h3>Emergency Contacts</h3>
+                <div class="form-group">
+                    <label>Campus Security</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-shield-alt"></i>
+                        {{ form.campus_security }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>University Clinic</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-hospital"></i>
+                        {{ form.university_clinic }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Local Police</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-police-box"></i>
+                        {{ form.local_police }}
+                    </div>
+                </div>
+
+                <h3>Copyright</h3>
+                <div class="form-group">
+                    <label>Copyright Text</label>
+                    {{ form.copyright_text }}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+            <a href="{% url 'dashboard' %}" class="btn btn-cancel">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Function to open image in lightbox
+    function openLightbox(imageUrl) {
+        // You can implement a lightbox here or just open the image in a new tab
+        window.open(imageUrl, '_blank');
+    }
+
+    // Function to clear the logo
+    function clearLogo() {
+        const fileInput = document.getElementById('logoInput');
+        const logoClearInput = document.getElementById('logoClear');
+        const previewContainer = document.querySelector('.logo-preview-container');
+        const noLogoMessage = document.querySelector('.no-logo-message');
+
+        // Clear the file input
+        fileInput.value = '';
+
+        // Set the clear flag to true
+        if (logoClearInput) {
+            logoClearInput.value = 'true';
+        }
+
+        // Remove preview if it exists
+        if (previewContainer) {
+            previewContainer.remove();
+        }
+
+        // Show no logo message
+        if (noLogoMessage) {
+            noLogoMessage.style.display = 'block';
+        }
+    }
+
+    // Preview logo when file is selected
+    document.getElementById('logoInput').addEventListener('change', function(e) {
+        const previewContainer = document.querySelector('.logo-preview-container');
+        const noLogoMessage = document.querySelector('.no-logo-message');
+        const fileInput = this;
+        const logoPreviewSection = document.querySelector('.logo-preview-section');
+        const logoClearInput = document.getElementById('logoClear');
+
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                // Reset clear flag if new image is selected
+                if (logoClearInput) {
+                    logoClearInput.value = 'false';
+                }
+
+                if (!previewContainer) {
+                    const container = document.createElement('div');
+                    container.className = 'logo-preview-container';
+                    container.innerHTML = `
+                        <img src="${e.target.result}" class="logo-preview" id="logoPreview">
+                        <div class="logo-preview-actions">
+                            <button type="button" class="remove-btn" onclick="clearLogo()">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    `;
+                    logoPreviewSection.insertBefore(container, noLogoMessage);
+                } else {
+                    const img = previewContainer.querySelector('.logo-preview');
+                    if (img) img.src = e.target.result;
+                }
+
+                if (noLogoMessage) noLogoMessage.style.display = 'none';
+            };
+
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+    });
+</script>
+{% endblock %}

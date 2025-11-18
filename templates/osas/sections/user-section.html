@@ -1,0 +1,145 @@
+{% block user-content %}
+<div class="section-header">
+    <div class="header-content">
+        <div class="title-section">
+            <h2 class="section-heading">User Management</h2>
+            <div class="divider"></div>
+        </div>
+
+        <!-- User Statistics Section -->
+        <div class="user-statistics">
+            <div class="stat-card">
+                <div class="stat-icon total-users">
+                    <i class='bx bx-user'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ total_users }}</h3>
+                    <p>Total Users</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon verified">
+                    <i class='bx bx-check-circle'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ verified_users }}</h3>
+                    <p>Verified</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon unverified">
+                    <i class='bx bx-time'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ unverified_users }}</h3>
+                    <p>Unverified</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon active">
+                    <i class='bx bx-user-check'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ active_users }}</h3>
+                    <p>Active</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon inactive">
+                    <i class='bx bx-user-x'></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ inactive_users }}</h3>
+                    <p>Inactive</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="user-search" placeholder="Search users..." class="search-input" value="{{ request.GET.search|default:'' }}">
+            </div>
+            <div class="unit-sort">
+                <select id="unit-sort" class="styled-select">
+                    <option value="">All Units</option>
+                    {% for value, name in user.USER_TYPE_CHOICES %}
+                        {% if value != 0 %}
+                            <option value="{{ value }}" {% if request.GET.unit == value|stringformat:"s" %}selected{% endif %}>{{ name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="verified-sort">
+                <select id="verified-sort" class="styled-select">
+                    <option value="">Sort by Verification</option>
+                    <option value="Verified" {% if request.GET.verified == "Verified" %}selected{% endif %}>Verified</option>
+                    <option value="Unverified" {% if request.GET.verified == "Unverified" %}selected{% endif %}>Unverified</option>
+                </select>
+            </div>
+
+            <div class="status-sort">
+                <select id="status-sort" class="styled-select">
+                    <option value="">Sort by Status</option>
+                    <option value="Active" {% if request.GET.status == "Active" %}selected{% endif %}>Active</option>
+                    <option value="Inactive" {% if request.GET.status == "Inactive" %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+            <button class="primary-btn" onclick="openModal()" {% if not perms.osas.add_customuser %}style="display: none;"{% endif %}>
+                <i class='bx bx-plus'></i> Create New User
+            </button>
+            {% if request.user.is_superuser or request.user.user_type == 1 %}
+            <button class="primary-btn" id="export-user-btn">
+                <i class='bx bx-export'></i> Export Data
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+    <table class="data-table" id="users-table">
+        <thead>
+            <tr>
+                <th data-sort="id">ID <i class='bx bx-sort'></i></th>
+                <th data-sort="name">Name <i class='bx bx-sort'></i></th>
+                <th data-sort="username">Username <i class='bx bx-sort'></i></th>
+                <th data-sort="user_type">Unit <i class='bx bx-sort'></i></th>
+                <th data-sort="is_verified">Verified <i class='bx bx-sort'></i></th>
+                <th data-sort="is_active">Status <i class='bx bx-sort'></i></th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Loading row -->
+            <tr id="loading-row">
+                <td colspan="8" style="text-align: center; padding: 20px;">
+                    <div class="loading-spinner"></div>
+                    Loading users...
+                </td>
+            </tr>
+            <!-- No data row -->
+            <tr id="no-data-row" style="display: none;">
+                <td colspan="8" style="text-align: center; padding: 20px; font-style: italic; color: #888;">
+                    No users found matching your criteria
+                </td>
+            </tr>
+            <!-- Error row -->
+            <tr id="error-row" style="display: none;">
+                <td colspan="8" style="text-align: center; padding: 20px; color: red; font-weight: 500;">
+                    Error loading data. Please try again.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+<!-- Pagination Container - Will be populated by AJAX -->
+<div class="pagination-container" id="user-pagination-container">
+    <div class="pagination-info" id="pagination-info"></div>
+    <div class="pagination-controls" id="pagination-controls"></div>
+</div>
+{% endblock user-content %}

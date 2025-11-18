@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scholarship Application Status</title>
+    <link rel="stylesheet" href="{% static 'css/core/scholarship-application-status.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="status-container">
+        <div class="glass-card">
+            <div class="status-header">
+                <div class="header-glow"></div>
+                <h1 class="status-title"><i class="fas fa-clipboard-check"></i> Application Status</h1>
+                <p class="status-subtitle">Your application details are shown below</p>
+            </div>
+
+            <div class="application-card">
+                <div class="card-header">
+                    <h2>{{ application.scholarship.name }}</h2>
+                    <span class="status-badge status-{{ application.status }}">
+                        <i class="fas fa-{% if application.status == 'approved' %}check-circle{% elif application.status == 'rejected' %}times-circle{% elif application.status == 'pending' %}hourglass-half{% else %}search{% endif %}"></i>
+                        {{ application.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-group">
+                            <h3><i class="fas fa-user"></i> Applicant Information</h3>
+                            <div class="info-item">
+                                <span class="info-label">Name:</span>
+                                <span class="info-value">{{ application.student.get_full_name }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Student Number:</span>
+                                <span class="info-value">{{ application.student.student_number }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Course:</span>
+                                <span class="info-value">{{ application.student.course }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Year & Section:</span>
+                                <span class="info-value">{{ application.student.year_level }} - {{ application.student.section }}</span>
+                            </div>
+                        </div>
+
+                        <div class="info-group">
+                            <h3><i class="fas fa-calendar-alt"></i> Application Details</h3>
+                            <div class="info-item">
+                                <span class="info-label">Date Applied:</span>
+                                <span class="info-value">{{ application.application_date|date:"F d, Y H:i" }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Scholarship Type:</span>
+                                <span class="info-value">{{ application.scholarship.get_scholarship_type_display }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Last Updated:</span>
+                                <span class="info-value">{{ application.last_updated|date:"F d, Y H:i" }}</span>
+                            </div>
+                            {% if application.status == 'approved' %}
+                            <div class="info-item">
+                                <span class="info-label">Approval Date:</span>
+                                <span class="info-value">{{ application.approval_date|date:"F d, Y" }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="documents-section">
+                        <h3><i class="fas fa-file-alt"></i> Submitted Documents</h3>
+                        <div class="documents-grid">
+                            <div class="document-card">
+                                <div class="document-icon">
+                                    <i class="fas fa-file-pdf"></i>
+                                </div>
+                                <h4>Application Form</h4>
+                                {% if application.application_form %}
+                                    <a href="{{ application.application_form.url }}" target="_blank" class="view-doc">
+                                        <i class="fas fa-eye"></i> View Document
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">Not submitted</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="document-card">
+                                <div class="document-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <h4>Certificate of Grades</h4>
+                                {% if application.cog %}
+                                    <a href="{{ application.cog.url }}" target="_blank" class="view-doc">
+                                        <i class="fas fa-eye"></i> View Document
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">Not submitted</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="document-card">
+                                <div class="document-icon">
+                                    <i class="fas fa-file-signature"></i>
+                                </div>
+                                <h4>Certificate of Registration</h4>
+                                {% if application.cor %}
+                                    <a href="{{ application.cor.url }}" target="_blank" class="view-doc">
+                                        <i class="fas fa-eye"></i> View Document
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">Not submitted</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="document-card">
+                                <div class="document-icon">
+                                    <i class="fas fa-id-card"></i>
+                                </div>
+                                <h4>ID Photo</h4>
+                                {% if application.id_photo %}
+                                    <a href="{{ application.id_photo.url }}" target="_blank" class="view-doc">
+                                        <i class="fas fa-eye"></i> View Document
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">Not submitted</span>
+                                {% endif %}
+                            </div>
+
+                            {% if application.other_documents %}
+                            <div class="document-card">
+                                <div class="document-icon">
+                                    <i class="fas fa-file-archive"></i>
+                                </div>
+                                <h4>Additional Documents</h4>
+                                <a href="{{ application.other_documents.url }}" target="_blank" class="view-doc">
+                                    <i class="fas fa-eye"></i> View Documents
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if application.notes %}
+                    <div class="notes-section">
+                        <h3><i class="fas fa-comment-alt"></i> Admin Notes</h3>
+                        <div class="notes-content">
+                            <div class="notes-card">
+                                <i class="fas fa-quote-left"></i>
+                                <div class="notes-text">{{ application.notes|linebreaks }}</div>
+                                <i class="fas fa-quote-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="card-footer">
+                    <div class="action-buttons">
+                        {% if application.status == 'pending' or application.status == 'under_review' %}
+                            <a href="{% url 'scholarship-apply' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Apply for Another Scholarship
+                            </a>
+                        {% endif %}
+                            <a href="/" class="btn btn-primary">Home</a>
+                            <a href="{% url 'dashboard' %}" class="btn btn-primary">Dashboard</a>
+                    </div>
+                </div>
+            </div>
+
+            {% if existing_applications.count > 1 %}
+            <div class="previous-applications">
+                <h3><i class="fas fa-history"></i> Previous Applications</h3>
+                <div class="applications-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Scholarship</th>
+                                <th>Date Applied</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in existing_applications %}
+                                {% if app.id != application.id %}
+                                <tr>
+                                    <td>{{ app.scholarship.name }}</td>
+                                    <td>{{ app.application_date|date:"M d, Y" }}</td>
+                                    <td>
+                                        <span class="status-badge status-{{ app.status }}">
+                                            <i class="fas fa-{% if app.status == 'approved' %}check-circle{% elif app.status == 'rejected' %}times-circle{% elif app.status == 'pending' %}hourglass-half{% else %}search{% endif %}"></i>
+                                            {{ app.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'application-status' pk=app.pk %}" class="btn-view">
+                                            <i class="fas fa-eye"></i> View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

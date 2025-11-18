@@ -1,0 +1,105 @@
+{% block create-company %}
+<div id="companyCreateModal" class="modal">
+    <div class="modal-overlay" onclick="closeCompanyCreateModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Add New Company</h2>
+                <p class="header-description">Register a new company for OJT placements</p>
+            </div>
+            <button class="modal-close" onclick="closeCompanyCreateModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="companyCreateForm" method="post" action="{% url 'add-company' %}">
+            {% csrf_token %}
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                        <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                        <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                    <p>Please provide all required information to add a new company. Fields marked with <span class="required-asterisk">*</span> are mandatory.</p>
+                </div>
+
+                <div id="companyFormResponse" class="form-response"></div>
+
+                <div class="form-columns">
+                    <!-- Left Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="id_name">Company Name <span class="required-asterisk">*</span></label>
+                            <input type="text" name="name" id="id_name" class="form-input" required placeholder="Enter company name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_contact_number">Contact Number <span class="required-asterisk">*</span></label>
+                            <input type="text"
+                                   name="contact_number"
+                                   id="id_contact_number"
+                                   class="form-input"
+                                   required
+                                   pattern="[0-9\-]+"
+                                   title="Only numbers and hyphens are allowed"
+                                   placeholder="Enter contact number (numbers and hyphens only)">
+                            <small class="help-text">Only numbers and hyphens are allowed (e.g., 123-456-7890)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_email">Email Address</label>
+                            <input type="email" name="email" id="id_email" class="form-input" placeholder="company@example.com">
+                            <small class="help-text">Official company email address</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_available_slots">Available Slots <span class="required-asterisk">*</span></label>
+                            <input type="number" name="available_slots" id="id_available_slots" class="form-input" required min="1" value="5" placeholder="Available slots">
+                            <small class="help-text">Number of currently available OJT positions</small>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="id_address">Address <span class="required-asterisk">*</span></label>
+                            <textarea name="address" id="id_address" class="form-input" rows="4" required placeholder="Enter company address"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_description">Company Description</label>
+                            <textarea name="description" id="id_description" class="form-input" rows="4" placeholder="Enter company description, services, or industry focus"></textarea>
+                            <small class="help-text">Brief description of the company and its services</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_website">Website</label>
+                            <input type="url" name="website" id="id_website" class="form-input" placeholder="https://example.com">
+                            <small class="help-text">Company website URL</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeCompanyCreateModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Add Company</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock create-company %}

@@ -1,0 +1,100 @@
+{% extends 'osas/dashboard.html' %}
+{% load static %}
+
+{% block section-content %}
+<div class="about-edit-container">
+    <h2>Edit Home Page Content</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label>Current Logo</label>
+            {% if current_logo %}
+                <div class="current-logo-container">
+                    <img src="{{ current_logo.url }}" alt="Current Logo" style="max-width: 200px; max-height: 100px;">
+                </div>
+            {% else %}
+                <p>No logo currently set</p>
+            {% endif %}
+
+            <label for="id_logo" class="btn btn-outline-primary mt-2">
+                <i class="fas fa-upload"></i> Upload New Logo
+                {{ form.logo }}
+            </label>
+            <small class="form-text text-muted">Recommended size: 200x100 pixels</small>
+        </div>
+
+        <div class="form-group">
+            <label>Title</label>
+            {{ form.title }}
+        </div>
+
+        <div class="form-group">
+            <label>Tagline</label>
+            {{ form.tagline }}
+        </div>
+
+        <div class="form-group">
+            <label>Weekdays Hours</label>
+            {{ form.weekdays_hours }}
+        </div>
+
+        <div class="form-group">
+            <label>Saturday Hours</label>
+            {{ form.saturday_hours }}
+        </div>
+
+        <div class="form-group">
+            <label>Sunday Hours</label>
+            {{ form.sunday_hours }}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .about-edit-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    #id_logo {
+        display: none;
+    }
+
+    .current-logo-container {
+        margin-bottom: 1rem;
+        padding: 10px;
+        border: 1px dashed #ccc;
+        display: inline-block;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 2rem;
+    }
+</style>
+{% endblock %}

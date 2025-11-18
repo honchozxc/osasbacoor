@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Admission Form | Futuristic Design</title>
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/core/create-admission.css' %}">
+</head>
+<body>
+
+    {% include 'core/navbar.html' %}
+
+    <div class="form-container">
+        <div class="form-header">
+            <div class="form-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h1>Student Admission</h1>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="admissionForm" class="futuristic-form">
+            {% csrf_token %}
+
+            <!-- Progress Steps -->
+            <div class="form-progress">
+                <div class="progress-step active" data-step="1">
+                    <span>1</span>
+                    <p>Basic Info</p>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <span>2</span>
+                    <p>Requirements</p>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <span>3</span>
+                    <p>Submission</p>
+                </div>
+            </div>
+
+            <!-- Basic Information Section -->
+            <div class="form-section active" id="basicInfoSection">
+                <h2><i class="fas fa-user-circle"></i> Basic Information</h2>
+                <div class="form-grid">
+                    <div class="form-group floating-label">
+                        <input type="text" class="form-control" name="first_name" id="id_first_name" readonly
+                               value="{{ request.user.first_name }}" required>
+                        <label for="id_first_name" class="required-field">First Name</label>
+                    </div>
+
+                    <div class="form-group floating-label">
+                        <input type="text" class="form-control" name="last_name" id="id_last_name" readonly
+                               value="{{ request.user.last_name }}" required>
+                        <label for="id_last_name" class="required-field">Last Name</label>
+                    </div>
+
+                    <div class="form-group floating-label">
+                        <select class="form-control" name="student_type" id="id_student_type" required>
+                            <option value=""></option>
+                            <option value="current_grade12">Current Grade 12 Student</option>
+                            <option value="shs_graduate">SHS Graduate</option>
+                            <option value="transferee">Transferee</option>
+                        </select>
+                        <label for="id_student_type" class="required-field">Student Type</label>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+
+                    <div class="form-group floating-label">
+                        <input type="text" class="form-control" name="control_no" id="id_control_no" required>
+                        <label for="id_control_no" class="required-field">Control Number</label>
+                    </div>
+
+                    <div class="form-group floating-label">
+                        <select class="form-control" name="course" id="id_course" required>
+                            <option value="">Select a course</option>
+                            {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="id_course" class="required-field">Course</label>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+
+                    <div class="form-group floating-label">
+                        <input type="text" class="form-control" name="strand" id="id_strand">
+                        <label for="id_strand">Strand (for SHS Students)</label>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" name="admission_portal_registration" id="id_admission_portal_registration" required>
+                        <label for="id_admission_portal_registration" class="required-field">
+                            <span class="checkbox-custom"></span>
+                            I have completed the Admission Portal Registration
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-navigation">
+                    <button type="button" class="next-btn" data-next="requirementsSection">Continue <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Current Grade 12 Student Section -->
+            <div class="form-section hidden-section" id="currentGrade12Section">
+                <h2><i class="fas fa-file-upload"></i> Current Grade 12 Requirements</h2>
+                <p class="section-description">You may submit these documents now or follow up later.</p>
+
+                <div class="file-upload-grid">
+                    <div class="file-upload-card">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <label for="id_grade11_report_card" class="optional-field">Grade 11 Report Card</label>
+                        <input type="file" class="file-input" name="grade11_report_card" id="id_grade11_report_card" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="file-info">PDF, JPG, JPEG, PNG</div>
+                        <button type="button" class="upload-btn">Choose File</button>
+                    </div>
+
+                    <div class="file-upload-card">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-file-certificate"></i>
+                        </div>
+                        <label for="id_certificate_of_enrollment" class="optional-field">Certificate of Enrollment</label>
+                        <input type="file" class="file-input" name="certificate_of_enrollment" id="id_certificate_of_enrollment" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="file-info">PDF, JPG, JPEG, PNG</div>
+                        <button type="button" class="upload-btn">Choose File</button>
+                    </div>
+                </div>
+
+                <div class="form-navigation">
+                    <button type="button" class="back-btn" data-back="basicInfoSection"><i class="fas fa-arrow-left"></i> Back</button>
+                    <button type="submit" class="submit-btn">Submit Application <i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+
+            <!-- SHS Graduate Section -->
+            <div class="form-section hidden-section" id="shsGraduateSection">
+                <h2><i class="fas fa-file-upload"></i> SHS Graduate Requirements</h2>
+                <p class="section-description">You may submit these documents now or follow up later.</p>
+
+                <div class="file-upload-grid">
+                    <div class="file-upload-card">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <label for="id_grade12_report_card" class="optional-field">Grade 12 Report Card</label>
+                        <input type="file" class="file-input" name="grade12_report_card" id="id_grade12_report_card" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="file-info">PDF, JPG, JPEG, PNG</div>
+                        <button type="button" class="upload-btn">Choose File</button>
+                    </div>
+
+                    <div class="file-upload-card">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <label for="id_form137" class="optional-field">Form 137</label>
+                        <input type="file" class="file-input" name="form137" id="id_form137" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="file-info">PDF, JPG, JPEG, PNG</div>
+                        <button type="button" class="upload-btn">Choose File</button>
+                    </div>
+                </div>
+
+                <div class="form-navigation">
+                    <button type="button" class="back-btn" data-back="basicInfoSection"><i class="fas fa-arrow-left"></i> Back</button>
+                    <button type="submit" class="submit-btn">Submit Application <i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+
+            <!-- Transferee Section -->
+            <div class="form-section hidden-section" id="transfereeSection">
+                <h2><i class="fas fa-file-upload"></i> Transferee Requirements</h2>
+                <p class="section-description">You may submit these documents now or follow up later.</p>
+
+                <div class="form-group floating-label">
+                    <select class="form-control" name="curriculum_type" id="id_curriculum_type">
+                        <option value=""></option>
+                        <option value="new">New Curriculum (2019 up)</option>
+                        <option value="old">Old Curriculum (2018 below)</option>
+                    </select>
+                    <label for="id_curriculum_type" class="required-field">When did you start college?</label>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+
+                <h3 class="sub-section-title"><i class="fas fa-calendar-alt"></i> Semester Completion Status</h3>
+                <div class="status-grid">
+                    <div class="form-group floating-label">
+                        <select class="form-control" name="first_year_first_semester" id="id_first_year_first_semester">
+                            <option value=""></option>
+                            <option value="not_finished">Not Finished</option>
+                            <option value="finished">Finished</option>
+                        </select>
+                        <label for="id_first_year_first_semester">1st Year - 1st Semester</label>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+
+                    <div class="form-group floating-label">
+                        <select class="form-control" name="first_year_second_semester" id="id_first_year_second_semester">
+                            <option value=""></option>
+                            <option value="not_finished">Not Finished</option>
+                            <option value="finished">Finished</option>
+                        </select>
+                        <label for="id_first_year_second_semester">1st Year - 2nd Semester</label>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+
+                    <div class="form-group floating-label">
+                        <select class="form-control" name="second_year_first_semester" id="id_second_year_first_semester">
+                            <option value=""></option>
+                            <option value="not_finished">Not Finished</option>
+                            <option value="finished">Finished</option>
+                        </select>
+                        <label for="id_second_year_first_semester">2nd Year - 1st Semester</label>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+
+                <div class="form-group floating-label">
+                    <textarea class="form-control" name="other_semester_info" id="id_other_semester_info" rows="3"></textarea>
+                    <label for="id_other_semester_info">Other Semester Information</label>
+                </div>
+
+                <h3 class="sub-section-title"><i class="fas fa-file-signature"></i> Required Documents</h3>
+                <div class="file-upload-grid">
+                    <div class="file-upload-card">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                        <label for="id_transcript_of_grades" class="optional-field">Transcript of Grades</label>
+                        <input type="file" class="file-input" name="transcript_of_grades" id="id_transcript_of_grades" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="file-info">PDF, JPG, JPEG, PNG</div>
+                        <button type="button" class="upload-btn">Choose File</button>
+                    </div>
+
+                    <div class="file-upload-card">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <label for="id_good_moral_certificate" class="optional-field">Good Moral Certificate</label>
+                        <input type="file" class="file-input" name="good_moral_certificate" id="id_good_moral_certificate" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="file-info">PDF, JPG, JPEG, PNG</div>
+                        <button type="button" class="upload-btn">Choose File</button>
+                    </div>
+
+                    <div class="file-upload-card">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-file-export"></i>
+                        </div>
+                        <label for="id_honorable_dismissal" class="optional-field">Honorable Dismissal</label>
+                        <input type="file" class="file-input" name="honorable_dismissal" id="id_honorable_dismissal" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="file-info">PDF, JPG, JPEG, PNG</div>
+                        <button type="button" class="upload-btn">Choose File</button>
+                    </div>
+
+                    <div class="file-upload-card">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-id-badge"></i>
+                        </div>
+                        <label for="id_nbi_police_clearance" class="optional-field">NBI/Police Clearance</label>
+                        <input type="file" class="file-input" name="nbi_police_clearance" id="id_nbi_police_clearance" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="file-info">PDF, JPG, JPEG, PNG</div>
+                        <button type="button" class="upload-btn">Choose File</button>
+                    </div>
+                </div>
+
+                <div class="form-navigation">
+                    <button type="button" class="back-btn" data-back="basicInfoSection"><i class="fas fa-arrow-left"></i> Back</button>
+                    <button type="submit" class="submit-btn">Submit Application <i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="{% static 'js/core/create-admission.js' %}"></script>
+</body>
+</html>

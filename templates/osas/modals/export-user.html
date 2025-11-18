@@ -1,0 +1,105 @@
+<div id="exportUserModal" class="modal">
+    <div class="export-modal-container">
+        <div class="export-modal-header">
+            <h3 class="export-modal-title">Export Users</h3>
+            <button type="button" class="export-modal-close">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+        <div class="export-modal-body">
+            <form id="exportUserForm" method="post" action="{% url 'export_users' %}">
+                {% csrf_token %}
+                <div class="export-form-group">
+                    <label class="export-form-label">Export Options</label>
+                    <div class="export-radio-group">
+                        <label class="export-radio-label">
+                            <input type="radio" name="export_option" value="all" checked>
+                            <span class="export-radio-custom"></span>
+                            All Users
+                        </label>
+                        <label class="export-radio-label">
+                            <input type="radio" name="export_option" value="filtered">
+                            <span class="export-radio-custom"></span>
+                            Filtered Data (Current View)
+                        </label>
+                        <label class="export-radio-label">
+                            <input type="radio" name="export_option" value="custom">
+                            <span class="export-radio-custom"></span>
+                            Custom Selection
+                        </label>
+                    </div>
+                </div>
+
+                <div id="customUserOptions" class="export-form-group" style="display: none;">
+                    <div class="export-form-row">
+                        <div class="export-form-col">
+                            <label class="export-form-label">Verification Status</label>
+                            <select name="verification_status" class="export-form-select">
+                                <option value="">All Status</option>
+                                <option value="verified">Verified</option>
+                                <option value="unverified">Unverified</option>
+                            </select>
+                        </div>
+                        <div class="export-form-col">
+                            <label class="export-form-label">Account Status</label>
+                            <select name="account_status" class="export-form-select">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="export-form-row">
+                        <div class="export-form-col">
+                            <label class="export-form-label">Unit</label>
+                            <select name="unit" class="export-form-select">
+                                <option value="">All Units</option>
+                                {% for value, name in user.USER_TYPE_CHOICES %}
+                                    {% if value != 0 %}
+                                        <option value="{{ value }}">{{ name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="export-form-group">
+                    <label class="export-form-label">Date Range (Optional)</label>
+                    <div class="export-form-row">
+                        <div class="export-form-col">
+                            <input type="date" name="start_date" class="export-form-input" placeholder="Start Date">
+                        </div>
+                        <div class="export-form-col">
+                            <input type="date" name="end_date" class="export-form-input" placeholder="End Date">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="export-form-group">
+                    <label class="export-form-label">File Format</label>
+                    <div class="export-radio-group">
+                        <label class="export-radio-label">
+                            <input type="radio" name="format" value="excel" checked>
+                            <span class="export-radio-custom"></span>
+                            Excel (.xlsx)
+                        </label>
+                        <label class="export-radio-label">
+                            <input type="radio" name="format" value="csv">
+                            <span class="export-radio-custom"></span>
+                            CSV (.csv)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="export-modal-footer">
+                    <button type="button" class="export-secondary-btn" id="cancelUserExport">Cancel</button>
+                    <button type="button" class="export-primary-btn" id="confirmUserExport">
+                        <i class='bx bx-download'></i> Export
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

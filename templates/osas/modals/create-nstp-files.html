@@ -1,0 +1,136 @@
+{% block create-nstp-files %}
+<div id="nstpFileCreateModal" class="modal">
+    <div class="modal-overlay" onclick="closeNSTPFileCreateModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Add New NSTP File</h2>
+                <p class="header-description">Upload a new file for NSTP program</p>
+            </div>
+            <button class="modal-close" onclick="closeNSTPFileCreateModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="nstpFileCreateForm" method="post" action="{% url 'nstp_file_create' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <p>Please provide all required information to upload a new NSTP file. Fields marked with <span class="required-asterisk">*</span> are mandatory.</p>
+                </div>
+
+                <div id="nstpFileFormResponse" class="form-response"></div>
+
+                <div class="form-columns">
+                    <!-- Left Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="id_title">Title <span class="required-asterisk">*</span></label>
+                            <input type="text" name="title" id="id_title" class="form-input" required placeholder="Enter file title">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_category">Category <span class="required-asterisk">*</span></label>
+                            <select name="category" id="id_category" class="form-input" required>
+                                <option value="">Select category</option>
+                                <option value="accomplishment_reports">Accomplishment Reports</option>
+                                <option value="communication_letters">Communication Letters</option>
+                                <option value="financial_plan">Financial Plan</option>
+                                <option value="letters">Letters</option>
+                                <option value="moa">MOA</option>
+                                <option value="nstp_files">NSTP Files</option>
+                                <option value="recommendation">Recommendation</option>
+                                <option value="schedule">Schedule</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="id_semester">Semester <span class="required-asterisk">*</span></label>
+                            <select name="semester" id="id_semester" class="form-input" required>
+                                <option value="">Select semester</option>
+                                <option value="1st_semester">1st Semester</option>
+                                <option value="2nd_semester">2nd Semester</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_school_year">School Year <span class="required-asterisk">*</span></label>
+                            <input type="text" name="school_year" id="id_school_year" class="form-input" required
+                                   placeholder="YYYY-YYYY" pattern="\d{4}-\d{4}"
+                                   title="Format: YYYY-YYYY (e.g., 2023-2024)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_description">Description</label>
+                    <textarea name="description" id="id_description" class="form-input" rows="3" placeholder="Brief description of the file contents"></textarea>
+                </div>
+
+                <div class="form-group file-upload-container">
+                    <label for="id_file">File <span class="required-asterisk">*</span></label>
+                    <div class="file-upload-wrapper">
+                        <label for="id_file" class="file-upload-label">
+                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <div class="upload-text">Upload NSTP File</div>
+                            <div class="upload-hint">PDF, DOC, XLS, PPT, JPG, PNG (max 10MB)</div>
+                        </label>
+                        <input type="file" name="file" id="id_file" class="form-input file-upload-input" required
+                               accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png">
+
+                        <!-- File preview container -->
+                        <div id="nstpFilePreviewContainer" class="file-preview-container" style="display: none;">
+                            <div class="file-preview-header">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                    <polyline points="13 2 13 9 20 9"></polyline>
+                                </svg>
+                                <span id="nstpFileNamePreview" class="file-name"></span>
+                                <button type="button" class="file-remove-btn" onclick="removeNSTPUploadedFile()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="file-preview-footer">
+                                <span id="nstpFileSizePreview" class="file-size"></span>
+                                <span class="file-status">Ready to upload</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeNSTPFileCreateModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Upload File</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock create-nstp-files %}

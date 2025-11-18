@@ -1,0 +1,235 @@
+{% block organization-view-modal %}
+<div id="organizationViewModal" class="modal">
+    <div class="modal-overlay" onclick="closeOrganizationViewModal()"></div>
+    <div class="modal-container wide-modal">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Organization Details</h2>
+                <p class="header-description">Comprehensive overview of organization information and status</p>
+            </div>
+            <button class="modal-close" onclick="closeOrganizationViewModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="form-body">
+            <div class="organization-layout-container">
+                <!-- TOP SECTION - Organization Basic Information -->
+                <div class="organization-info-section">
+                    <div class="organization-main-card">
+                        <!-- Organization Header -->
+                        <div class="organization-header">
+                            <div class="organization-logo-section">
+                                {% if organization.organization_logo %}
+                                <img src="{{ organization.organization_logo.url }}" alt="{{ organization.organization_name }}" class="organization-logo-large" id="viewOrganizationLogo">
+                                {% else %}
+                                <div class="organization-logo-large placeholder" id="viewOrganizationLogo">
+                                    <i class='bx bxs-group'></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="organization-title-section">
+                                <h3 class="organization-title" id="viewOrganizationName">-</h3>
+                                <div class="organization-meta-info">
+                                    <span class="organization-acronym" id="viewOrganizationAcronym">-</span>
+                                    <span class="organization-type-badge" id="viewOrganizationType">-</span>
+                                    <span class="organization-status-badge" id="viewOrganizationStatus">-</span>
+                                </div>
+                                <div class="organization-contact">
+                                    <span class="contact-email" id="viewOrganizationEmail">-</span>
+                                    <span class="contact-username" id="viewOrganizationUsername">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Organization Description -->
+                        <div class="organization-description-section">
+                            <h4 class="section-title">
+                                <i class='bx bx-info-circle'></i>
+                                About the Organization
+                            </h4>
+                            <div class="description-content">
+                                <div class="description-item">
+                                    <span class="description-label">Mission:</span>
+                                    <div class="description-value" id="viewOrganizationMission">-</div>
+                                </div>
+                                <div class="description-item">
+                                    <span class="description-label">Vision:</span>
+                                    <div class="description-value" id="viewOrganizationVision">-</div>
+                                </div>
+                                <div class="description-item">
+                                    <span class="description-label">Description:</span>
+                                    <div class="description-value" id="viewOrganizationDescription">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MIDDLE SECTION - Organization Details -->
+                <div class="organization-details-section">
+                    <div class="details-grid">
+                        <!-- Adviser Information -->
+                        <div class="details-column">
+                            <div class="details-card">
+                                <h4 class="details-title">
+                                    <i class='bx bx-user-circle'></i>
+                                    Adviser Information
+                                </h4>
+                                <div class="details-content">
+                                    <div class="info-item">
+                                        <span class="info-label">Name:</span>
+                                        <span class="info-value" id="viewAdviserName">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Department:</span>
+                                        <span class="info-value" id="viewAdviserDepartment">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Email:</span>
+                                        <span class="info-value" id="viewAdviserEmail">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Phone:</span>
+                                        <span class="info-value" id="viewAdviserPhone">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Co-Adviser Information (NEW) -->
+                        <div class="details-column" id="viewCoAdviserSection" style="display: none;">
+                            <div class="details-card">
+                                <h4 class="details-title">
+                                    <i class='bx bx-user-plus'></i>
+                                    Co-Adviser Information
+                                    <small class="optional-badge">Optional</small>
+                                </h4>
+                                <div class="details-content">
+                                    <div class="info-item">
+                                        <span class="info-label">Name:</span>
+                                        <span class="info-value" id="viewCoAdviserName">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Department:</span>
+                                        <span class="info-value" id="viewCoAdviserDepartment">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Email:</span>
+                                        <span class="info-value" id="viewCoAdviserEmail">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Phone:</span>
+                                        <span class="info-value" id="viewCoAdviserPhone">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Validity Period -->
+                        <div class="details-column">
+                            <div class="details-card">
+                                <h4 class="details-title">
+                                    <i class='bx bx-calendar'></i>
+                                    Registration Period
+                                </h4>
+                                <div class="details-content">
+                                    <div class="info-item">
+                                        <span class="info-label">Valid From:</span>
+                                        <span class="info-value" id="viewValidFrom">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Valid Until:</span>
+                                        <span class="info-value" id="viewValidUntil">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">School Year:</span>
+                                        <span class="info-value" id="viewSchoolYear">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Member Count:</span>
+                                        <span class="info-value" id="viewMemberCount">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Approval Information -->
+                        <div class="details-column" id="viewApprovalSection">
+                            <div class="details-card">
+                                <h4 class="details-title">
+                                    <i class='bx bx-check-shield'></i>
+                                    Approval Information
+                                </h4>
+                                <div class="details-content">
+                                    <div class="info-item">
+                                        <span class="info-label">Approved By:</span>
+                                        <span class="info-value" id="viewApprovedBy">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Approved At:</span>
+                                        <span class="info-value" id="viewApprovedAt">-</span>
+                                    </div>
+                                    <div class="info-item full-width" id="viewRejectionSection">
+                                        <span class="info-label">Rejection Reason:</span>
+                                        <div class="info-value" id="viewRejectionReason">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MEMBERS SECTION - Organization Members -->
+                <div class="organization-members-section">
+                    <div class="members-card">
+                        <h4 class="section-title">
+                            <i class='bx bx-group'></i>
+                            Organization Members
+                            <span class="members-count" id="viewMembersCount">0 members</span>
+                        </h4>
+                        <div class="members-table-container">
+                            <table class="members-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Position</th>
+                                        <th>Email</th>
+                                        <th>Student ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="viewMembersList">
+                                    <!-- Members will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DOCUMENTS SECTION - Organization Documents -->
+                <div class="organization-documents-section">
+                    <div class="documents-card">
+                        <h4 class="section-title">
+                            <i class='bx bx-folder'></i>
+                            Organization Documents
+                            <span class="documents-count" id="viewDocumentsCount">0 documents</span>
+                        </h4>
+                        <div class="documents-grid" id="viewDocumentsList">
+                            <!-- Documents will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-close-modal" onclick="closeOrganizationViewModal()">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock organization-view-modal %}

@@ -1,0 +1,483 @@
+:root {
+    --primary-blue: #003366;
+    --light-blue: #3b82f6;
+    --dark-blue: #001a33;
+    --secondary-gold: #FFD700;
+    --alert-red: #ef4444;
+    --dark-gray: #333333;
+    --medium-gray: #666666;
+    --light-gray: #f8f9fa;
+    --white: #ffffff;
+    --border-radius: 12px;
+    --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --glass-effect: rgba(255, 255, 255, 0.15);
+    --glass-border: 1px solid rgba(0, 0, 0, 0.1);
+    --neon-blue: #0066cc;
+    --neon-gold: #ffd700;
+    --futuristic-bg: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    --card-bg: rgba(255, 255, 255, 0.9);
+}
+
+/* Base Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--futuristic-bg);
+    color: var(--dark-gray);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+body::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+    overflow: hidden;
+}
+
+.osas-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Glass Card Effect */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    border: var(--glass-border);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+}
+
+/* Header Styles */
+.osas-main-header {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+    color: var(--white);
+    padding: 8rem 0 6rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.osas-main-header::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: var(--futuristic-bg);
+    transform: skewY(-2deg);
+    z-index: 1;
+}
+
+.osas-main-title {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin-bottom: 1rem;
+    color: var(--white);
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.osas-tagline {
+    font-size: 1.5rem;
+    font-weight: 300;
+    opacity: 0.9;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* About Section */
+.osas-about-section {
+    padding: 4rem 0;
+    position: relative;
+    z-index: 2;
+    background-color: var(--light-gray);
+}
+
+.osas-about-card {
+    composes: glass-card;
+    padding: 3rem;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+    background-color: var(--white);
+}
+
+.osas-about-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-blue), var(--secondary-gold));
+}
+
+/* Typography Enhancements */
+.osas-section-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    position: relative;
+    display: inline-block;
+    color: var(--primary-blue);
+}
+
+.osas-section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-blue), var(--secondary-gold));
+    border-radius: 3px;
+}
+
+.osas-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
+    color: var(--primary-blue);
+    font-weight: 600;
+}
+
+.osas-about-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--dark-gray);
+}
+
+/* Mission/Vision Grid */
+.osas-grid-container {
+    display: grid;
+    gap: 2.5rem;
+    margin: 3rem 0;
+}
+
+@media (min-width: 992px) {
+    .osas-grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.osas-mission-vision {
+    composes: glass-card;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+    background-color: var(--white);
+}
+
+.osas-mission-vision:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+}
+
+.osas-mission-vision::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, var(--primary-blue), var(--secondary-gold));
+}
+
+.osas-mission-vision p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--dark-gray);
+    margin: 0;
+}
+
+/* Goals & Objectives Styles */
+.osas-goals-card {
+    composes: glass-card;
+    padding: 3rem;
+    margin-top: 3rem;
+    border-top: 4px solid var(--primary-blue);
+    position: relative;
+    background-color: var(--white);
+}
+
+.osas-goals-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(0, 51, 102, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.osas-goals-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.osas-goals-icon {
+    width: 48px;
+    height: 48px;
+    fill: var(--primary-blue);
+}
+
+.osas-goals-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--dark-gray);
+    margin-bottom: 2rem;
+}
+
+.osas-objectives-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary-blue);
+    backdrop-filter: blur(5px);
+    margin-top: 2rem;
+}
+
+.osas-objectives-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.osas-objectives-icon {
+    width: 32px;
+    height: 32px;
+    fill: var(--primary-blue);
+}
+
+.osas-objectives-title {
+    font-size: 1.4rem;
+    color: var(--primary-blue);
+    margin: 0;
+    font-weight: 600;
+}
+
+.osas-objectives-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.osas-objective-item {
+    padding: 1rem 0 1rem 2rem;
+    position: relative;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--dark-gray);
+}
+
+.osas-objective-item:last-child {
+    border-bottom: none;
+}
+
+.osas-objective-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 1.4rem;
+    width: 12px;
+    height: 12px;
+    background: var(--primary-blue);
+    border-radius: 50%;
+}
+
+/* Courses Section */
+.osas-courses-section {
+    padding: 4rem 0;
+    background: var(--light-gray);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.osas-courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.course-card {
+    composes: glass-card;
+    padding: 2rem;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: var(--white);
+}
+
+.course-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-blue), var(--secondary-gold));
+}
+
+.course-card h3 {
+    color: var(--primary-blue);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+    font-weight: 600;
+}
+
+.subtext {
+    color: var(--medium-gray);
+    font-size: 0.875rem;
+    font-style: italic;
+    margin-top: auto;
+    position: relative;
+    z-index: 1;
+}
+
+.course-logo-container {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.course-logo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.no-logo {
+    font-size: 3rem;
+    color: #ccc;
+}
+
+/* Neon Effects for Interactive Elements */
+.osas-mission-vision:hover::after,
+.course-card:hover::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: linear-gradient(45deg,
+        transparent 0%,
+        rgba(0, 102, 204, 0.1) 30%,
+        rgba(0, 102, 204, 0.05) 50%,
+        rgba(0, 102, 204, 0.1) 70%,
+        transparent 100%);
+    z-index: -1;
+    animation: neonGlow 2s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes neonGlow {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .osas-container {
+        padding: 0 1.25rem;
+    }
+
+    .osas-main-title {
+        font-size: 2.25rem;
+    }
+
+    .osas-tagline {
+        font-size: 1.25rem;
+    }
+
+    .osas-section-title {
+        font-size: 1.75rem;
+    }
+
+    .osas-about-card,
+    .osas-goals-card {
+        padding: 2rem;
+    }
+
+    .osas-courses-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .osas-main-title {
+        font-size: 2rem;
+    }
+
+    .osas-tagline {
+        font-size: 1.1rem;
+    }
+}
+
+/* ------------------------------------------------ Fade In Animation ----------------------------------------------- */
+/* Scroll Animation Styles */
+[data-scroll] {
+    opacity: 0;
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+[data-scroll="fadeIn"] {
+    transform: translateY(30px);
+}
+
+[data-scroll="fadeInLeft"] {
+    transform: translateX(-30px);
+}
+
+[data-scroll="fadeInRight"] {
+    transform: translateX(30px);
+}
+
+[data-scroll].is-visible {
+    opacity: 1;
+    transform: translate(0);
+}
+
+/* Delay classes for staggered animations */
+[data-scroll-delay="100"] {
+    transition-delay: 100ms;
+}
+
+[data-scroll-delay="200"] {
+    transition-delay: 200ms;
+}
+
+[data-scroll-delay="300"] {
+    transition-delay: 300ms;
+}
+
+[data-scroll-delay="400"] {
+    transition-delay: 400ms;
+}

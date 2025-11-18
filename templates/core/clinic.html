@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic Services</title>
+    <link rel="stylesheet" href="{% static 'css/core/clinic.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+{% include 'core/navbar.html' %}
+
+<body>
+    <div class="clinic-container">
+        <!-- Hero Section -->
+        <section class="clinic-hero">
+            <h1>{{ clinic_content.hero_title }}</h1>
+            <p>{{ clinic_content.hero_description }}</p>
+        </section>
+
+        <!-- Services Section -->
+        <section class="clinic-services-section">
+            <h2 class="clinic-section-title">Our Services</h2>
+            <div class="clinic-services-grid">
+                {% for service in clinic_content.services %}
+                <div class="clinic-service-card">
+                    <div class="clinic-service-icon">{{ service.icon }}</div>
+                    <h3>{{ service.title }}</h3>
+                    <p>{{ service.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section class="clinic-gallery-section">
+            <h2 class="clinic-section-title">Our Clinic</h2>
+            <div class="clinic-gallery-grid">
+                {% for image in clinic_content.gallery_images %}
+                <div class="clinic-gallery-item">
+                    {% if image.image %}
+                        <img src="/{{ image.image }}" alt="{{ image.alt }}"
+                             data-image="/{{ image.image }}"
+                             data-alt="{{ image.alt }}"
+                             class="gallery-image">
+                        <div class="image-overlay">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
+                    {% else %}
+                        <div class="no-image">No Image</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="clinic-faq-section">
+            <h2 class="clinic-section-title">Frequently Asked Questions</h2>
+            <div class="clinic-faq-container">
+                {% for faq in clinic_content.faqs %}
+                <div class="clinic-faq-item" data-delay="{{ forloop.counter0|divisibleby:2|yesno:'0,0.1' }}">
+                    <div class="clinic-faq-question">
+                        {{ faq.question }}
+                        <span class="clinic-faq-toggle">▼</span>
+                    </div>
+                    <div class="clinic-faq-answer">
+                        {{ faq.answer }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="clinic-contact-section">
+            <h2>Contact Us</h2>
+            <div class="clinic-contact-info">
+                <div class="clinic-contact-item">
+                    <span class="clinic-contact-icon">📞</span>
+                    <span>{{ clinic_content.phone }}</span>
+                </div>
+                <div class="clinic-contact-item">
+                    <span class="clinic-contact-icon">✉️</span>
+                    <span>{{ clinic_content.email }}</span>
+                </div>
+                <div class="clinic-contact-item">
+                    <span class="clinic-contact-icon">📍</span>
+                    <span>{{ clinic_content.address }}</span>
+                </div>
+            </div>
+            <p>We're here to help you with all your healthcare needs. Visit us today or contact us to schedule an appointment.</p>
+        </section>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="imageLightbox" class="lightbox">
+        <div class="lightbox-content">
+            <span class="lightbox-close">&times;</span>
+            <img class="lightbox-image" src="" alt="">
+            <div class="lightbox-caption"></div>
+            <div class="lightbox-nav">
+                <button class="lightbox-prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="lightbox-next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="{% static 'js/core/clinic.js' %}"></script>
+{% include 'core/footer.html' %}
+</html>

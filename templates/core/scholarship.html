@@ -1,0 +1,478 @@
+{% load static %}
+{% block content %}
+<title>Scholarship</title>
+<link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+<link rel="stylesheet" href="{% static 'css/core/scholarship.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<div class="scholarship-container">
+
+    {% include 'core/navbar.html' %}
+
+    <!-- Hero Section -->
+    <section class="scholarship-hero">
+        <div class="hero-content">
+            <div class="title-wrapper fade-in">
+                <h1 class="hero-title fade-in delay-1">{{ scholarship_content.hero_title }}</h1>
+                <div class="title-underline"></div>
+            </div>
+            <p class="hero-subtitle">{{ scholarship_content.hero_subtitle }}</p>
+            <div class="stats-container">
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ public_scholarships.count }}</div>
+                        <div class="stat-label">Public Scholarship</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ private_scholarships.count }}</div>
+                        <div class="stat-label">Private Scholarship</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ total_scholarships }}</div>
+                        <div class="stat-label">Total Scholarships</div>
+                    </div>
+                </div>
+            </div>
+            <a href="{% url 'scholarship-apply' %}" class="apply-scholarship-btn fade-in delay-3">
+                Apply for Scholarship <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        <div class="hero-image">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
+            {% if scholarship_content.hero_image %}
+                <img src="{{ scholarship_content.hero_image.url }}" alt="Scholarship Opportunities" class="hero-visual">
+            {% else %}
+                <img src="{% static 'images/cvsu-logo.png' %}" alt="Scholarship Opportunities" class="hero-visual">
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Quick Links Section -->
+    <section class="quick-links-section">
+        <div class="quick-link-card glass-card" data-scroll="left" onclick="location.href='../downloadables'">
+            <div class="link-icon">
+                <i class="fas fa-file-download"></i>
+            </div>
+            <span>Download Forms</span>
+            <div class="link-hover-effect"></div>
+        </div>
+        <div class="quick-link-card glass-card" data-scroll="right" onclick="location.href='#faq-section'">
+            <div class="link-icon">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <span>FAQ</span>
+            <div class="link-hover-effect"></div>
+        </div>
+    </section>
+
+    <div class="content-wrapper">
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Public Scholarships Section -->
+            <section class="scholarship-section">
+                <div class="section-header fade-in">
+                    <i class="fas fa-university icon"></i>
+                    <h2>Public Scholarships</h2>
+                    <div class="header-accent"></div>
+                    {% if public_scholarships.count > 2 %}
+                    <!--<a href="#" class="view-all-btn">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>-->
+                    {% endif %}
+                </div>
+
+                {% if public_scholarships %}
+                    <div class="scholarship-cards">
+                        {% for scholarship in public_scholarships|slice:":2" %}
+                        <div class="scholarship-card glass-card" data-scroll="up">
+                            <div class="card-header">
+                                <h3>{{ scholarship.name }}</h3>
+                                {% if scholarship.slots_available %}
+                                <span class="slots-badge">{{ scholarship.slots_available }} slots</span>
+                                {% endif %}
+                            </div>
+                            <div class="card-content">
+                                <div class="description">
+                                    <h4>Description</h4>
+                                    <p>{{ scholarship.description|truncatewords:30 }}</p>
+                                </div>
+
+                                <div class="details-grid">
+                                    <div class="details-column">
+                                        <h4><i class="fas fa-gift"></i> Benefits</h4>
+                                        <div class="benefits-content">
+                                            {{ scholarship.benefits|linebreaks }}
+                                        </div>
+                                    </div>
+                                    <div class="details-column">
+                                        <h4><i class="fas fa-clipboard-check"></i> Requirements</h4>
+                                        <div class="requirements-content">
+                                            {{ scholarship.requirements|linebreaks }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card-footer">
+                                    {% if scholarship.application_form %}
+                                    <a href="{{ scholarship.application_form.file.url }}" class="download-btn" download>
+                                        <i class="fas fa-download"></i> Get Form
+                                    </a>
+                                    {% endif %}
+                                    <!--<a href="#" class="view-btn">
+                                        View Details <i class="fas fa-chevron-right"></i>
+                                    </a>-->
+                                    <span class="update-info">
+                                        Updated: {{ scholarship.updated_at|date:"M d, Y" }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-hover-effect"></div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>No public scholarships currently available</p>
+                    </div>
+                {% endif %}
+            </section>
+
+            <!-- Private Scholarships Section -->
+            <section class="scholarship-section">
+                <div class="section-header">
+                    <i class="fas fa-building icon"></i>
+                    <h2>Private Scholarships</h2>
+                    <div class="header-accent"></div>
+                    {% if private_scholarships.count > 2 %}
+                    <!--<a href="{% url 'all_scholarships' type='private' %}" class="view-all-btn">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>-->
+                    {% endif %}
+                </div>
+
+                {% if private_scholarships %}
+                    <div class="scholarship-cards">
+                        {% for scholarship in private_scholarships|slice:":2" %}
+                        <div class="scholarship-card glass-card fade-in delay-1" data-scroll="up">
+                            <div class="card-header">
+                                <h3>{{ scholarship.name }}</h3>
+                                {% if scholarship.slots_available %}
+                                <span class="slots-badge">{{ scholarship.slots_available }} slots</span>
+                                {% endif %}
+                            </div>
+                            <div class="card-content">
+                                <div class="description">
+                                    <h4>Description</h4>
+                                    <p>{{ scholarship.description|truncatewords:30 }}</p>
+                                </div>
+
+                                <div class="details-grid">
+                                    <div class="details-column">
+                                        <h4><i class="fas fa-gift"></i> Benefits</h4>
+                                        <div class="benefits-content">
+                                            {{ scholarship.benefits|linebreaks }}
+                                        </div>
+                                    </div>
+                                    <div class="details-column">
+                                        <h4><i class="fas fa-clipboard-check"></i> Requirements</h4>
+                                        <div class="requirements-content">
+                                            {{ scholarship.requirements|linebreaks }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card-footer">
+                                    {% if scholarship.application_form %}
+                                    <a href="{{ scholarship.application_form.file.url }}" class="download-btn" download>
+                                        <i class="fas fa-download"></i> Get Form
+                                    </a>
+                                    {% endif %}
+                                    <!-- <a href="#" class="view-btn">
+                                        View Details <i class="fas fa-chevron-right"></i>
+                                    </a>-->
+                                    <span class="update-info">
+                                        Updated: {{ scholarship.updated_at|date:"M d, Y" }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-hover-effect"></div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>No private scholarships currently available</p>
+                    </div>
+                {% endif %}
+            </section>
+
+            <!-- FAQ Section -->
+            <section id="faq-section" class="faq-section">
+                <div class="section-header fade-in">
+                    <i class="fas fa-question-circle icon"></i>
+                    <h2>Frequently Asked Questions</h2>
+                    <div class="header-accent"></div>
+                </div>
+
+                <div class="faq-accordion">
+                    {% for faq in scholarship_content.faq_content %}
+                    <div class="faq-item glass-card fade-in" data-scroll="up">
+                        <button class="faq-question">
+                            {{ faq.question }}
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                {{ faq.answer|linebreaks }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Authentication Modal -->
+<div id="authModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="modal-icon">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <h3 id="modalTitle">Authentication Required</h3>
+        <p id="modalMessage">You must be logged in to access this page.</p>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary close-modal-btn">Okay</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const faqItems = document.querySelectorAll('.faq-item');
+
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+        const chevron = question.querySelector('i');
+
+        question.addEventListener('click', function() {
+            // Close all other items
+            faqItems.forEach(otherItem => {
+                if (otherItem !== item) {
+                    otherItem.classList.remove('active');
+                    otherItem.querySelector('.faq-answer').style.maxHeight = '0';
+                    otherItem.querySelector('.faq-answer').style.padding = '0 1.5rem';
+                    otherItem.querySelector('.faq-question i').classList.remove('fa-chevron-up');
+                    otherItem.querySelector('.faq-question i').classList.add('fa-chevron-down');
+                }
+            });
+
+            // Toggle current item
+            item.classList.toggle('active');
+
+            if (item.classList.contains('active')) {
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+                answer.style.padding = '0 1.5rem 1.5rem';
+                chevron.classList.remove('fa-chevron-down');
+                chevron.classList.add('fa-chevron-up');
+            } else {
+                answer.style.maxHeight = '0';
+                answer.style.padding = '0 1.5rem';
+                chevron.classList.remove('fa-chevron-up');
+                chevron.classList.add('fa-chevron-down');
+            }
+        });
+    });
+
+    // Open first FAQ by default
+    if (faqItems.length > 0) {
+        const firstItem = faqItems[0];
+        const firstAnswer = firstItem.querySelector('.faq-answer');
+        const firstChevron = firstItem.querySelector('.faq-question i');
+        firstItem.classList.add('active');
+        firstAnswer.style.maxHeight = firstAnswer.scrollHeight + 'px';
+        firstAnswer.style.padding = '0 1.5rem 1.5rem';
+        firstChevron.classList.remove('fa-chevron-down');
+        firstChevron.classList.add('fa-chevron-up');
+    }
+});
+
+// Intersection Observer for Fade-In Animation
+const fadeInElements = document.querySelectorAll('.fade-in');
+
+const fadeInObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            fadeInObserver.unobserve(entry.target);
+        }
+    });
+}, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+});
+
+fadeInElements.forEach(element => {
+    fadeInObserver.observe(element);
+});
+
+// Data Scroll Animation
+const scrollElements = document.querySelectorAll('[data-scroll]');
+
+const scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const direction = entry.target.getAttribute('data-scroll');
+            let transformValue;
+
+            switch(direction) {
+                case 'left':
+                    transformValue = 'translateX(0)';
+                    break;
+                case 'right':
+                    transformValue = 'translateX(0)';
+                    break;
+                case 'up':
+                    transformValue = 'translateY(0)';
+                    break;
+                case 'down':
+                    transformValue = 'translateY(0)';
+                    break;
+                default:
+                    transformValue = 'translateY(0)';
+            }
+
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = transformValue;
+            scrollObserver.unobserve(entry.target);
+        }
+    });
+}, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+});
+
+scrollElements.forEach(element => {
+    const direction = element.getAttribute('data-scroll');
+
+    // Set initial state based on direction
+    switch(direction) {
+        case 'left':
+            element.style.transform = 'translateX(-50px)';
+            break;
+        case 'right':
+            element.style.transform = 'translateX(50px)';
+            break;
+        case 'up':
+            element.style.transform = 'translateY(50px)';
+            break;
+        case 'down':
+            element.style.transform = 'translateY(-50px)';
+            break;
+        default:
+            element.style.transform = 'translateY(50px)';
+    }
+
+    element.style.opacity = '0';
+    element.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+
+    scrollObserver.observe(element);
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Modal elements
+    const authModal = document.getElementById('authModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const closeModalButtons = document.querySelectorAll('.close-modal, .close-modal-btn');
+
+    // Apply Scholarship button
+    const applyBtn = document.querySelector('.apply-scholarship-btn');
+
+    // Function to show modal
+    function showModal(title, message) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        authModal.style.display = 'block';
+        setTimeout(() => {
+            authModal.classList.add('show');
+        }, 10);
+    }
+
+    // Function to hide modal
+    function hideModal() {
+        authModal.classList.remove('show');
+        setTimeout(() => {
+            authModal.style.display = 'none';
+        }, 300);
+    }
+
+    // Close modal when clicking X or cancel button
+    closeModalButtons.forEach(button => {
+        button.addEventListener('click', hideModal);
+    });
+
+    // Close modal when clicking outside
+    authModal.addEventListener('click', function(e) {
+        if (e.target === authModal) {
+            hideModal();
+        }
+    });
+
+    // Apply Scholarship button click handler
+    if (applyBtn) {
+        applyBtn.addEventListener('click', function(e) {
+            // Check if user is authenticated
+            const isAuthenticated = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
+
+            if (!isAuthenticated) {
+                e.preventDefault();
+                showModal(
+                    'Authentication Required',
+                    'You must login before accessing the scholarship application page.'
+                );
+                return;
+            }
+
+            // Check if user is a student (user_type = 14)
+            const isStudent = {% if request.user.is_authenticated and request.user.user_type == 14 %}true{% else %}false{% endif %};
+
+            if (!isStudent) {
+                e.preventDefault();
+                showModal(
+                    'Access Restricted',
+                    'Only students are allowed to apply for scholarships.'
+                );
+            }
+        });
+    }
+});
+</script>
+
+    {% include 'core/footer.html' %}
+
+{% endblock %}

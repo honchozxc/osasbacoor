@@ -1,0 +1,178 @@
+{% block edit-ojt-report %}
+<div id="reportEditModal" class="modal">
+    <div class="modal-overlay" onclick="closeReportEditModal()"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-content">
+                <h2>Edit OJT Report</h2>
+                <p class="header-description">Update report information and content</p>
+            </div>
+            <button class="modal-close" onclick="closeReportEditModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form id="reportEditForm" method="post" action="">
+            {% csrf_token %}
+            <div class="form-body">
+                <div class="form-intro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <p>Update the report information below. Fields marked with <span class="required-asterisk">*</span> are required.</p>
+                </div>
+
+                <div id="reportEditFormResponse" class="form-response"></div>
+                <input type="hidden" name="report_id" id="editReportId">
+
+                <div class="form-columns">
+                    <!-- Left Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="editReportTitle">Report Title <span class="required-asterisk">*</span></label>
+                            <input type="text" name="title" id="editReportTitle" class="form-input" required placeholder="Enter report title">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editReportType">Report Type <span class="required-asterisk">*</span></label>
+                            <select name="report_type" id="editReportType" class="form-input" required>
+                                <option value="">Select Report Type</option>
+                                <option value="weekly">Weekly Report</option>
+                                <option value="monthly">Monthly Report</option>
+                                <option value="final">Final Report</option>
+                                <option value="incident">Incident Report</option>
+                                <option value="complaint">Complaint Report</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editReportApplication">OJT Application <span class="required-asterisk">*</span></label>
+                            <select name="application" id="editReportApplication" class="form-input" required>
+                                <option value="">Select OJT Application</option>
+                                <!-- Options will be populated dynamically -->
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editReportDate">Report Date <span class="required-asterisk">*</span></label>
+                            <input type="date" name="report_date" id="editReportDate" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <!-- Period Fields (for weekly/monthly reports) -->
+                        <div class="period-fields-edit" id="periodFieldsEdit" style="display: none;">
+                            <div class="form-group">
+                                <label for="editPeriodStart">Period Start Date <span class="required-asterisk">*</span></label>
+                                <input type="date" name="period_start" id="editPeriodStart" class="form-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editPeriodEnd">Period End Date <span class="required-asterisk">*</span></label>
+                                <input type="date" name="period_end" id="editPeriodEnd" class="form-input">
+                            </div>
+                        </div>
+
+                        <!-- Current Status Display -->
+                        <div class="form-group">
+                            <label>Current Status</label>
+                            <div class="current-status">
+                                <span id="editReportCurrentStatus" class="status-badge">-</span>
+                                <small class="help-text">Report submission status</small>
+                            </div>
+                        </div>
+
+                        <!-- Submission Info -->
+                        <div class="submission-info">
+                            <div class="info-item">
+                                <span class="info-label">Submitted by:</span>
+                                <span id="editReportSubmittedBy" class="info-value">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Submitted on:</span>
+                                <span id="editReportSubmittedAt" class="info-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Content -->
+                <div class="form-group">
+                    <label for="editReportDescription">Report Description & Activities <span class="required-asterisk">*</span></label>
+                    <textarea name="description" id="editReportDescription" class="form-input" rows="6" required placeholder="Describe your activities, accomplishments, and experiences..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="editReportIssues">Issues & Challenges</label>
+                    <textarea name="issues_challenges" id="editReportIssues" class="form-input" rows="4" placeholder="Describe any issues, challenges, or concerns you encountered..."></textarea>
+                    <small class="help-text">Optional: Describe any difficulties or problems faced during this period</small>
+                </div>
+
+                <!-- Attachments Section -->
+                <div class="form-group">
+                    <label>Current Attachments</label>
+                    <div class="current-attachments" id="editCurrentAttachments">
+                        <!-- Current attachments will be populated here -->
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="editReportAttachments">Add New Attachments</label>
+                    <div class="file-upload-area" id="editFileUploadArea">
+                        <div class="upload-content">
+                            <i class='bx bx-cloud-upload'></i>
+                            <div class="upload-text">
+                                <span class="upload-title">Drop files here or click to upload</span>
+                                <span class="upload-subtitle">Supports PDF, DOC, DOCX, JPG, PNG (Max 10MB each)</span>
+                            </div>
+                        </div>
+                        <input type="file" name="attachments" id="editReportAttachments" class="file-input" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                    </div>
+                    <div class="file-list" id="editFileList"></div>
+                    <small class="help-text">You can add multiple files. Existing attachments will be preserved unless you remove them.</small>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeReportEditModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Update Report</span>
+                    <span class="btn-loader">
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Pass approved applications data from Django context to JavaScript
+window.ojtApprovedApplications = [
+    {% for app in approved_ojt_applications_list %}
+    {
+        id: {{ app.id }},
+        company: {
+            name: "{{ app.company.name|escapejs }}"
+        },
+        student: {
+            get_full_name: function() { return "{{ app.student.get_full_name|escapejs }}"; }
+        }
+    }{% if not forloop.last %},{% endif %}
+    {% empty %}
+    // No approved applications available
+    {% endfor %}
+];
+</script>
+
+{% endblock edit-ojt-report %}

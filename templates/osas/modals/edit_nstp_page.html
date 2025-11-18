@@ -1,0 +1,264 @@
+{% extends 'osas/dashboard.html' %}
+{% load static %}
+
+{% block section-content %}
+<div class="edit-container">
+    <h2>Edit NSTP Page Content</h2>
+    <form method="post" id="nstpPageForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" id="id_programs" name="programs" value="{{ form.instance.programs|default:'[]' }}">
+        <input type="hidden" id="id_faqs" name="faqs" value="{{ form.instance.faqs|default:'[]' }}">
+
+        <div class="form-section">
+            <h3>Hero Section</h3>
+            <div class="form-group">
+                {{ form.hero_title.label_tag }}
+                {{ form.hero_title }}
+            </div>
+            <div class="form-group">
+                {{ form.hero_subtitle.label_tag }}
+                {{ form.hero_subtitle }}
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>About Section</h3>
+            <div class="form-group">
+                {{ form.about_title.label_tag }}
+                {{ form.about_title }}
+            </div>
+            <div class="form-group">
+                {{ form.about_text.label_tag }}
+                {{ form.about_text }}
+            </div>
+            <div class="form-group">
+                {{ form.about_image.label_tag }}
+                {{ form.about_image }}
+                {% if form.instance.about_image %}
+                <div class="current-image">
+                    <small>Current Image:</small>
+                    <img src="{{ form.instance.about_image.url }}" alt="Current about image" style="max-width: 200px;">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Programs</h3>
+            <div id="programsContainer">
+                <!-- Programs will be added here by JavaScript -->
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" id="addProgram">
+                <i class="fas fa-plus"></i> Add Program
+            </button>
+        </div>
+
+        <div class="form-section">
+            <h3>FAQs</h3>
+            <div id="faqsContainer">
+                <!-- FAQs will be added here by JavaScript -->
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" id="addFaq">
+                <i class="fas fa-plus"></i> Add FAQ
+            </button>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Programs management
+    const programs = JSON.parse('{{ programs_json|escapejs }}') || [];
+    const programsContainer = document.getElementById('programsContainer');
+    const programsInput = document.getElementById('id_programs');
+
+    // FAQs management
+    const faqs = JSON.parse('{{ faqs_json|escapejs }}') || [];
+    const faqsContainer = document.getElementById('faqsContainer');
+    const faqsInput = document.getElementById('id_faqs');
+
+    // Render programs
+    function renderPrograms() {
+        programsContainer.innerHTML = '';
+        programs.forEach((program, index) => {
+            const programHtml = `
+                <div class="card mb-3 program-item" data-index="${index}">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" class="form-control program-title"
+                                   value="${program.title || ''}" data-index="${index}">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea class="form-control program-description"
+                                      data-index="${index}" rows="3">${program.description || ''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Icon Class (e.g., fas fa-shield-alt)</label>
+                            <input type="text" class="form-control program-icon"
+                                   value="${program.icon || ''}" data-index="${index}">
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger remove-item">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            `;
+            programsContainer.insertAdjacentHTML('beforeend', programHtml);
+        });
+        programsInput.value = JSON.stringify(programs);
+    }
+
+    // Render FAQs
+    function renderFaqs() {
+        faqsContainer.innerHTML = '';
+        faqs.forEach((faq, index) => {
+            const faqHtml = `
+                <div class="card mb-3 faq-item" data-index="${index}">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Question</label>
+                            <input type="text" class="form-control faq-question"
+                                   value="${faq.question || ''}" data-index="${index}">
+                        </div>
+                        <div class="form-group">
+                            <label>Answer</label>
+                            <textarea class="form-control faq-answer"
+                                      data-index="${index}" rows="3">${faq.answer || ''}</textarea>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger remove-item">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            `;
+            faqsContainer.insertAdjacentHTML('beforeend', faqHtml);
+        });
+        faqsInput.value = JSON.stringify(faqs);
+    }
+
+    // Add new program
+    document.getElementById('addProgram').addEventListener('click', () => {
+        programs.push({title: "", description: "", icon: ""});
+        renderPrograms();
+    });
+
+    // Add new FAQ
+    document.getElementById('addFaq').addEventListener('click', () => {
+        faqs.push({question: "", answer: ""});
+        renderFaqs();
+    });
+
+    // Handle remove item
+    function handleRemoveItem(container, array, e) {
+        if (e.target.classList.contains('remove-item')) {
+            const item = e.target.closest('.card');
+            const index = item.dataset.index;
+            array.splice(index, 1);
+            if (container === programsContainer) {
+                renderPrograms();
+            } else {
+                renderFaqs();
+            }
+        }
+    }
+
+    // Handle input changes
+    function handleInputChange(array, inputField, e) {
+        const index = e.target.dataset.index;
+        if (index !== undefined) {
+            const field = e.target.classList.contains('program-title') ? 'title' :
+                          e.target.classList.contains('program-description') ? 'description' :
+                          e.target.classList.contains('program-icon') ? 'icon' :
+                          e.target.classList.contains('faq-question') ? 'question' : 'answer';
+
+            array[index][field] = e.target.value;
+            inputField.value = JSON.stringify(array);
+        }
+    }
+
+    // Event delegation for programs
+    programsContainer.addEventListener('click', (e) => handleRemoveItem(programsContainer, programs, e));
+    programsContainer.addEventListener('input', (e) => handleInputChange(programs, programsInput, e));
+
+    // Event delegation for FAQs
+    faqsContainer.addEventListener('click', (e) => handleRemoveItem(faqsContainer, faqs, e));
+    faqsContainer.addEventListener('input', (e) => handleInputChange(faqs, faqsInput, e));
+
+    // Form submission handler
+    document.getElementById('nstpPageForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Update the hidden fields with current data
+        programsInput.value = JSON.stringify(programs);
+        faqsInput.value = JSON.stringify(faqs);
+
+        // Create FormData object
+        const formData = new FormData(this);
+
+        // Send AJAX request
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload the page after successful save
+                window.location.href = data.redirect_url;
+            } else {
+                alert('Error saving changes');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while saving');
+        });
+    });
+
+    // Initial render
+    renderPrograms();
+    renderFaqs();
+});
+</script>
+
+<style>
+.edit-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.form-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+.form-actions {
+    margin-top: 30px;
+    text-align: right;
+}
+.current-image {
+    margin-top: 10px;
+}
+.card {
+    margin-top: 15px;
+}
+.remove-item {
+    margin-top: 10px;
+}
+</style>
+{% endblock %}

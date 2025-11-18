@@ -1,0 +1,144 @@
+<div id="companyExportModal" class="modal">
+  <div class="modal-overlay" onclick="closeCompanyExportModal()"></div>
+  <div class="modal-container wide-modal">
+    <div class="modal-header">
+      <div class="header-content">
+        <h2>Export OJT Companies Data</h2>
+        <p class="header-description">Choose what companies to export</p>
+      </div>
+      <button class="modal-close" onclick="closeCompanyExportModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <form id="companyExportForm" class="approval-form" method="post" action="{% url 'export-ojt-companies' %}">
+      {% csrf_token %}
+      <div class="form-body">
+        <div class="form-intro">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <p>Export company information with optional student lists in Excel format.</p>
+        </div>
+
+        <div id="companyExportFormResponse" class="form-response"></div>
+
+        <div class="form-main-layout">
+          <div class="form-column">
+            <div class="form-section">
+              <h3 class="section-title">Export Scope</h3>
+
+              <div class="form-group">
+                <label for="exportType">Companies to Export</label>
+                <select id="exportType" name="export_type" class="form-input" onchange="handleExportTypeChange()">
+                  <option value="all">All Companies</option>
+                  <option value="available">Available Companies Only</option>
+                  <option value="not_available">Not Available Companies Only</option>
+                  <option value="specific">Specific Company Only</option>
+                </select>
+              </div>
+
+              <div id="specificCompanySection" class="form-group" style="display: none;">
+                <label for="specificCompany">Select Company</label>
+                <select id="specificCompany" name="specific_company" class="form-input">
+                  <option value="">Select a company...</option>
+                </select>
+                <small class="form-hint">Choose one company to export</small>
+              </div>
+
+              <div class="form-group">
+                <label for="exportCompanyTitle">Report Title</label>
+                <input type="text" id="exportCompanyTitle" name="export_title" class="form-input"
+                       placeholder="OJT Companies Report" value="OJT Companies Report">
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="includeStudents" name="include_students" checked>
+                  <span>Include student lists</span>
+                </label>
+                <small class="form-hint">Include current OJT students for each company</small>
+              </div>
+
+              <div class="form-section">
+              <h3 class="section-title">Export Summary</h3>
+              <div class="export-summary">
+                <div class="summary-item">
+                  <i class='bx bx-info-circle'></i>
+                  <div>
+                    <strong>Format:</strong> Professional Excel report
+                  </div>
+                </div>
+                <div class="summary-item">
+                  <i class='bx bx-time'></i>
+                  <div>
+                    <strong>Generated:</strong> <span id="currentTime"></span>
+                  </div>
+                </div>
+                <div class="summary-item">
+                  <i class='bx bx-data'></i>
+                  <div>
+                    <strong>Includes:</strong> Company info, slots, status, students
+                  </div>
+                </div>
+              </div>
+            </div>
+            </div>
+          </div>
+
+          <div class="form-column">
+            <div class="form-section">
+              <h3 class="section-title">Export Preview</h3>
+              <div class="export-preview">
+                <div class="preview-item">
+                  <strong>Export Type:</strong>
+                  <span id="previewExportType">All Companies</span>
+                </div>
+                <div class="preview-item">
+                  <strong>Selected Company:</strong>
+                  <span id="previewSelectedCompany">-</span>
+                </div>
+                <div class="preview-item">
+                  <strong>Includes Students:</strong>
+                  <span id="previewIncludesStudents">Yes</span>
+                </div>
+                <div class="preview-item">
+                  <strong>File Format:</strong>
+                  <span>Excel (.xlsx)</span>
+                </div>
+                <div class="preview-item">
+                  <strong>Content:</strong>
+                  <span>Company details + OJT student lists</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" onclick="closeCompanyExportModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="exportSubmitBtn">
+          <span class="btn-text">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Export to Excel
+          </span>
+          <span class="btn-loader">
+            <svg viewBox="0 0 50 50">
+              <circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

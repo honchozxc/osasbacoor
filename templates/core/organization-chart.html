@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSAS Organizational Structure</title>
+    <link rel="stylesheet" href="{% static 'css/core/organization-chart.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/cvsu-logo.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    {% include 'core/navbar.html' %}
+
+    <div class="org-container">
+        <!-- Header Section -->
+        <header class="org-header">
+            <div class="org-logo">
+                <i class="fas fa-users"></i>
+            </div>
+            <h1 class="org-main-title">OFFICE OF THE STUDENT AFFAIRS AND SERVICES</h1>
+            <h2 class="org-subtitle">Organizational Structure</h2>
+            <div class="org-divider"></div>
+        </header>
+
+        <!-- Organization Chart -->
+        <div class="org-chart">
+            {% if osas_users %}
+                <!-- Level 1: Campus Admin -->
+                <div class="org-level org-level-1">
+                    <div class="org-connectors">
+                        <div class="org-vertical-connector"></div>
+                    </div>
+                    {% for user in osas_users %}
+                        {% if user.osas_position == 'campus_admin' %}
+                            <div class="org-user-card">
+                                <div class="org-position-detail">{{ user.get_osas_position_display }}</div>
+                                <img src="{{ user.profile_picture.url }}"
+                                     alt="{{ user.get_full_name }}"
+                                     class="org-profile-picture"
+                                     onerror="this.src='https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'">
+                                <div class="org-user-info">
+                                    <div class="org-user-name">{{ user.get_full_name }}</div>
+                                    <div class="org-user-position">{{ user.get_osas_position_display }}</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Level 2: OSAS Head -->
+                <div class="org-level org-level-2">
+                    <div class="org-connectors">
+                        <div class="org-vertical-connector"></div>
+                    </div>
+                    {% for user in osas_users %}
+                        {% if user.osas_position == 'osas_head' %}
+                            <div class="org-user-card">
+                                <div class="org-position-detail">{{ user.get_osas_position_display }}</div>
+                                <img src="{{ user.profile_picture.url }}"
+                                     alt="{{ user.get_full_name }}"
+                                     class="org-profile-picture"
+                                     onerror="this.src='https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'">
+                                <div class="org-user-info">
+                                    <div class="org-user-name">{{ user.get_full_name }}</div>
+                                    <div class="org-user-position">{{ user.get_osas_position_display }}</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Level 3: Department Heads -->
+                <div class="org-level org-level-3">
+                    <div class="org-connectors">
+                        <div class="org-vertical-connector"></div>
+                    </div>
+
+                    <!-- Student Welfare Services Head -->
+                    <div class="org-department">
+                        <div class="org-connectors">
+                            <div class="org-horizontal-connector"></div>
+                            <div class="org-vertical-connector"></div>
+                        </div>
+                        {% for user in osas_users %}
+                            {% if user.osas_position == 'sws_head' %}
+                                <div class="org-user-card">
+                                    <div class="org-position-detail">{{ user.get_osas_position_display }}</div>
+                                    <img src="{{ user.profile_picture.url }}"
+                                         alt="{{ user.get_full_name }}"
+                                         class="org-profile-picture"
+                                         onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'">
+                                    <div class="org-user-info">
+                                        <div class="org-user-name">{{ user.get_full_name }}</div>
+                                        <div class="org-user-position">{{ user.get_osas_position_display }}</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Student Development Head -->
+                    <div class="org-department">
+                        <div class="org-connectors">
+                            <div class="org-horizontal-connector"></div>
+                            <div class="org-vertical-connector"></div>
+                        </div>
+                        {% for user in osas_users %}
+                            {% if user.osas_position == 'sds_head' %}
+                                <div class="org-user-card">
+                                    <div class="org-position-detail">{{ user.get_osas_position_display }}</div>
+                                    <img src="{{ user.profile_picture.url }}"
+                                         alt="{{ user.get_full_name }}"
+                                         class="org-profile-picture"
+                                         onerror="this.src='https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'">
+                                    <div class="org-user-info">
+                                        <div class="org-user-name">{{ user.get_full_name }}</div>
+                                        <div class="org-user-position">{{ user.get_osas_position_display }}</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Admission Head -->
+                    <div class="org-department">
+                        <div class="org-connectors">
+                            <div class="org-horizontal-connector"></div>
+                            <div class="org-vertical-connector"></div>
+                        </div>
+                        {% for user in osas_users %}
+                            {% if user.osas_position == 'admission_head' %}
+                                <div class="org-user-card">
+                                    <div class="org-position-detail">{{ user.get_osas_position_display }}</div>
+                                    <img src="{{ user.profile_picture.url }}"
+                                         alt="{{ user.get_full_name }}"
+                                         class="org-profile-picture"
+                                         onerror="this.src='https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'">
+                                    <div class="org-user-info">
+                                        <div class="org-user-name">{{ user.get_full_name }}</div>
+                                        <div class="org-user-position">{{ user.get_osas_position_display }}</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Level 4: Sub-department Heads -->
+                <div class="org-level org-level-4">
+                    <!-- Under Student Welfare Services -->
+                    <div class="org-department org-welfare-container">
+                        <div class="org-connectors">
+                            <div class="org-vertical-connector"></div>
+                            <div class="org-horizontal-connector"></div>
+                        </div>
+                        <div class="org-members">
+                            {% for user in osas_users %}
+                                {% if user.osas_position == 'guidance_head' or user.osas_position == 'job_placement_head' %}
+                                    <div class="org-user-card">
+                                        <div class="org-position-detail">{{ user.get_osas_position_display }}</div>
+                                        <img src="{{ user.profile_picture.url }}"
+                                             alt="{{ user.get_full_name }}"
+                                             class="org-profile-picture"
+                                             onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'">
+                                        <div class="org-user-info">
+                                            <div class="org-user-name">{{ user.get_full_name }}</div>
+                                            <div class="org-user-position">{{ user.get_osas_position_display }}</div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Under Student Development - Single column -->
+                    <div class="org-department org-development-container">
+                        <div class="org-connectors">
+                            <div class="org-vertical-connector"></div>
+                            <div class="org-horizontal-connector"></div>
+                        </div>
+                        <div class="org-members">
+                            {% for user in osas_users %}
+                                {% if user.osas_position == 'misdeamenor_head' or user.osas_position == 'csg_president' %}
+                                    <div class="org-user-card">
+                                        <div class="org-position-detail">{{ user.get_osas_position_display }}</div>
+                                        <img src="{{ user.profile_picture.url }}"
+                                             alt="{{ user.get_full_name }}"
+                                             class="org-profile-picture"
+                                             onerror="this.src='https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'">
+                                        <div class="org-user-info">
+                                            <div class="org-user-name">{{ user.get_full_name }}</div>
+                                            <div class="org-user-position">{{ user.get_osas_position_display }}</div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Under Admission -->
+                    <div class="org-department org-admission-container">
+                        <div class="org-connectors">
+                            <div class="org-vertical-connector"></div>
+                            <div class="org-horizontal-connector"></div>
+                        </div>
+                        <div class="org-members">
+                            {% for user in osas_users %}
+                                {% if user.osas_position == 'sports_dev_head' or user.osas_position == 'nstp_head' or user.osas_position == 'culture_arts_head' or user.osas_position == 'scholarship_head' %}
+                                    <div class="org-user-card">
+                                        <div class="org-position-detail">{{ user.get_osas_position_display }}</div>
+                                        <img src="{{ user.profile_picture.url }}"
+                                             alt="{{ user.get_full_name }}"
+                                             class="org-profile-picture"
+                                             onerror="this.src='https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'">
+                                        <div class="org-user-info">
+                                            <div class="org-user-name">{{ user.get_full_name }}</div>
+                                            <div class="org-user-position">{{ user.get_osas_position_display }}</div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="org-no-users">
+                    <i class="fas fa-users-slash" style="font-size: 2.5rem; margin-bottom: 15px; color: #cbd5e1;"></i>
+                    <p>No OSAS staff members found in the system.</p>
+                    <p style="margin-top: 8px; font-size: 0.85rem;">Please contact the administrator to add organization members.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% include 'core/footer.html' %}
+
+</body>
+</html>
