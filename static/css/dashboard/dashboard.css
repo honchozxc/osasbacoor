@@ -102,6 +102,7 @@ nav .container {
     align-items: center;
     gap: 0.75rem;
     min-width: 250px;
+    flex-shrink: 0;
 }
 
 .logo {
@@ -138,6 +139,7 @@ nav .container {
     gap: 1rem;
     min-width: 100px;
     justify-content: flex-end;
+    flex-wrap: nowrap;
 }
 
 .profile-photo {
@@ -166,15 +168,18 @@ nav .container {
     background: transparent;
     border: none;
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     cursor: pointer;
     padding: 0.5rem;
-    border-radius: 50%;
+    border-radius: 8px;
     transition: var(--transition);
+    flex-shrink: 0;
+    margin-left: 0.5rem; /* Added space on left side of burger */
 }
 
 .burger-menu:hover {
     background-color: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
 }
 
 .home-button,
@@ -191,6 +196,8 @@ nav .container {
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     font-size: 0.9rem;
     backdrop-filter: blur(5px);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* Home Button */
@@ -251,6 +258,7 @@ nav .container {
     height: 18px;
     stroke: currentColor;
     transition: transform 0.3s ease;
+    flex-shrink: 0;
 }
 
 .home-button:hover svg,
@@ -260,13 +268,21 @@ nav .container {
     transform: scale(1.1);
 }
 
-.user-controls {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .logo-container {
+        min-width: 200px;
+    }
+
+    .office-name {
+        font-size: 0.9rem;
+    }
+
+    .university-name {
+        font-size: 0.7rem;
+    }
 }
 
-/* Responsive Adjustments */
 @media (max-width: 992px) {
     .home-button,
     .calendar-button,
@@ -275,9 +291,25 @@ nav .container {
         padding: 0.5rem 1rem;
         font-size: 0.85rem;
     }
+
+    .logo-container {
+        min-width: 180px;
+    }
+
+    .office-name {
+        font-size: 0.85rem;
+    }
+
+    .university-name {
+        font-size: 0.65rem;
+    }
 }
 
 @media (max-width: 768px) {
+    .user-controls {
+        gap: 0.5rem;
+    }
+
     .home-button span,
     .calendar-button span,
     .profile-button span,
@@ -289,35 +321,26 @@ nav .container {
     .calendar-button,
     .profile-button,
     .logout-button {
-        padding: 0.5rem;
+        padding: 0.6rem;
         border-radius: 50%;
-        width: 36px;
-        height: 36px;
+        width: 42px;
+        height: 42px;
         justify-content: center;
     }
 
-    .nav-actions,
-    .user-controls {
-        gap: 0.75rem;
+    .burger-menu {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 1rem; /* More space on mobile */
     }
-}
 
-/* Responsive adjustments */
-@media (max-width: 992px) {
-    .office-name {
-        font-size: 0.9rem;
-    }
-    .university-name {
-        font-size: 0.7rem;
-    }
-}
-
-@media (max-width: 768px) {
     .logo-text {
         display: none;
     }
-    .burger-menu {
-        display: block;
+
+    .logo-container {
+        min-width: auto;
     }
 }
 
@@ -325,6 +348,103 @@ nav .container {
     .logo {
         height: 35px;
     }
+
+    nav .container {
+        padding: 0 1rem;
+    }
+
+    .home-button,
+    .calendar-button,
+    .profile-button,
+    .logout-button {
+        padding: 0.5rem;
+        width: 38px;
+        height: 38px;
+    }
+
+    .home-button svg,
+    .calendar-button svg,
+    .profile-button svg,
+    .logout-button svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .burger-menu {
+        font-size: 1.6rem;
+        padding: 0.4rem;
+        margin-left: 1.5rem; /* Even more space on very small screens */
+        margin-right: 0.5rem; /* Added right margin for extra spacing */
+    }
+
+    .user-controls {
+        padding-right: 0.5rem; /* Additional padding for the entire user controls */
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+    .user-controls {
+        gap: 0.25rem;
+        padding-right: 0.75rem; /* More padding on extra small screens */
+    }
+
+    .home-button,
+    .calendar-button,
+    .profile-button,
+    .logout-button {
+        width: 36px;
+        height: 36px;
+        padding: 0.4rem;
+    }
+
+    .logo {
+        height: 32px;
+    }
+
+    nav .container {
+        padding: 0 0.5rem; /* Reduced container padding to allow more space for burger */
+    }
+
+    .burger-menu {
+        margin-left: 1rem;
+        margin-right: 0.75rem; /* Increased right margin */
+        font-size: 1.7rem; /* Slightly larger for better touch */
+        padding: 0.5rem 0.6rem; /* More horizontal padding */
+    }
+}
+
+/* Very small devices (phones in portrait) */
+@media (max-width: 380px) {
+    .burger-menu {
+        margin-left: 0.75rem;
+        margin-right: 1rem; /* Maximum right margin for very small screens */
+        padding: 0.5rem 0.7rem;
+    }
+
+    .user-controls {
+        padding-right: 1rem;
+    }
+
+    nav .container {
+        padding: 0 0.25rem;
+    }
+}
+
+/* Ensure buttons are properly aligned and visible */
+.user-controls a {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Fix for any potential overflow issues */
+nav .container {
+    overflow: visible;
+}
+
+.user-controls {
+    overflow: visible;
 }
 
 /* ------------------------------------------------- Main Content Layout ---------------------------------------------*/
