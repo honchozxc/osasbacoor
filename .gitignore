@@ -18,3 +18,14 @@ __pycache__/
 # IDE
 .vscode/
 .idea/
+
+# Log files
+*.log
+django_errors.log
+
+# Local data files
+local_*.json
+local_data.json
+
+# Test/development images
+static/images/clinic/

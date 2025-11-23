@@ -8,7 +8,7 @@ from smtplib import SMTPException
 import pandas as pd
 from venv import logger
 from django import forms
-from MySQLdb import IntegrityError
+from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import Permission
 from django.contrib.auth.views import PasswordChangeView
@@ -7326,13 +7326,16 @@ class ArchivedItemDetailView(LoginRequiredMixin, View):
                 'archived_at': item.archived_at.strftime('%B %d, %Y %H:%M') if item.archived_at else None,
                 'archived_by': item.archived_by.get_full_name() if item.archived_by else None,
                 'current_students': [{
-                    'id': record.student.id,
-                    'full_name': record.student.get_full_name(),
-                    'student_number': record.student.student_number,
-                    'course': record.student.course,
-                    'profile_picture': record.student.profile_picture.url if record.student.profile_picture else None,
-                    'status': record.get_status_display(),
-                } for record in item.ojtrecord_set.all() if record.status != 'completed']
+                    'id': application.student.id,
+                    'full_name': application.student.get_full_name(),
+                    'student_number': application.student.student_number,
+                    'course': application.student.course.name if application.student.course else 'Not specified',
+                    'profile_picture': application.student.profile_picture.url if application.student.profile_picture else None,
+                    'status': application.get_status_display(),
+                } for application in item.ojt_applications.filter(
+                    is_archived=False,
+                    status='approved'
+                )]
             }
         elif item_type == 'ojt-application':
             item = get_object_or_404(OJTApplication, pk=pk, is_archived=True)

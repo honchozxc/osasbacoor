@@ -13,7 +13,7 @@ from django.core.validators import MinLengthValidator, FileExtensionValidator, M
     RegexValidator
 from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser
-from pip._internal.utils._jaraco_text import _
+from packaging.utils import _
 
 
 class Course(models.Model):
