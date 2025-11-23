@@ -698,6 +698,32 @@ body::-webkit-scrollbar {
     .tab-btn {
         white-space: nowrap;
     }
+
+    .pagination-info {
+        display: none;
+    }
+
+    .page-numbers {
+        gap: 0.25rem;
+    }
+
+    .pagination-btn {
+        min-width: 20px;
+        height: 20px;
+        font-size: 0.75rem;
+    }
+
+    .pagination-btn i {
+        font-size: 0.8rem;
+    }
+
+    /* Navigation buttons */
+    .first-page,
+    .last-page,
+    .prev-page,
+    .next-page {
+        min-width: 10px;
+    }
 }
 
 @media (max-width: 480px) {

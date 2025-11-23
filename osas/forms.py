@@ -795,12 +795,8 @@ class UserProfileForm(forms.ModelForm):
         widget=forms.DateInput(attrs={'type': 'date'}),
         required=False
     )
-    bio = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 4}),
-        required=False
-    )
 
-    # Only keep OSAS position field
+    # OSAS position field - make it available for OSAS staff
     osas_position = forms.ChoiceField(
         choices=CustomUser.OSAS_POSITION_CHOICES,
         required=False,
@@ -810,43 +806,48 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ('first_name', 'last_name', 'gender', 'birth_date', 'address', 'phone_number',
-                  'osas_position', 'bio', 'profile_picture')
+                  'osas_position', 'profile_picture', 'student_number', 'year_level', 'section', 'department')
         widgets = {
             'gender': forms.Select(attrs={'class': 'zen-form-input'}),
+            'department': forms.TextInput(attrs={'class': 'zen-form-input'}),
+            'student_number': forms.TextInput(attrs={'class': 'zen-form-input'}),
+            'year_level': forms.TextInput(attrs={'class': 'zen-form-input'}),
+            'section': forms.TextInput(attrs={'class': 'zen-form-input'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Remove the old 'position' field if it exists in the form
-        if 'position' in self.fields:
-            del self.fields['position']
-
-        for field in self.fields.values():
-            field.widget.attrs['class'] = 'zen-form-input'
-
-        # Set initial values for position field based on user type
+        # Set initial values and configure fields based on user type
         if self.instance:
-            if self.instance.is_osas_unit:
-                # For OSAS staff, show OSAS position
-                if self.instance.osas_position:
-                    self.fields['osas_position'].initial = self.instance.osas_position
-            else:
-                # For students and others, hide OSAS position field
+            # Show/hide fields based on user type
+            if not self.instance.is_osas_unit:
                 self.fields['osas_position'].widget = forms.HiddenInput()
+                self.fields['department'].widget = forms.HiddenInput()
+
+            if not self.instance.is_student:
+                self.fields['student_number'].widget = forms.HiddenInput()
+                self.fields['year_level'].widget = forms.HiddenInput()
+                self.fields['section'].widget = forms.HiddenInput()
 
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get('phone_number')
-        if phone_number and not phone_number.isdigit():
-            raise ValidationError('Phone number should contain only digits')
+        if phone_number and not phone_number.replace('+', '').replace(' ', '').isdigit():
+            raise ValidationError('Phone number should contain only digits and valid characters')
         return phone_number
 
     def save(self, commit=True):
         user = super().save(commit=False)
 
-        # Save OSAS position only for OSAS staff
+        # Only save OSAS position for OSAS staff
         if user.is_osas_unit:
             user.osas_position = self.cleaned_data.get('osas_position')
+        else:
+            user.osas_position = None
+
+        # Only save department for OSAS staff
+        if not user.is_osas_unit:
+            user.department = None
 
         if commit:
             user.save()
@@ -867,9 +868,12 @@ class AccountInfoForm(forms.ModelForm):
         for field in self.fields.values():
             field.widget.attrs['class'] = 'zen-form-input'
 
+        # Only superusers can change user_type and is_active
         if not self.instance.is_superuser:
             self.fields.pop('user_type')
             self.fields.pop('is_active')
+            # Regular users can't change username
+            self.fields['username'].widget.attrs['readonly'] = True
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -879,8 +883,10 @@ class AccountInfoForm(forms.ModelForm):
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        if CustomUser.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
-            raise ValidationError('This username is already taken')
+        # Only validate uniqueness if user is superuser (can change username)
+        if self.instance.is_superuser:
+            if CustomUser.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+                raise ValidationError('This username is already taken')
         return username
 
 

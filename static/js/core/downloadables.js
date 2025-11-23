@@ -1,185 +1,77 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('search-input');
-    const categoryFilter = document.getElementById('category-filter');
-    const dateFilter = document.getElementById('date-filter');
-    const counterElements = document.querySelectorAll('.stat-number');
-    const downloadablesList = document.querySelector('.downloadables-list');
-    const downloadableItems = document.querySelectorAll('.downloadable-item');
-    const originalNoResults = document.querySelector('.no-results');
-    const paginationContainer = document.querySelector('.pagination-container');
-    const showingStart = document.getElementById('showing-start');
-    const showingEnd = document.getElementById('showing-end');
-    const totalItems = document.getElementById('total-items');
-    const loadingIndicator = document.querySelector('.loading-indicator');
+class DownloadablesManager {
+    constructor() {
+        this.searchInput = document.getElementById('search-input');
+        this.categoryFilter = document.getElementById('category-filter');
+        this.dateFilter = document.getElementById('date-filter');
+        this.searchButton = document.getElementById('search-button');
+        this.clearFiltersBtn = document.getElementById('clear-filters');
 
-    // Store all items for filtering
-    const allItems = Array.from(downloadableItems);
-
-    let noResultsElement = null;
-    if (originalNoResults) {
-        noResultsElement = originalNoResults;
-        noResultsElement.classList.add('hidden');
+        this.init();
     }
 
-    function showLoading() {
-        loadingIndicator.style.display = 'flex';
-        setTimeout(() => {
-            loadingIndicator.style.opacity = '1';
-        }, 10);
+    init() {
+        this.bindEvents();
+        this.updateClearButton();
     }
 
-    function hideLoading() {
-        loadingIndicator.style.opacity = '0';
-        setTimeout(() => {
-            loadingIndicator.style.display = 'none';
-        }, 300);
-    }
+    bindEvents() {
+        // Search with debouncing
+        this.searchInput.addEventListener('input', this.debounce(() => this.updateFilters(), 500));
 
-    function isDefaultState() {
-        return !searchInput.value.trim() && categoryFilter.value === 'all' && dateFilter.value === 'latest';
-    }
+        // Filter changes
+        this.categoryFilter.addEventListener('change', () => this.updateFilters());
+        this.dateFilter.addEventListener('change', () => this.updateFilters());
 
-    function filterItems() {
-        showLoading();
+        // Search button click
+        this.searchButton.addEventListener('click', () => this.updateFilters());
 
-        setTimeout(() => {
-            const searchTerm = searchInput.value.trim().toLowerCase();
-            const category = categoryFilter.value;
-            const dateFilterValue = dateFilter.value;
+        // Clear filters
+        this.clearFiltersBtn.addEventListener('click', () => this.clearFilters());
 
-            if (isDefaultState()) {
-                resetToDefault();
-                hideLoading();
-                return;
-            }
-
-            let visibleItems = allItems;
-
-            // Apply search filter
-            if (searchTerm) {
-                visibleItems = visibleItems.filter(item => {
-                    const title = item.getAttribute('data-title') || '';
-                    const description = item.getAttribute('data-description') || '';
-                    return title.includes(searchTerm) || description.includes(searchTerm);
-                });
-            }
-
-            // Apply category filter
-            if (category !== 'all') {
-                visibleItems = visibleItems.filter(item => {
-                    const itemCategory = item.getAttribute('data-category') || '';
-                    return itemCategory === category;
-                });
-            }
-
-            // Apply date filter
-            if (dateFilterValue !== 'latest') {
-                visibleItems = sortItemsByDate(visibleItems, dateFilterValue);
-            } else {
-                // Default to latest first
-                visibleItems = sortItemsByDate(visibleItems, 'latest');
-            }
-
-            // Hide all items first
-            allItems.forEach(item => {
-                item.classList.add('hidden');
-            });
-
-            // Show filtered items
-            visibleItems.forEach(item => {
-                item.classList.remove('hidden');
-            });
-
-            // Show no results message if needed
-            if (visibleItems.length === 0) {
-                if (!noResultsElement) {
-                    noResultsElement = document.createElement('div');
-                    noResultsElement.className = 'no-results glass-card';
-                    noResultsElement.innerHTML = '<i class="fas fa-folder-open"></i><p>No documents match your criteria.</p>';
-                    downloadablesList.appendChild(noResultsElement);
-                } else {
-                    noResultsElement.classList.remove('hidden');
-                }
-            } else if (noResultsElement) {
-                noResultsElement.classList.add('hidden');
-            }
-
-            // Update showing information
-            showingStart.textContent = '1';
-            showingEnd.textContent = visibleItems.length;
-            totalItems.textContent = visibleItems.length;
-
-            paginationContainer.classList.add('hidden');
-
-            hideLoading();
-        }, 100);
-    }
-
-    function resetToDefault() {
-        // Show all items
-        allItems.forEach(item => {
-            item.classList.remove('hidden');
-        });
-
-        if (noResultsElement && noResultsElement !== originalNoResults) {
-            noResultsElement.remove();
-            noResultsElement = originalNoResults;
-        }
-
-        if (noResultsElement) {
-            noResultsElement.classList.add('hidden');
-        }
-
-        showingStart.textContent = showingStart.dataset.original;
-        showingEnd.textContent = showingEnd.dataset.original;
-        totalItems.textContent = totalItems.dataset.original;
-
-        paginationContainer.classList.remove('hidden');
-    }
-
-    function sortItemsByDate(items, filter) {
-        const sortedItems = [...items];
-
-        sortedItems.sort((a, b) => {
-            const dateA = new Date(a.getAttribute('data-date') || 0);
-            const dateB = new Date(b.getAttribute('data-date') || 0);
-
-            if (filter === 'oldest') {
-                return dateA - dateB;
-            } else {
-                // Default: latest first
-                return dateB - dateA;
+        // Enter key in search
+        this.searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.updateFilters();
             }
         });
-
-        return sortedItems;
     }
 
-    // Function to animate counters
-    function animateCounters() {
-        counterElements.forEach(counter => {
-            const target = +counter.innerText;
-            const duration = 2000;
-            const step = target / (duration / 16);
+    updateFilters() {
+        const searchValue = this.searchInput.value.trim();
+        const categoryValue = this.categoryFilter.value;
+        const dateValue = this.dateFilter.value;
 
-            let current = 0;
+        // Build URL with current filters
+        const params = new URLSearchParams();
 
-            const updateCounter = () => {
-                current += step;
-                if (current < target) {
-                    counter.innerText = Math.ceil(current);
-                    requestAnimationFrame(updateCounter);
-                } else {
-                    counter.innerText = target;
-                }
-            };
+        if (searchValue) params.append('search', searchValue);
+        if (categoryValue !== 'all') params.append('category', categoryValue);
+        if (dateValue !== 'latest') params.append('date', dateValue);
 
-            counter.innerText = '0';
-            updateCounter();
-        });
+        // Always go to first page when filtering
+        params.append('page', '1');
+
+        const queryString = params.toString();
+        const newUrl = queryString ? `?${queryString}` : '?';
+
+        window.location.href = newUrl;
     }
 
-    function debounce(func, wait) {
+    clearFilters() {
+        this.searchInput.value = '';
+        this.categoryFilter.value = 'all';
+        this.dateFilter.value = 'latest';
+        this.updateFilters();
+    }
+
+    updateClearButton() {
+        const hasActiveFilters = this.searchInput.value ||
+                               this.categoryFilter.value !== 'all' ||
+                               this.dateFilter.value !== 'latest';
+        this.clearFiltersBtn.style.display = hasActiveFilters ? 'flex' : 'none';
+    }
+
+    debounce(func, wait) {
         let timeout;
         return function() {
             const context = this, args = arguments;
@@ -187,16 +79,9 @@ document.addEventListener('DOMContentLoaded', function() {
             timeout = setTimeout(() => func.apply(context, args), wait);
         };
     }
+}
 
-    // Store original values
-    showingStart.dataset.original = showingStart.textContent;
-    showingEnd.dataset.original = showingEnd.textContent;
-    totalItems.dataset.original = totalItems.textContent;
-
-    // Event listeners
-    searchInput.addEventListener('input', debounce(filterItems, 300));
-    categoryFilter.addEventListener('change', filterItems);
-    dateFilter.addEventListener('change', filterItems);
-
-    hideLoading();
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    new DownloadablesManager();
 });

@@ -647,7 +647,7 @@ class TemplatePageView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         # Get filter parameters from request
-        search_term = self.request.GET.get('search', '')
+        search_term = self.request.GET.get('search', '').strip()
         category_filter = self.request.GET.get('category', 'all')
         date_filter = self.request.GET.get('date', 'latest')
 
@@ -657,18 +657,30 @@ class TemplatePageView(TemplateView):
             is_archived=False
         )
 
-        # Apply search filter
         if search_term:
-            downloadables = downloadables.filter(
-                Q(title__icontains=search_term) |
-                Q(description__icontains=search_term)
-            )
+            query = Q()
+
+            query |= Q(title__icontains=search_term)
+            query |= Q(description__icontains=search_term)
+
+            if any(char.isdigit() for char in search_term):
+                words = search_term.split()
+                for word in words:
+                    if word.isdigit():
+                        query |= Q(title__icontains=word)
+                        query |= Q(description__icontains=word)
+
+            if search_term.isdigit():
+                query |= Q(title__icontains=search_term)
+                query |= Q(description__icontains=search_term)
+
+            downloadables = downloadables.filter(query)
 
         # Apply category filter
         if category_filter != 'all':
             downloadables = downloadables.filter(category=category_filter)
 
-        # Apply date filter
+        # Apply date filter and ordering
         if date_filter == 'latest':
             downloadables = downloadables.order_by('-created_at')
         elif date_filter == 'oldest':
@@ -683,30 +695,43 @@ class TemplatePageView(TemplateView):
             start_of_year = timezone.now().replace(month=1, day=1)
             downloadables = downloadables.filter(created_at__gte=start_of_year)
 
+        # Get total counts before pagination
+        total_count = downloadables.count()
+
+        # Get counts for each category from the filtered queryset
+        osas_forms_count = downloadables.filter(category='osas_forms').count()
+        society_forms_count = downloadables.filter(category='society_forms').count()
+        ojt_forms_count = downloadables.filter(category='ojt_forms').count()
+        guidelines_count = downloadables.filter(category='guidelines').count()
+        manuals_count = downloadables.filter(category='manuals').count()
+        others_count = downloadables.filter(category='others').count()
+
         # Get page number from request
         page_number = self.request.GET.get('page', 1)
 
         # Create paginator with 10 items per page
         paginator = Paginator(downloadables, 10)
-        page_obj = paginator.get_page(page_number)
 
-        context['downloadables'] = page_obj
-        context['total_count'] = downloadables.count()
-        context['osas_forms_count'] = downloadables.filter(category='osas_forms').count()
-        context['society_forms_count'] = downloadables.filter(category='society_forms').count()
-        context['ojt_forms_count'] = downloadables.filter(category='ojt_forms').count()
-        context['guidelines_count'] = downloadables.filter(category='guidelines').count()
-        context['manuals_count'] = downloadables.filter(category='manuals').count()
-        context['others_count'] = downloadables.filter(category='others').count()
+        try:
+            page_obj = paginator.get_page(page_number)
+        except (PageNotAnInteger, EmptyPage):
+            page_obj = paginator.get_page(1)
 
-        # Add current filter parameters to context for template
-        context['current_search'] = search_term
-        context['current_category'] = category_filter
-        context['current_date_filter'] = date_filter
-
-        # Add pagination context
-        context['paginator'] = paginator
-        context['page_obj'] = page_obj
+        context.update({
+            'downloadables': page_obj,
+            'total_count': total_count,
+            'osas_forms_count': osas_forms_count,
+            'society_forms_count': society_forms_count,
+            'ojt_forms_count': ojt_forms_count,
+            'guidelines_count': guidelines_count,
+            'manuals_count': manuals_count,
+            'others_count': others_count,
+            'current_search': search_term,
+            'current_category': category_filter,
+            'current_date_filter': date_filter,
+            'paginator': paginator,
+            'page_obj': page_obj,
+        })
 
         # Retrieving Footer Information
         footer_content = FooterContent.objects.first()
@@ -1707,6 +1732,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # Scholarship Applications
         context['applications'] = self.get_paginated_scholarship_applications()
+
+        # Scholarship
+        context['scholarships'] = self.get_filtered_scholarships()
 
         # Complaints
         context['complaints'] = self.get_paginated_complaints(status='under_review')
@@ -3147,14 +3175,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_filtered_scholarships_ajax(self, request):
         search_term = request.GET.get('search', '').lower()
-        type_filter = request.GET.get('type', 'all')
+        scholarship_type_filter = request.GET.get('scholarship_type', 'all')
         status_filter = request.GET.get('status', 'all')
         sort_column = request.GET.get('sort', 'created_at')
         sort_direction = request.GET.get('direction', 'desc')
         page_number = request.GET.get('scholarship_page', 1)
         per_page = int(request.GET.get('per_page', 10))
 
-        print(f"DEBUG Scholarships - Search: '{search_term}', Type: '{type_filter}', Status: '{status_filter}'")
+        print(
+            f"DEBUG Scholarships - Search: '{search_term}', Type: '{scholarship_type_filter}', Status: '{status_filter}'")
 
         if request.user.is_superuser or request.user.user_type == 1:
             scholarships = Scholarship.objects.filter(is_archived=False)
@@ -3180,11 +3209,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             )
             print(f"DEBUG: After search filter count: {scholarships.count()}")
 
-        # Apply type filter
-        if type_filter != 'all':
-            scholarships = scholarships.filter(scholarship_type=type_filter)
+        # Apply scholarship type filter
+        if scholarship_type_filter != 'all':
+            scholarships = scholarships.filter(scholarship_type=scholarship_type_filter)
             print(f"DEBUG: After type filter count: {scholarships.count()}")
 
+        # Apply status filter
         if status_filter != 'all':
             is_active = status_filter == 'active'
             scholarships = scholarships.filter(is_active=is_active)
@@ -4465,7 +4495,30 @@ class UpdateProfileView(LoginRequiredMixin, View):
         form = UserProfileForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             user = form.save()
-            return JsonResponse({
+
+            # Handle organization updates if user is an organization
+            if user.is_organization and hasattr(user, 'organization_account'):
+                organization = user.organization_account
+                organization_data = {
+                    'organization_name': request.POST.get('organization_name'),
+                    'organization_acronym': request.POST.get('organization_acronym'),
+                    'organization_type': request.POST.get('organization_type'),
+                    'organization_email': request.POST.get('organization_email'),
+                    'organization_adviser_name': request.POST.get('organization_adviser_name'),
+                    'organization_adviser_department': request.POST.get('organization_adviser_department'),
+                    'organization_description': request.POST.get('organization_description'),
+                    'organization_mission': request.POST.get('organization_mission'),
+                    'organization_vision': request.POST.get('organization_vision'),
+                }
+
+                # Update organization fields
+                for field, value in organization_data.items():
+                    if value is not None:
+                        setattr(organization, field, value)
+                organization.save()
+
+            # Prepare response data
+            response_data = {
                 'success': True,
                 'user': {
                     'first_name': user.first_name,
@@ -4474,11 +4527,43 @@ class UpdateProfileView(LoginRequiredMixin, View):
                     'birth_date': user.birth_date.strftime('%B %d, %Y') if user.birth_date else 'Not specified',
                     'address': user.address or 'Not specified',
                     'phone_number': user.phone_number or 'Not specified',
-                    'position': user.position or 'Not specified',
+                    'student_number': user.student_number or 'Not specified',
+                    'section': user.section or 'Not specified',
+                    'department': user.department or 'Not specified',
                 },
-                'profile_picture_url': user.profile_picture.url if user.profile_picture else None,
                 'message': 'Profile updated successfully!'
-            })
+            }
+
+            # Add OSAS-specific fields
+            if user.is_osas_unit:
+                response_data['user']['position'] = user.get_position_display() or 'Not specified'
+
+            # Add student-specific fields (course is display-only)
+            if user.is_student:
+                year_level_display = 'Not specified'
+                if user.year_level:
+                    if user.year_level == "1":
+                        year_level_display = "1st Year"
+                    elif user.year_level == "2":
+                        year_level_display = "2nd Year"
+                    elif user.year_level == "3":
+                        year_level_display = "3rd Year"
+                    elif user.year_level == "4":
+                        year_level_display = "4th Year"
+                    elif user.year_level == "5":
+                        year_level_display = "5th Year"
+                    else:
+                        year_level_display = user.year_level
+
+                response_data['user']['year_level'] = year_level_display
+                response_data['user']['course'] = user.course.name if user.course else 'Not specified'
+
+            # Add profile picture URL if available
+            if user.profile_picture:
+                response_data['profile_picture_url'] = user.profile_picture.url
+
+            return JsonResponse(response_data)
+
         return JsonResponse({
             'success': False,
             'errors': form.errors.get_json_data(),

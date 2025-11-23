@@ -245,13 +245,153 @@ body::-webkit-scrollbar {
     max-width: 800px;
 }
 
+/* University Name Responsive Styles */
 .university-name {
     font-size: 2.2rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3));
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     animation: fadeInUp 1s ease-out;
     white-space: nowrap;
+    line-height: 1.2;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Large Desktop */
+@media (max-width: 1440px) {
+    .university-name {
+        font-size: 2rem;
+    }
+}
+
+/* Desktop */
+@media (max-width: 1200px) {
+    .university-name {
+        font-size: 1.8rem;
+    }
+}
+
+/* Small Desktop / Tablet Landscape */
+@media (max-width: 992px) {
+    .university-name {
+        font-size: 1.6rem;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.3;
+        margin-bottom: 0.8rem;
+    }
+}
+
+/* Tablet Portrait */
+@media (max-width: 768px) {
+    .university-name {
+        font-size: 1.4rem;
+        line-height: 1.4;
+        padding: 0 1rem;
+    }
+
+    .title-wrapper {
+        text-align: center;
+    }
+
+    .title-underline {
+        left: 50%;
+        transform: translateX(-50%) scaleX(0.6);
+        width: 80%;
+    }
+
+    @keyframes underlineGrow {
+        from {
+            transform: translateX(-50%) scaleX(0);
+        }
+        to {
+            transform: translateX(-50%) scaleX(0.6);
+        }
+    }
+}
+
+/* Mobile Landscape */
+@media (max-width: 576px) {
+    .university-name {
+        font-size: 1.3rem;
+        line-height: 1.4;
+        padding: 0 0.5rem;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Mobile Portrait */
+@media (max-width: 480px) {
+    .university-name {
+        font-size: 1.2rem;
+        line-height: 1.5;
+        word-break: break-word;
+        hyphens: auto;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 375px) {
+    .university-name {
+        font-size: 1.1rem;
+        line-height: 1.5;
+        padding: 0 0.25rem;
+    }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 320px) {
+    .university-name {
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+}
+
+/* High DPI Screens */
+@media (min-resolution: 192dpi) and (max-width: 768px) {
+    .university-name {
+        font-weight: 600; /* Slightly reduce weight for better rendering on high DPI */
+    }
+}
+
+/* Print Styles */
+@media print {
+    .university-name {
+        font-size: 1.5rem;
+        color: #000 !important;
+        text-shadow: none !important;
+        white-space: normal;
+    }
+}
+
+/* Orientation Specific */
+@media (max-width: 768px) and (orientation: landscape) {
+    .university-name {
+        font-size: 1.3rem;
+        line-height: 1.3;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .university-name {
+        animation: none;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .university-name {
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .university-name {
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
 }
 
 @keyframes fadeInUp {

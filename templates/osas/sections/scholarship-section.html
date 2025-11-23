@@ -1,4 +1,5 @@
 {% block content %}
+<div id="scholarship-section">
 <div class="section-header">
     <div class="header-content">
         <div class="title-section">
@@ -11,22 +12,25 @@
                 <input type="text" id="scholarship-search" placeholder="Search scholarships..." class="search-input">
             </div>
 
-            <!-- Type filter dropdown -->
-            <div class="filter-dropdown">
-                <select id="type-filter" class="styled-select">
-                    <option value="all">All Types</option>
-                    <option value="public">Public</option>
-                    <option value="private">Private</option>
-                </select>
-            </div>
-
-            <!-- Status filter dropdown -->
-            <div class="filter-dropdown">
-                <select id="status-filter" class="styled-select">
-                    <option value="all">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
+            <!-- Add Filter Controls -->
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <select id="scholarship-type-filter" class="filter-select">
+                        <option value="all">All Types</option>
+                        <option value="public">Public Scholarships</option>
+                        <option value="private">Private Scholarships</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="scholarship-status-filter" class="filter-select">
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <button id="clear-filters" class="secondary-btn">
+                    <i class='bx bx-reset'></i> Clear
+                </button>
             </div>
 
             {% if perms.osas.add_scholarship %}
@@ -206,5 +210,6 @@
         </div>
     </div>
     {% endif %}
+</div>
 </div>
 {% endblock %}

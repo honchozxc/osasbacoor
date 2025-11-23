@@ -81,8 +81,8 @@
 
             <div class="search-filter">
                 <div class="search-box">
-                    <input type="text" id="search-input" placeholder="Search documents..." value="{{ current_search|default:'' }}">
-                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search documents by title, description, or numbers..." value="{{ current_search|default:'' }}">
+                    <i class="fas fa-search" id="search-button"></i>
                 </div>
                 <div class="filter-group">
                     <select id="category-filter" class="filter-select">
@@ -102,17 +102,16 @@
                         <option value="this_month" {% if current_date_filter == 'this_month' %}selected{% endif %}>This Month</option>
                         <option value="this_year" {% if current_date_filter == 'this_year' %}selected{% endif %}>This Year</option>
                     </select>
+                    <button type="button" id="clear-filters" class="clear-btn">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
                 </div>
             </div>
         </div>
 
         <div class="downloadables-list">
             {% for downloadable in downloadables %}
-            <div class="downloadable-item glass-card"
-                 data-category="{{ downloadable.category|default:'others' }}"
-                 data-date="{{ downloadable.created_at|date:'c'|default:'' }}"
-                 data-title="{{ downloadable.title|lower }}"
-                 data-description="{{ downloadable.description|lower }}">
+            <div class="downloadable-item glass-card">
                 <div class="file-icon">
                     {% if downloadable.file.url %}
                         {% with ext=downloadable.file.url|slice:'-4:'|cut:'.' %}
@@ -173,26 +172,25 @@
         </div>
 
         <!-- Pagination Controls -->
+        {% if downloadables.has_other_pages %}
         <div class="pagination-container glass-card">
             <div class="pagination-info">
-                Showing <span id="showing-start">{{ page_obj.start_index }}</span> - <span id="showing-end">{{ page_obj.end_index }}</span> of <span id="total-items">{{ paginator.count }}</span> items
+                Showing {{ page_obj.start_index }} - {{ page_obj.end_index }} of {{ paginator.count }} items
             </div>
 
             <div class="pagination-controls">
                 {% if page_obj.has_previous %}
-                    <a href="?page=1{% if current_search %}&search={{ current_search|urlencode }}{% endif %}{% if current_category != 'all' %}&category={{ current_category }}{% endif %}{% if current_date_filter != 'latest' %}&date={{ current_date_filter }}{% endif %}"
-                       class="pagination-btn first-page" title="First Page">
+                    <a href="?page=1&search={{ current_search }}&category={{ current_category }}&date={{ current_date_filter }}" class="pagination-btn first-page">
                         <i class="fas fa-angle-double-left"></i>
                     </a>
-                    <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search|urlencode }}{% endif %}{% if current_category != 'all' %}&category={{ current_category }}{% endif %}{% if current_date_filter != 'latest' %}&date={{ current_date_filter }}{% endif %}"
-                       class="pagination-btn prev-page" title="Previous Page">
+                    <a href="?page={{ page_obj.previous_page_number }}&search={{ current_search }}&category={{ current_category }}&date={{ current_date_filter }}" class="pagination-btn prev-page">
                         <i class="fas fa-angle-left"></i>
                     </a>
                 {% else %}
-                    <span class="pagination-btn disabled first-page" title="First Page">
+                    <span class="pagination-btn disabled first-page">
                         <i class="fas fa-angle-double-left"></i>
                     </span>
-                    <span class="pagination-btn disabled prev-page" title="Previous Page">
+                    <span class="pagination-btn disabled prev-page">
                         <i class="fas fa-angle-left"></i>
                     </span>
                 {% endif %}
@@ -202,40 +200,32 @@
                         {% if page_obj.number == num %}
                             <span class="pagination-btn active">{{ num }}</span>
                         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                            <a href="?page={{ num }}{% if current_search %}&search={{ current_search|urlencode }}{% endif %}{% if current_category != 'all' %}&category={{ current_category }}{% endif %}{% if current_date_filter != 'latest' %}&date={{ current_date_filter }}{% endif %}"
-                               class="pagination-btn">{{ num }}</a>
+                            <a href="?page={{ num }}&search={{ current_search }}&category={{ current_category }}&date={{ current_date_filter }}" class="pagination-btn">{{ num }}</a>
                         {% endif %}
                     {% endfor %}
                 </div>
 
                 {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search|urlencode }}{% endif %}{% if current_category != 'all' %}&category={{ current_category }}{% endif %}{% if current_date_filter != 'latest' %}&date={{ current_date_filter }}{% endif %}"
-                       class="pagination-btn next-page" title="Next Page">
+                    <a href="?page={{ page_obj.next_page_number }}&search={{ current_search }}&category={{ current_category }}&date={{ current_date_filter }}" class="pagination-btn next-page">
                         <i class="fas fa-angle-right"></i>
                     </a>
-                    <a href="?page={{ paginator.num_pages }}{% if current_search %}&search={{ current_search|urlencode }}{% endif %}{% if current_category != 'all' %}&category={{ current_category }}{% endif %}{% if current_date_filter != 'latest' %}&date={{ current_date_filter }}{% endif %}"
-                       class="pagination-btn last-page" title="Last Page">
+                    <a href="?page={{ paginator.num_pages }}&search={{ current_search }}&category={{ current_category }}&date={{ current_date_filter }}" class="pagination-btn last-page">
                         <i class="fas fa-angle-double-right"></i>
                     </a>
                 {% else %}
-                    <span class="pagination-btn disabled next-page" title="Next Page">
+                    <span class="pagination-btn disabled next-page">
                         <i class="fas fa-angle-right"></i>
                     </span>
-                    <span class="pagination-btn disabled last-page" title="Last Page">
+                    <span class="pagination-btn disabled last-page">
                         <i class="fas fa-angle-double-right"></i>
                     </span>
                 {% endif %}
             </div>
         </div>
+        {% endif %}
     </div>
 
-    <!-- Loading Indicator -->
-    <div class="loading-indicator">
-        <div class="spinner"></div>
-        <p>Filtering documents...</p>
-    </div>
-
-{% include 'core/footer.html' %}
+    {% include 'core/footer.html' %}
     <script src="{% static 'js/core/downloadables.js' %}"></script>
 </body>
 </html>

@@ -556,13 +556,13 @@ function initScholarshipTable() {
     const table = document.getElementById('scholarships-table');
     const tableContainer = document.getElementById('scholarships-table-container');
     const searchInput = document.getElementById('scholarship-search');
-    const typeFilter = document.getElementById('type-filter');
-    const statusFilter = document.getElementById('status-filter');
+    const typeFilter = document.getElementById('scholarship-type-filter');
+    const statusFilter = document.getElementById('scholarship-status-filter');
+    const clearFiltersBtn = document.getElementById('clear-filters');
     const sortableHeaders = table.querySelectorAll('th[data-sort]');
     const tbody = table.querySelector('tbody');
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
 
-    // If no table found, exit
     if (!table) {
         console.error('Scholarships table not found');
         return;
@@ -580,7 +580,6 @@ function initScholarshipTable() {
             const column = header.getAttribute('data-sort');
             console.log('Sorting by:', column);
 
-            // If clicking the same column, reverse the direction
             if (currentSortColumn === column) {
                 currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
@@ -604,19 +603,28 @@ function initScholarshipTable() {
         });
     });
 
-    // Initialize search and filter events
+    // Initialize search event
     searchInput.addEventListener('input', debounce(function() {
         console.log('Search input changed:', searchInput.value);
         fetchAndDisplayScholarships();
     }, 300));
 
+    // Initialize filter events
     typeFilter.addEventListener('change', function() {
-        console.log('Type filter changed:', typeFilter.value);
+        console.log('Type filter changed:', this.value);
         fetchAndDisplayScholarships();
     });
 
     statusFilter.addEventListener('change', function() {
-        console.log('Status filter changed:', statusFilter.value);
+        console.log('Status filter changed:', this.value);
+        fetchAndDisplayScholarships();
+    });
+
+    // Clear filters
+    clearFiltersBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        typeFilter.value = 'all';
+        statusFilter.value = 'all';
         fetchAndDisplayScholarships();
     });
 
@@ -645,7 +653,7 @@ function initScholarshipTable() {
         const params = new URLSearchParams({
             get_filtered_scholarships: '1',
             search: searchTerm,
-            type: typeFilterValue,
+            scholarship_type: typeFilterValue,
             status: statusFilterValue,
             sort: currentSortColumn,
             direction: currentSortDirection,
@@ -936,9 +944,9 @@ function initScholarshipTable() {
     // Make fetchAndDisplayScholarships available globally
     window.fetchAndDisplayScholarships = fetchAndDisplayScholarships;
 
-    // Initial load - but only if we're not already showing data
+    // Initial load
     const existingRows = tbody.querySelectorAll('tr');
-    if (existingRows.length <= 1) { // Only empty row or no data
+    if (existingRows.length <= 1) {
         console.log('Performing initial AJAX load...');
         fetchAndDisplayScholarships();
     } else {

@@ -9,160 +9,6 @@
     <link rel="stylesheet" href="{% static 'css/core/announcement_detail.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Lightbox CSS for image gallery -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lightgallery-bundle.min.css">
-    <style>
-        /* Enhanced styles for formatted content */
-        .content-text {
-            line-height: 1.8;
-            font-size: 1.1rem;
-            color: #333;
-        }
-
-        .content-text h1 {
-            font-size: 2rem;
-            margin: 1.5em 0 0.8em;
-            color: #2c3e50;
-            font-weight: 600;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 0.3em;
-        }
-
-        .content-text h2 {
-            font-size: 1.7rem;
-            margin: 1.3em 0 0.7em;
-            color: #2c3e50;
-            font-weight: 600;
-        }
-
-        .content-text h3 {
-            font-size: 1.4rem;
-            margin: 1.1em 0 0.6em;
-            color: #2c3e50;
-            font-weight: 600;
-        }
-
-        .content-text h4 {
-            font-size: 1.2rem;
-            margin: 1em 0 0.5em;
-            color: #2c3e50;
-            font-weight: 600;
-        }
-
-        .content-text p {
-            margin-bottom: 1.2em;
-        }
-
-        .content-text strong,
-        .content-text b {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .content-text em,
-        .content-text i {
-            font-style: italic;
-        }
-
-        .content-text ul,
-        .content-text ol {
-            margin: 1em 0;
-            padding-left: 2em;
-        }
-
-        .content-text ul {
-            list-style-type: disc;
-        }
-
-        .content-text ol {
-            list-style-type: decimal;
-        }
-
-        .content-text li {
-            margin-bottom: 0.5em;
-        }
-
-        .content-text a {
-            color: #3498db;
-            text-decoration: underline;
-        }
-
-        .content-text a:hover {
-            color: #2980b9;
-        }
-
-        .content-text blockquote {
-            border-left: 4px solid #3498db;
-            padding: 0.5em 1em;
-            margin: 1em 0;
-            background-color: #f8f9fa;
-            font-style: italic;
-        }
-
-        .content-text code {
-            font-family: 'Courier New', monospace;
-            background-color: #f8f9fa;
-            padding: 0.2em 0.4em;
-            border-radius: 3px;
-            font-size: 0.9em;
-        }
-
-        .content-text pre {
-            background-color: #f8f9fa;
-            padding: 1em;
-            border-radius: 4px;
-            overflow-x: auto;
-            margin: 1em 0;
-        }
-
-        .content-text pre code {
-            padding: 0;
-            background-color: transparent;
-            border-radius: 0;
-        }
-
-        .content-text table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1em 0;
-        }
-
-        .content-text th,
-        .content-text td {
-            padding: 0.75em;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-
-        .content-text th {
-            background-color: #f2f2f2;
-            font-weight: 600;
-        }
-
-        .content-text img {
-            max-width: 100%;
-            height: auto;
-            margin: 1em 0;
-            border-radius: 4px;
-        }
-
-        /* Styles for other content sections */
-        .requirements,
-        .benefits {
-            line-height: 1.6;
-            margin: 1em 0;
-        }
-
-        .requirements h3,
-        .benefits h3 {
-            font-size: 1.2rem;
-            margin: 1em 0 0.5em;
-        }
-
-        .related-card p {
-            line-height: 1.5;
-        }
-    </style>
 </head>
 <body>
     {% include 'core/navbar.html' %}
@@ -207,35 +53,44 @@
 
                 <!-- Article Content -->
                 <div class="article-content">
-                    <!-- Featured Image with Lightbox -->
-                    {% if announcement.images.exists %}
-                    <div class="featured-gallery">
-                        {% if announcement.images.count == 1 %}
-                            <figure class="featured-image">
-                                <a href="{{ announcement.images.first.image.url }}" data-lg-size="1600-1200">
-                                    <img src="{{ announcement.images.first.image.url }}" alt="{{ announcement.title }}">
-                                </a>
-                                {% if announcement.images.first.caption %}
-                                <figcaption>{{ announcement.images.first.caption }}</figcaption>
-                                {% endif %}
-                            </figure>
-                        {% else %}
-                            <div class="gallery-grid" id="lightgallery">
+                <!-- Responsive Image Gallery -->
+                {% if announcement.images.exists %}
+                <div class="featured-gallery">
+                    {% if announcement.images.count == 1 %}
+                        <figure class="featured-image">
+                            <img src="{{ announcement.images.first.image.url }}" alt="{{ announcement.title }}" class="gallery-single-image">
+                            {% if announcement.images.first.caption %}
+                            <figcaption>{{ announcement.images.first.caption }}</figcaption>
+                            {% endif %}
+                        </figure>
+                    {% else %}
+                        <div class="gallery-container" id="announcement-gallery">
+                            <div class="gallery-grid">
                                 {% for image in announcement.images.all %}
-                                <figure class="gallery-item" data-src="{{ image.image.url }}" data-sub-html=".caption-{{ forloop.counter }}">
-                                    <img src="{{ image.image.url }}" alt="Announcement image {{ forloop.counter }}">
-                                    {% if image.caption %}
-                                    <div class="caption-{{ forloop.counter }}" style="display:none;">
-                                        <h4>{{ announcement.title }}</h4>
-                                        <p>{{ image.caption }}</p>
+                                <div class="gallery-item {% if forloop.counter > 4 %}hidden-item{% endif %}"
+                                     data-index="{{ forloop.counter0 }}"
+                                     data-src="{{ image.image.url }}"
+                                     data-caption="{{ image.caption|default:announcement.title }}">
+                                    <img src="{{ image.image.url }}" alt="Announcement image {{ forloop.counter }}" loading="lazy">
+                                    <!-- Mobile: Show overlay on first image when multiple images exist -->
+                                    {% if forloop.first and announcement.images.count > 1 %}
+                                    <div class="image-overlay mobile-overlay">
+                                        <span class="remaining-count">+{{ announcement.images.count|add:"-1" }}</span>
                                     </div>
                                     {% endif %}
-                                </figure>
+                                    <!-- Desktop: Show overlay on 4th image when more than 4 images exist -->
+                                    {% if forloop.counter == 4 and announcement.images.count > 4 %}
+                                    <div class="image-overlay desktop-overlay">
+                                        <span class="remaining-count">+{{ announcement.images.count|add:"-4" }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
                                 {% endfor %}
                             </div>
-                        {% endif %}
-                    </div>
+                        </div>
                     {% endif %}
+                </div>
+                {% endif %}
 
                     <!-- Main Content -->
                     <div class="content-text">
@@ -474,12 +329,35 @@
         </aside>
     </div>
 
-    <!-- Lightbox Gallery and JS for image gallery function -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/lightgallery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lg-zoom/2.7.1/lg-zoom.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/2.7.1/lg-fullscreen.min.js"></script>
-    <script src="{% static 'js/core/announcement_detail.js' %}"></script>
+    <!-- Image Viewer Modal -->
+    <div id="image-viewer" class="image-viewer">
+        <div class="viewer-container">
+            <button class="viewer-close" id="viewer-close">
+                <i class="fas fa-times"></i>
+            </button>
+            <button class="viewer-nav viewer-prev" id="viewer-prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="viewer-nav viewer-next" id="viewer-next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
 
+            <div class="viewer-content">
+                <img id="viewer-image" src="" alt="">
+                <div class="viewer-caption" id="viewer-caption"></div>
+            </div>
+
+            <div class="viewer-thumbnails" id="viewer-thumbnails">
+                <!-- Thumbnails will be populated by JavaScript -->
+            </div>
+
+            <div class="viewer-info">
+                <span id="viewer-counter"></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/core/announcement_detail.js' %}"></script>
     {% include 'core/footer.html' %}
 </body>
 </html>
