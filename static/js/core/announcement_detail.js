@@ -242,3 +242,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
     preloadImages();
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const relatedCards = document.querySelectorAll('.related-card');
+
+    relatedCards.forEach(card => {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' || e.target.closest('a')) {
+                return;
+            }
+
+            const readMoreLink = this.querySelector('.read-more');
+            if (readMoreLink && readMoreLink.href) {
+                window.location.href = readMoreLink.href;
+            }
+        });
+
+        // Add hover effects
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+        });
+
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});

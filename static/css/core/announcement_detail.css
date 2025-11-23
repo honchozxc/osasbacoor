@@ -1955,7 +1955,6 @@ button:hover,
         background: rgba(255, 255, 255, 0.25);
     }
 
-    /* Ensure overlay visibility in dark mode */
     .image-overlay {
         background: rgba(0, 0, 0, 0.8);
     }
@@ -1965,7 +1964,6 @@ button:hover,
     }
 }
 
-/* Landscape orientation optimizations */
 @media (max-height: 500px) and (orientation: landscape) {
     .image-viewer {
         padding: 10px;
@@ -2001,7 +1999,6 @@ button:hover,
     }
 }
 
-/* Large screen optimizations */
 @media (min-width: 1400px) {
     .announcement-detail-container {
         max-width: 1300px;
@@ -2010,4 +2007,15 @@ button:hover,
     .gallery-grid {
         max-width: 700px;
     }
+}
+
+.related-card {
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.related-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 51, 102, 0.3);
 }
