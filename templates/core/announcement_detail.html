@@ -279,13 +279,17 @@
                 <div class="related-grid">
                     {% for related in related_announcements %}
                     <article class="related-card">
-                        <div class="related-header">
-                            <span class="category-badge {{ related.category|lower }}">{{ related.get_category_display }}</span>
-                            <span class="post-time">{{ related.created_at|timesince }} ago</span>
-                        </div>
-                        <h3><a href="{% url 'home_announcement_detail' related.id %}">{{ related.title }}</a></h3>
-                        <p>{{ related.content|truncatechars:100|safe }}</p>
-                        <a href="{% url 'home_announcement_detail' related.id %}" class="read-more">Read More <i class="fas fa-chevron-right"></i></a>
+                        <a href="{% url 'home_announcement_detail' related.id %}" class="card-link">
+                            <div class="related-header">
+                                <span class="category-badge {{ related.category|lower }}">{{ related.get_category_display }}</span>
+                                <span class="post-time">{{ related.created_at|timesince }} ago</span>
+                            </div>
+                            <h3>{{ related.title }}</h3>
+                            <p>{{ related.content|truncatechars:100|safe }}</p>
+                            <div class="read-more">
+                                Read More <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </a>
                     </article>
                     {% empty %}
                     <div class="no-related">
