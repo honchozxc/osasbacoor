@@ -3220,7 +3220,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             scholarships = scholarships.filter(is_active=is_active)
             print(f"DEBUG: After status filter count: {scholarships.count()}")
 
-        # Apply sorting - REMOVED 'slots' from sort mapping
         sort_mapping = {
             'name': 'name',
             'type': 'scholarship_type',
@@ -3252,7 +3251,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         print(f"DEBUG: Pagination - Page {page_obj.number} of {paginator.num_pages}")
         print(f"DEBUG: Results on page: {page_obj.object_list.count()}")
 
-        # Prepare data for JSON response - REMOVED slots_available field
         scholarship_data = []
         for scholarship in page_obj.object_list:
             scholarship_data.append({
@@ -8203,18 +8201,17 @@ class ScholarshipApplicationApproveView(View):
             'notes': notes,
             'status_update_date': application.status_update_date.strftime("%B %d, %Y"),
             'status_updated_by': application.status_updated_by.get_full_name(),
-            # REMOVED: slots_remaining from email context
         }
 
         # Render HTML email template
         html_message = render_to_string('emails/scholarship_decision.html', context)
-        plain_message = strip_tags(html_message)  # Create plain text version
+        plain_message = strip_tags(html_message)
 
         # Send email
         send_mail(
             subject=subject,
             message=plain_message,
-            from_email=None,  # Uses DEFAULT_FROM_EMAIL from settings
+            from_email=None,
             recipient_list=[student.email],
             html_message=html_message,
             fail_silently=False,
@@ -8272,7 +8269,6 @@ class ScholarshipApplicationView(LoginRequiredMixin, CreateView):
                              f"You already have an existing application for this scholarship (Status: {existing_app.get_status_display()}).")
             return redirect('scholarship_application_status', pk=existing_app.pk)
 
-        # REMOVED: Slot availability check since we no longer have slots
         form.instance.student = self.request.user
         response = super().form_valid(form)
         messages.success(self.request, "Your scholarship application has been submitted successfully!")
@@ -8383,29 +8379,8 @@ class ScholarshipApplicationUpdateView(LoginRequiredMixin, View):
                         'message': 'This student already has an application for the selected scholarship program.'
                     }, status=400)
 
-            # Handle status change and scholarship slots
             if 'status' in form.changed_data:
                 new_status = form.cleaned_data['status']
-
-                # If changing from approved to another status, increment the scholarship slots
-                if previous_status == 'approved' and new_status != 'approved':
-                    scholarship = application.scholarship
-                    if scholarship.slots_available is not None:
-                        scholarship.slots_available += 1
-                        scholarship.save()
-
-                # If changing to approved from another status, decrement the scholarship slots
-                elif new_status == 'approved' and previous_status != 'approved':
-                    scholarship = application.scholarship
-                    if scholarship.slots_available is not None:
-                        if scholarship.slots_available > 0:
-                            scholarship.slots_available -= 1
-                            scholarship.save()
-                        else:
-                            return JsonResponse({
-                                'success': False,
-                                'message': 'No available slots remaining for this scholarship.'
-                            }, status=400)
 
                 application.status_updated_by = request.user
                 application.status_update_date = timezone.now()
