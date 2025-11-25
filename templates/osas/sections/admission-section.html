@@ -18,7 +18,7 @@
                             </div>
                             <div class="stat-content">
                                 <span class="stat-number">
-                                    {% if request.user.is_superuser or request.user.user_type == 1 %}
+                                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 12 %}
                                         {{ current_grade12_count }}
                                     {% else %}
                                         {{ user_current_grade12_count }}
@@ -33,7 +33,7 @@
                             </div>
                             <div class="stat-content">
                                 <span class="stat-number">
-                                    {% if request.user.is_superuser or request.user.user_type == 1 %}
+                                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 12 %}
                                         {{ shs_graduate_count }}
                                     {% else %}
                                         {{ user_shs_graduate_count }}
@@ -48,7 +48,7 @@
                             </div>
                             <div class="stat-content">
                                 <span class="stat-number">
-                                    {% if request.user.is_superuser or request.user.user_type == 1 %}
+                                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 12 %}
                                         {{ transferee_count }}
                                     {% else %}
                                         {{ user_transferee_count }}
@@ -70,7 +70,7 @@
                             </div>
                             <div class="stat-content">
                                 <span class="stat-number">
-                                    {% if request.user.is_superuser or request.user.user_type == 1 %}
+                                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 12 %}
                                         {{ complete_requirements_count }}
                                     {% else %}
                                         {{ user_complete_requirements_count }}
@@ -85,7 +85,7 @@
                             </div>
                             <div class="stat-content">
                                 <span class="stat-number">
-                                    {% if request.user.is_superuser or request.user.user_type == 1 %}
+                                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 12 %}
                                         {{ incomplete_requirements_count }}
                                     {% else %}
                                         {{ user_incomplete_requirements_count }}
@@ -100,7 +100,7 @@
                             </div>
                             <div class="stat-content">
                                 <span class="stat-number">
-                                    {% if request.user.is_superuser or request.user.user_type == 1 %}
+                                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 12 %}
                                         {{ total_admissions }}
                                     {% else %}
                                         {{ user_total_admissions }}

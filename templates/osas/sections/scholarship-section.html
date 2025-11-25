@@ -109,7 +109,6 @@
             <tr>
                 <th data-sort="name">Name <i class='bx bx-sort'></i></th>
                 <th data-sort="type">Type <i class='bx bx-sort'></i></th>
-                <th data-sort="slots">Slots <i class='bx bx-sort'></i></th>
                 <th data-sort="is_active">Active <i class='bx bx-sort'></i></th>
                 <th>Actions</th>
             </tr>
@@ -119,7 +118,6 @@
             <tr data-created-at="{{ scholarship.created_at|date:'c' }}">
                 <td>{{ scholarship.name }}</td>
                 <td>{{ scholarship.get_scholarship_type_display }}</td>
-                <td>{{ scholarship.slots_available|default:"-" }}</td>
                 <td>
                     <span class="status-badge {% if scholarship.is_active %}active{% else %}inactive{% endif %}">
                         {% if scholarship.is_active %}Active{% else %}Inactive{% endif %}
@@ -143,7 +141,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="5" class="empty-table">
+                <td colspan="4" class="empty-table">
                     <div class="empty-state">
                         <i class='bx bx-bookmark-alt'></i>
                         <p>No scholarships found</p>

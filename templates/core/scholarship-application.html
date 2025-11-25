@@ -109,7 +109,6 @@
                         This could be because:
                         <ul class="mt-2">
                             <li>There are no active scholarship programs at this time</li>
-                            <li>All scholarships have reached their application limits</li>
                             <li>The application period has not started or has ended</li>
                         </ul>
                         Please check back later or contact the scholarship office for more information.
@@ -127,17 +126,15 @@
                                         data-benefits="{{ scholarship.benefits }}"
                                         data-requirements="{{ scholarship.requirements }}"
                                         data-type="{{ scholarship.get_scholarship_type_display }}"
-                                        data-slots="{% if scholarship.slots_available %}{{ scholarship.slots_available }} slots available{% else %}No slot limit{% endif %}"
                                         {% if scholarship.id in existing_scholarship_ids %}data-existing="true"{% endif %}>
                                         {{ scholarship.name }} ({{ scholarship.get_scholarship_type_display }})
-                                        {% if scholarship.slots_available %} - {{ scholarship.slots_available }} slots left{% endif %}
                                         {% if scholarship.id in existing_scholarship_ids %} (Already Applied){% endif %}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
                         <small class="form-text text-muted">
-                            Only active and available scholarships are shown here.
+                            Only active scholarships are shown here.
                         </small>
                     </div>
 
@@ -149,11 +146,8 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <p><strong>Type:</strong> <span id="scholarshipType"></span></p>
-                                </div>
-                                <div class="col-md-6">
-                                    <p><strong>Availability:</strong> <span id="scholarshipSlots"></span></p>
                                 </div>
                             </div>
                             <div class="mt-3">

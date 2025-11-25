@@ -88,6 +88,11 @@ document.getElementById('scholarshipCreateForm').addEventListener('submit', func
 
     // Show loading state
     const submitBtn = form.querySelector('button[type="submit"]');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoader = submitBtn.querySelector('.btn-loader');
+
+    btnText.style.display = 'none';
+    btnLoader.style.display = 'block';
     submitBtn.disabled = true;
 
     fetch(form.action, {
@@ -108,15 +113,56 @@ document.getElementById('scholarshipCreateForm').addEventListener('submit', func
         } else {
             // Handle errors
             console.error(data);
-            showToast(data.message || 'Error creating scholarship', 'error');
+
+            // Reset button state
+            btnText.style.display = 'block';
+            btnLoader.style.display = 'none';
+            submitBtn.disabled = false;
+
+            const responseDiv = document.getElementById('scholarshipFormResponse');
+            responseDiv.innerHTML = '';
+
+            if (data.errors) {
+                // Show error toast for form errors
+                const firstError = Object.values(data.errors)[0].messages[0];
+                showToast(firstError, 'error');
+
+                // Display detailed form errors
+                let errorHtml = '<div class="alert alert-danger"><ul>';
+                for (const field in data.errors) {
+                    data.errors[field].messages.forEach(error => {
+                        errorHtml += `<li>${error}</li>`;
+                        // Highlight problematic fields
+                        const input = form.querySelector(`[name="${field}"]`);
+                        if (input) {
+                            input.classList.add('error');
+                            const formGroup = input.closest('.form-group');
+                            if (formGroup) {
+                                formGroup.classList.add('has-error');
+                            }
+                        }
+                    });
+                }
+                errorHtml += '</ul></div>';
+                responseDiv.innerHTML = errorHtml;
+            } else if (data.message) {
+                // Show error message as toast
+                showToast(data.message, 'error');
+                responseDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+            }
         }
     })
     .catch(error => {
         console.error('Error:', error);
         showToast('An error occurred', 'error');
-    })
-    .finally(() => {
+
+        // Reset button state
+        btnText.style.display = 'block';
+        btnLoader.style.display = 'none';
         submitBtn.disabled = false;
+
+        document.getElementById('scholarshipFormResponse').innerHTML =
+            `<div class="alert alert-danger">An error occurred. Please try again.</div>`;
     });
 });
 
@@ -160,14 +206,12 @@ function openScholarshipViewModal(scholarshipId) {
                 document.getElementById('scholarshipTypeTag').textContent = scholarship.scholarship_type;
                 document.getElementById('scholarshipTypeTag').className = 'scholarship-type-tag ' + scholarship.scholarship_type.toLowerCase();
 
-                // Set status and slots
+                // Set status (removed slots)
                 const statusBadge = document.getElementById('scholarshipStatus');
                 statusBadge.textContent = scholarship.is_active ? 'Active' : 'Inactive';
                 statusBadge.className = 'status-badge ' + (scholarship.is_active ? 'active' : 'inactive');
 
-                document.getElementById('scholarshipSlots').textContent = scholarship.slots_available ?
-                    `${scholarship.slots_available} slot(s) available` : 'No slot limit';
-
+                // Set created by (removed slots display)
                 document.getElementById('scholarshipCreatedBy').textContent = scholarship.created_by ?
                     `Created by: ${scholarship.created_by}` : '';
 
@@ -256,7 +300,6 @@ function openEditScholarshipModal(scholarshipId) {
                 document.getElementById('editDescription').value = scholarship.description;
                 document.getElementById('editBenefits').value = scholarship.benefits;
                 document.getElementById('editRequirements').value = scholarship.requirements;
-                document.getElementById('editSlots').value = scholarship.slots_available || '';
                 document.getElementById('editStatus').checked = scholarship.is_active;
 
                 // Handle application form if exists
@@ -704,7 +747,7 @@ function initScholarshipTable() {
     }
 
     function showErrorInTable(message) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: red;">${message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px; color: red;">${message}</td></tr>`;
     }
 
     function updateScholarshipsPaginationControls(data) {
@@ -848,7 +891,7 @@ function initScholarshipTable() {
         if (scholarships.length === 0) {
             const noDataRow = document.createElement('tr');
             const noDataCell = document.createElement('td');
-            noDataCell.colSpan = 5;
+            noDataCell.colSpan = 4; // Changed from 5 to 4 columns
             noDataCell.textContent = 'No scholarships found matching your criteria';
             noDataCell.style.textAlign = 'center';
             noDataCell.style.padding = '20px';
@@ -876,12 +919,7 @@ function initScholarshipTable() {
             typeCell.textContent = scholarship.type_display || scholarship.type || 'N/A';
             row.appendChild(typeCell);
 
-            // Slots
-            const slotsCell = document.createElement('td');
-            slotsCell.textContent = scholarship.slots_available || scholarship.slots_available === 0 ? scholarship.slots_available : '-';
-            row.appendChild(slotsCell);
-
-            // Status
+            // Status (REMOVED Slots column)
             const statusCell = document.createElement('td');
             const statusBadge = document.createElement('span');
             const isActive = scholarship.is_active === true || scholarship.is_active === 'true';

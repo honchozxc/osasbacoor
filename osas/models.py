@@ -1990,7 +1990,6 @@ class Scholarship(models.Model):
     scholarship_type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     benefits = models.TextField(help_text="Describe what the scholarship provides")
     requirements = models.TextField(help_text="List of requirements for applicants")
-    slots_available = models.PositiveIntegerField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

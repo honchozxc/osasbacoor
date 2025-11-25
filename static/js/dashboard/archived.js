@@ -1926,84 +1926,79 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 break;
                 case 'scholarship':
-                    modalBody.innerHTML = `
-                        <div class="view-scholarship-details">
-                            <div class="scholarship-header">
-                                <h3>${data.name}</h3>
-                                <div class="scholarship-meta">
-                                    <span class="badge ${data.scholarship_type}">${data.scholarship_type_display}</span>
-                                    <span class="badge ${data.is_active ? 'active' : 'inactive'}">
-                                        ${data.is_active ? 'Active' : 'Inactive'}
-                                    </span>
-                                    ${data.slots_available ? `
-                                    <span class="badge slots">
-                                        ${data.slots_available} slot${data.slots_available != 1 ? 's' : ''} available
-                                    </span>
-                                    ` : ''}
-                                </div>
-                            </div>
-
-                            <div class="scholarship-content">
-                                <div class="scholarship-section">
-                                    <h4>Description</h4>
-                                    <p>${data.description}</p>
-                                </div>
-
-                                <div class="scholarship-section">
-                                    <h4>Benefits</h4>
-                                    <p>${data.benefits}</p>
-                                </div>
-
-                                <div class="scholarship-section">
-                                    <h4>Requirements</h4>
-                                    <p>${data.requirements}</p>
-                                </div>
-
-                                ${data.application_form ? `
-                                <div class="scholarship-section">
-                                    <h4>Application Form</h4>
-                                    <div class="application-form">
-                                        <div class="file-info">
-                                            <i class="fas fa-file-alt"></i>
-                                            <div>
-                                                <p class="file-name">${data.application_form.file_name}</p>
-                                            </div>
-                                        </div>
-                                        <a href="${data.application_form.file_url}" class="btn btn-primary" download>
-                                            <i class="fas fa-download"></i> Download Form
-                                        </a>
-                                    </div>
-                                </div>
-                                ` : ''}
-                            </div>
-
+                modalBody.innerHTML = `
+                    <div class="view-scholarship-details">
+                        <div class="scholarship-header">
+                            <h3>${data.name}</h3>
                             <div class="scholarship-meta">
-                                <div class="meta-item">
-                                    <span class="meta-label">Created by:</span>
-                                    <span>${data.created_by}</span>
-                                </div>
-                                <div class="meta-item">
-                                    <span class="meta-label">Created on:</span>
-                                    <span>${data.created_at}</span>
-                                </div>
-                                ${data.updated_at ? `
-                                <div class="meta-item">
-                                    <span class="meta-label">Last updated:</span>
-                                    <span>${data.updated_at}</span>
-                                </div>
-                                ` : ''}
-                                <div class="meta-item">
-                                    <span class="meta-label">Archived on:</span>
-                                    <span>${data.archived_at}</span>
-                                </div>
-                                <div class="meta-item">
-                                    <span class="meta-label">Archived by:</span>
-                                    <span>${data.archived_by || 'System'}</span>
-                                </div>
+                                <span class="badge ${data.scholarship_type}">${data.scholarship_type_display}</span>
+                                <span class="badge ${data.is_active ? 'active' : 'inactive'}">
+                                    ${data.is_active ? 'Active' : 'Inactive'}
+                                </span>
                             </div>
                         </div>
-                    `;
-                    break;
+
+                        <div class="scholarship-content">
+                            <div class="scholarship-section">
+                                <h4>Description</h4>
+                                <p>${data.description}</p>
+                            </div>
+
+                            <div class="scholarship-section">
+                                <h4>Benefits</h4>
+                                <p>${data.benefits}</p>
+                            </div>
+
+                            <div class="scholarship-section">
+                                <h4>Requirements</h4>
+                                <p>${data.requirements}</p>
+                            </div>
+
+                            ${data.application_form ? `
+                            <div class="scholarship-section">
+                                <h4>Application Form</h4>
+                                <div class="application-form">
+                                    <div class="file-info">
+                                        <i class="fas fa-file-alt"></i>
+                                        <div>
+                                            <p class="file-name">${data.application_form.file_name}</p>
+                                        </div>
+                                    </div>
+                                    <a href="${data.application_form.file_url}" class="btn btn-primary" download>
+                                        <i class="fas fa-download"></i> Download Form
+                                    </a>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="scholarship-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">Created by:</span>
+                                <span>${data.created_by}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Created on:</span>
+                                <span>${data.created_at}</span>
+                            </div>
+                            ${data.updated_at ? `
+                            <div class="meta-item">
+                                <span class="meta-label">Last updated:</span>
+                                <span>${data.updated_at}</span>
+                            </div>
+                            ` : ''}
+                            <div class="meta-item">
+                                <span class="meta-label">Archived on:</span>
+                                <span>${data.archived_at}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Archived by:</span>
+                                <span>${data.archived_by || 'System'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                break;
                     case 'scholarship-application':
                         modalBody.innerHTML = `
                             <div class="view-scholarship-application-details">

@@ -495,7 +495,6 @@
                     <tr>
                         <th>Name</th>
                         <th>Type</th>
-                        <th>Slots Available</th>
                         <th>Status</th>
                         <th>Archived Date</th>
                         <th>Archived By</th>
@@ -507,7 +506,6 @@
                     <tr>
                         <td>{{ scholarship.name }}</td>
                         <td><span class="badge">{{ scholarship.get_scholarship_type_display }}</span></td>
-                        <td>{{ scholarship.slots_available|default:"Unlimited" }}</td>
                         <td>
                             <span class="badge {% if scholarship.is_active %}active{% else %}inactive{% endif %}">
                                 {% if scholarship.is_active %}Active{% else %}Inactive{% endif %}
@@ -536,7 +534,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="no-data">
+                        <td colspan="6" class="no-data">
                             <i class="fas fa-inbox"></i>
                             <span>No archived scholarships found</span>
                         </td>

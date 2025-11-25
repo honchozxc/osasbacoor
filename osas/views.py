@@ -2597,7 +2597,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['total_admissions'] = admissions.count()
 
         # User-specific statistics (for non-superusers)
-        if not (self.request.user.is_superuser or self.request.user.user_type == 1):
+        if not (self.request.user.is_superuser or self.request.user.user_type == 1 or self.request.user.user_type == 12):
             user_admissions = admissions.filter(user=self.request.user)
 
             context['user_current_grade12_count'] = user_admissions.filter(student_type='current_grade12').count()
@@ -3220,11 +3220,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             scholarships = scholarships.filter(is_active=is_active)
             print(f"DEBUG: After status filter count: {scholarships.count()}")
 
-        # Apply sorting
+        # Apply sorting - REMOVED 'slots' from sort mapping
         sort_mapping = {
             'name': 'name',
             'type': 'scholarship_type',
-            'slots': 'slots_available',
             'created_at': 'created_at',
             'is_active': 'is_active'
         }
@@ -3253,7 +3252,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         print(f"DEBUG: Pagination - Page {page_obj.number} of {paginator.num_pages}")
         print(f"DEBUG: Results on page: {page_obj.object_list.count()}")
 
-        # Prepare data for JSON response
+        # Prepare data for JSON response - REMOVED slots_available field
         scholarship_data = []
         for scholarship in page_obj.object_list:
             scholarship_data.append({
@@ -3261,7 +3260,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 'name': scholarship.name,
                 'type': scholarship.scholarship_type,
                 'type_display': scholarship.get_scholarship_type_display(),
-                'slots_available': scholarship.slots_available,
                 'is_active': scholarship.is_active,
                 'created_at': scholarship.created_at.isoformat(),
                 'can_view': request.user.has_perm('osas.view_scholarship'),
@@ -7177,7 +7175,6 @@ class ArchivedItemDetailView(LoginRequiredMixin, View):
                 'scholarship_type_display': item.get_scholarship_type_display(),
                 'benefits': item.benefits,
                 'requirements': item.requirements,
-                'slots_available': item.slots_available,
                 'is_active': item.is_active,
                 'created_at': item.created_at.strftime('%B %d, %Y %H:%M'),
                 'updated_at': item.updated_at.strftime('%B %d, %Y %H:%M') if item.updated_at else None,
@@ -7206,7 +7203,6 @@ class ArchivedItemDetailView(LoginRequiredMixin, View):
                     'full_name': item.student.get_full_name(),
                     'student_number': item.student.student_number,
                     'course': str(item.student.course) if item.student.course else None,
-                    # Fix: Convert Course to string
                     'email': item.student.email,
                     'phone_number': item.student.phone_number,
                     'profile_picture': item.student.profile_picture.url if item.student.profile_picture else None,
@@ -7667,6 +7663,7 @@ class RetrieveArchivedItemView(LoginRequiredMixin, View):
                     user=request.user,
                     activity=f"{request.user.first_name} retrieved scholarship: {item.name}"
                 )
+
             elif item_type == 'scholarship-application':
                 item = get_object_or_404(ScholarshipApplication, pk=pk, is_archived=True)
 
@@ -8045,7 +8042,6 @@ class ScholarshipDetailView(LoginRequiredMixin, DetailView):
                     'scholarship_type': scholarship.get_scholarship_type_display(),
                     'benefits': scholarship.benefits,
                     'requirements': scholarship.requirements,
-                    'slots_available': scholarship.slots_available,
                     'is_active': scholarship.is_active,
                     'created_at': scholarship.created_at.strftime('%Y-%m-%d %H:%M:%S'),
                     'updated_at': scholarship.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
@@ -8091,7 +8087,6 @@ class ScholarshipUpdateView(LoginRequiredMixin, View):
                         'description': updated_scholarship.description,
                         'benefits': updated_scholarship.benefits,
                         'requirements': updated_scholarship.requirements,
-                        'slots_available': updated_scholarship.slots_available,
                         'is_active': updated_scholarship.is_active,
                     }
                 })
@@ -8160,7 +8155,7 @@ class ScholarshipApplicationApproveView(View):
         application = get_object_or_404(ScholarshipApplication, pk=kwargs['pk'])
 
         # Check permissions
-        if not request.user.user_type in [1, 5]:  # Only OSAS Staff and Scholarship unit can approve
+        if not request.user.user_type in [1, 5]:
             return JsonResponse({
                 'success': False,
                 'message': 'You do not have permission to approve applications.'
@@ -8174,25 +8169,6 @@ class ScholarshipApplicationApproveView(View):
                 'success': False,
                 'message': 'Invalid decision.'
             }, status=400)
-
-        # Check if scholarship has available slots before approving
-        if decision == 'approved' and application.scholarship.slots_available is not None:
-            if application.scholarship.slots_available <= 0:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Cannot approve application. No available slots remaining for this scholarship.'
-                }, status=400)
-
-            # Check if this application was previously approved (to prevent double deduction)
-            if application.status != 'approved':
-                # Deduct one slot
-                application.scholarship.slots_available -= 1
-                application.scholarship.save()
-
-        # If changing from approved to rejected, return the slot
-        if decision == 'rejected' and application.status == 'approved' and application.scholarship.slots_available is not None:
-            application.scholarship.slots_available += 1
-            application.scholarship.save()
 
         # Update the application
         application.status = decision
@@ -8212,8 +8188,7 @@ class ScholarshipApplicationApproveView(View):
 
         return JsonResponse({
             'success': True,
-            'message': f'Application {decision} successfully.',
-            'slots_remaining': application.scholarship.slots_available if application.scholarship.slots_available is not None else 'unlimited'
+            'message': f'Application {decision} successfully.'
         })
 
     def send_decision_email(self, application, decision, notes):
@@ -8228,7 +8203,7 @@ class ScholarshipApplicationApproveView(View):
             'notes': notes,
             'status_update_date': application.status_update_date.strftime("%B %d, %Y"),
             'status_updated_by': application.status_updated_by.get_full_name(),
-            'slots_remaining': application.scholarship.slots_available if application.scholarship.slots_available is not None else 'unlimited'
+            # REMOVED: slots_remaining from email context
         }
 
         # Render HTML email template
@@ -8257,12 +8232,10 @@ class ScholarshipApplicationView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Get active scholarships that either have slots available or have no slot limit
+        # Get active scholarships (no slot filtering needed anymore)
         active_scholarships = Scholarship.objects.filter(
             is_active=True,
             is_archived=False
-        ).exclude(
-            slots_available=0  # Exclude scholarships with 0 slots available
         ).order_by('name')
 
         # Get existing applications with their scholarship IDs
@@ -8299,12 +8272,7 @@ class ScholarshipApplicationView(LoginRequiredMixin, CreateView):
                              f"You already have an existing application for this scholarship (Status: {existing_app.get_status_display()}).")
             return redirect('scholarship_application_status', pk=existing_app.pk)
 
-        # Check if the scholarship still has available slots
-        scholarship = form.cleaned_data['scholarship']
-        if scholarship.slots_available is not None and scholarship.slots_available <= 0:
-            messages.error(self.request, "This scholarship no longer has available slots.")
-            return redirect('scholarship_application')
-
+        # REMOVED: Slot availability check since we no longer have slots
         form.instance.student = self.request.user
         response = super().form_valid(form)
         messages.success(self.request, "Your scholarship application has been submitted successfully!")

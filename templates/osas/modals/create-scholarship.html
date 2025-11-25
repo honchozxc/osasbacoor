@@ -48,8 +48,12 @@
                     <!-- Right Column -->
                     <div class="form-column">
                         <div class="form-group">
-                            <label for="id_slots_available">Available Slots</label>
-                            <input type="number" name="slots_available" id="id_slots_available" class="form-input" placeholder="Enter number of slots">
+                            <label for="id_is_active">Status</label>
+                            <div class="form-checkbox">
+                                <input type="checkbox" name="is_active" id="id_is_active" checked>
+                                <label for="id_is_active">Active Scholarship</label>
+                            </div>
+                            <small class="form-hint">Uncheck to deactivate this scholarship</small>
                         </div>
                     </div>
                 </div>
@@ -104,15 +108,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="checkbox-container">
-                        <input type="checkbox" name="is_active" id="id_is_active" checked>
-                        <span class="checkmark"></span>
-                        Active Scholarship
-                    </label>
-                    <small class="form-hint">Uncheck to deactivate this scholarship</small>
                 </div>
             </div>
 

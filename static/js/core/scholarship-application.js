@@ -50,7 +50,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (scholarshipId) {
             document.getElementById('scholarshipName').textContent = selectedOption.text;
             document.getElementById('scholarshipType').textContent = selectedOption.getAttribute('data-type');
-            document.getElementById('scholarshipSlots').textContent = selectedOption.getAttribute('data-slots');
             document.getElementById('scholarshipDescription').textContent = selectedOption.getAttribute('data-description');
             document.getElementById('scholarshipBenefits').textContent = selectedOption.getAttribute('data-benefits');
             document.getElementById('scholarshipRequirements').textContent = selectedOption.getAttribute('data-requirements');

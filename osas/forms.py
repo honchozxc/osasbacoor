@@ -1394,7 +1394,7 @@ class ScholarshipForm(forms.ModelForm):
         model = Scholarship
         fields = [
             'name', 'scholarship_type', 'description', 'benefits',
-            'requirements', 'slots_available', 'is_active'
+            'requirements', 'is_active'
         ]
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
