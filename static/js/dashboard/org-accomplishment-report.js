@@ -184,7 +184,6 @@ class AccomplishmentReportFilter {
                     <td>
                         <div class="report-title-cell">
                             <strong class="report-title">${this.escapeHtml(report.title)}</strong>
-                            ${report.organization_acronym && report.organization_acronym !== 'N/A' ? `<small class="org-badge">${this.escapeHtml(report.organization_acronym)}</small>` : ''}
                         </div>
                     </td>
 

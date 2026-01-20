@@ -158,9 +158,7 @@ function updateCompaniesTable(data) {
 
         html += `
             <tr>
-                <td>${company.id}</td>
                 <td title="${escapeHtml(company.name)}">${escapeHtml(truncatedName)}</td>
-                <td title="${escapeHtml(company.address)}">${escapeHtml(truncatedAddress)}</td>
                 <td>${escapeHtml(company.contact_number)}</td>
                 <td>${escapeHtml(company.email || '-')}</td>
                 <td>

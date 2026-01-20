@@ -98,9 +98,7 @@
 <table class="data-table" id="companies-table">
     <thead>
         <tr>
-            <th>ID</th>
             <th>Company Name</th>
-            <th>Address</th>
             <th>Contact Number</th>
             <th>Email</th>
             <th>Status</th>
@@ -111,9 +109,7 @@
         {% if ojt_companies %}
             {% for company in ojt_companies %}
             <tr>
-                <td>{{ company.id }}</td>
                 <td>{{ company.name }}</td>
-                <td>{{ company.address|truncatewords:10 }}</td>
                 <td>{{ company.contact_number }}</td>
                 <td>{{ company.email|default:"-" }}</td>
 
