@@ -21,9 +21,6 @@
                 <div class="ojt-hero-content">
                     <h1>{{ ojt_content.hero_title }}</h1>
                     <p>{{ ojt_content.hero_subtitle }}</p>
-                    <div class="ojt-hero-buttons">
-                        <a href="{% url 'add-ojt-application' %}" class="ojt-btn ojt-btn-primary apply-ojt-btn">Apply Now</a>
-                    </div>
                 </div>
                 <div class="ojt-hero-visual">
                     <div class="ojt-visual-card">
@@ -104,7 +101,14 @@
                         </div>
                         <h3>{{ company.name }}</h3>
                         <p>{{ company.description|default:"Industry Leader"|truncatewords:10 }}</p>
-                        <span class="ojt-partner-tag">{{ company.filled_slots }}+ interns placed</span>
+                        <!-- Remove the filled_slots reference since it doesn't exist -->
+                        <span class="ojt-partner-tag">
+                            {% if company.status == 'active' %}
+                                <i class="fas fa-check-circle"></i> Active Partner
+                            {% else %}
+                                <i class="fas fa-clock"></i> Inactive
+                            {% endif %}
+                        </span>
                     </div>
                     {% empty %}
                     <!-- Empty State -->
@@ -173,7 +177,6 @@
                 <div class="ojt-cta-content">
                     <h2>{{ ojt_content.cta_title }}</h2>
                     <p>{{ ojt_content.cta_subtitle }}</p>
-                    <a href="{% url 'add-ojt-application' %}" class="ojt-btn ojt-btn-primary ojt-btn-large apply-ojt-btn">{{ ojt_content.cta_button_text }}</a>
                 </div>
             </div>
         </section>

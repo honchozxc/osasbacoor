@@ -1319,13 +1319,11 @@
     border-radius: 4px;
 }
 
-/* Remarks Cell */
 .remarks-cell {
     max-width: 250px;
     overflow: hidden;
 }
 
-/* Highlight for missing requirements */
 .remarks-cell[data-missing="true"] {
     color: #D32F2F;
     font-weight: 500;
@@ -1334,11 +1332,106 @@
     border-radius: 4px;
 }
 
-/* Complete requirements highlight */
 .remarks-cell[data-complete="true"] {
     color: #2E7D32;
     font-weight: 500;
     background-color: #E8F5E9;
     padding: 4px 8px;
     border-radius: 4px;
+}
+
+#admissions-table.data-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    background-color: var(--white) !important;
+    border-radius: var(--border-radius-sm) !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    table-layout: fixed !important;
+}
+
+#admissions-table.data-table td {
+    padding: 0.75rem 1.25rem !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    border-bottom: 2px solid var(--gray-light) !important;
+    font-size: 0.875rem !important;
+    color: var(--dark) !important;
+    line-height: 1.5 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+}
+
+#admissions-table.data-table th {
+    padding: 1rem 1.25rem !important;
+    background-color: var(--primary-dark) !important;
+    color: var(--white) !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.5px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+}
+
+#admissions-table.data-table td.actions {
+    display: table-cell !important;
+    min-width: 180px !important;
+    max-width: 180px !important;
+    width: 180px !important;
+    padding: 0.75rem 1.25rem !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+#admissions-table.data-table td.actions .actions {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#admissions-table.data-table .actions .btn-icon {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    flex-shrink: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+}
+
+#admissions-table.data-table tbody tr {
+    height: auto !important;
+    min-height: 0 !important;
+}
+
+#admissions-table.data-table tbody tr:hover td {
+    background-color: rgba(67, 97, 238, 0.03) !important;
+}
+
+#admissions-table.data-table tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+#admissions-table.data-table th:nth-child(8) {
+    min-width: 180px !important;
+    max-width: 180px !important;
+    width: 180px !important;
 }

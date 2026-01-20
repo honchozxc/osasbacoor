@@ -8,7 +8,7 @@ from .views import (
     AnnouncementCreateView, AnnouncementDetailView, AnnouncementArchiveView, AnnouncementUpdateView,
     download_downloadable, ArchivedItemDetailView, RetrieveArchivedItemView, HomeAnnouncementDetailView,
     AllAnnouncementView, TemplatePageView, AboutPageEditView, ComplaintCreateView, download_complaint_pdf,
-    ResolveComplaintView, ComplaintDetailView, ComplaintEditView, ArchiveComplaintView, FooterView,
+    ComplaintDetailView, ComplaintEditView, ArchiveComplaintView, FooterView,
     FooterEditView, StudentDisciplinePageView, StudentDisciplineEditView, RegistrationView, clear_registration_session,
     ApproveUserView, ScholarshipCreateView, ScholarshipDetailView, ScholarshipUpdateView, ScholarshipArchiveView,
     ScholarshipApplicationView, ScholarshipApplicationStatusView, ScholarshipApplicationUpdateView,
@@ -19,7 +19,6 @@ from .views import (
     NSTPStudentUpdateView, NSTPEnlistmentArchiveView, NSTPApproveView, NSTPExportTemplateView, NSTPFileCreateView,
     NSTPFileDetailView, NSTPFileUpdateView, NSTPFileArchiveView, NSTPLandingView, NSTPPageEditView, ClinicView,
     CompanyCreateView, OJTCompanyDetailView, OJTCompanyUpdateView, OJTCompanyArchiveView, OJTCompanyExportView,
-    OJTApplicationView, OJTApplicationEditView, OJTApplicationExportView, OJTReportDetailView, OJTReportArchiveView,
     OJTPageEditView, OrganizationReactivateView, AccomplishmentCreateView, AccomplishmentRecordDetailView,
     AccomplishmentRecordUpdateView, SupportingFileDeleteView, OSASOrganizationChartView,
 )
@@ -60,6 +59,8 @@ urlpatterns = [
     path('footer/', FooterView.as_view(), name='footer'),
     path('footer/edit/', FooterEditView.as_view(), name='footer_edit'),
 
+    path('get-courses/', views.get_courses, name='get_courses'),
+
     # Admin Functionalities
     # Profile
     path('profile/', ProfileView.as_view(), name='profile'),
@@ -94,7 +95,7 @@ urlpatterns = [
     # Complaint
     path('create-complaint/', ComplaintCreateView.as_view(), name='complaint-create'),
     path('complaint/pdf/<str:complaint_id>/', download_complaint_pdf, name='download_complaint_pdf'),
-    path('complaints/<int:pk>/resolve/', ResolveComplaintView.as_view(), name='resolve_complaint'),
+    path('complaints/<int:pk>/update-status/', views.UpdateComplaintStatusView.as_view(), name='update_complaint_status'),
     path('complaints/<int:pk>/view/', ComplaintDetailView.as_view(), name='complaint_detail'),
     path('dashboard/complaints/<int:pk>/edit/', ComplaintEditView.as_view(), name='edit_complaint'),
     path('complaints/<int:pk>/archive/', ArchiveComplaintView.as_view(), name='archive_complaint'),
@@ -148,25 +149,6 @@ urlpatterns = [
     path('ojt-company/<int:pk>/edit/', OJTCompanyUpdateView.as_view(), name='ojt-company-edit'),
     path('ojt-company/<int:pk>/archive/', OJTCompanyArchiveView.as_view(), name='ojt-company-archive'),
     path('export-ojt-companies/', views.OJTCompanyExportView.as_view(), name='export-ojt-companies'),
-
-    # OJT Applications
-    path('ojt-application/add/', OJTApplicationView.as_view(), name='add-ojt-application'),
-    path('ojt-applications/<int:pk>/approve-modal/', views.OJTApplicationApproveModalView.as_view(), name='ojt_application_approve_modal'),
-    path('ojt-applications/<int:pk>/approve/', views.OJTApplicationApproveView.as_view(), name='ojt_application_approve'),
-    path('ojt-applications/<int:pk>/view-modal/', views.OJTApplicationViewModalView.as_view(), name='ojt_application_view_modal'),
-    path('ojt-applications/<int:pk>/archive-modal/', views.OJTApplicationArchiveModalView.as_view(), name='ojt_application_archive_modal'),
-    path('ojt-applications/<int:pk>/archive/', views.OJTApplicationArchiveView.as_view(), name='ojt_application_archive'),
-    path('ojt-applications/<int:pk>/edit/', OJTApplicationEditView.as_view(), name='ojt-application-edit'),
-    path('export-ojt-applications/', OJTApplicationExportView.as_view(), name='export-ojt-applications'),
-
-    # OJT Reports
-    path('ojt-reports/create/', views.OJTReportCreateView.as_view(), name='create-ojt-report'),
-    path('ojt-reports/<int:pk>/', OJTReportDetailView.as_view(), name='ojt-report-detail'),
-    path('ojt-reports/<int:pk>/edit/', views.OJTReportUpdateView.as_view(), name='ojt_report_edit'),
-    path('ojt-reports/attachments/<int:pk>/delete/', views.OJTReportAttachmentDeleteView.as_view(), name='ojt_report_attachment_delete'),
-    path('ojt-reports/<int:pk>/archive/', OJTReportArchiveView.as_view(), name='ojt_report_archive'),
-    path('ojt-reports/<int:pk>/review/', views.OJTReportReviewView.as_view(), name='ojt_report_review'),
-    path('ojt-reports/export/', views.OJTReportExportView.as_view(), name='export-ojt-reports'),
 
     # SDS Organization
     path('add-organization/', views.OrganizationCreateView.as_view(), name='add-organization'),

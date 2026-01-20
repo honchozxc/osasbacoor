@@ -5,7 +5,7 @@
         <div class="modal-header">
             <div class="header-content">
                 <h2>Company Profile</h2>
-                <p class="header-description">Comprehensive overview of company details and OJT placements</p>
+                <p class="header-description">Comprehensive overview of company details</p>
             </div>
             <button class="modal-close" onclick="closeCompanyViewModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -17,7 +17,7 @@
 
         <div class="form-body">
             <div class="company-layout-container">
-                <!-- TOP SECTION - Company Information - Clean Unified Design -->
+                <!-- Company Information Section -->
                 <div class="company-info-section">
                     <div class="company-main-card">
                         <!-- Company Header -->
@@ -50,29 +50,23 @@
                         <div class="company-details-grid">
                             <!-- Left Column -->
                             <div class="details-column">
-                                <!-- Capacity Stats -->
+                                <!-- Contact Information -->
                                 <div class="details-group">
                                     <h4 class="details-group-title">
-                                        <i class='bx bx-user-check'></i>
-                                        OJT Capacity
+                                        <i class='bx bx-phone'></i>
+                                        Contact Information
                                     </h4>
-                                    <div class="capacity-stats">
-                                        <div class="stat-item">
-                                            <span class="stat-value" id="viewCompanyTotalSlots">-</span>
-                                            <span class="stat-label">Total Slots</span>
-                                        </div>
-                                        <div class="stat-item">
-                                            <span class="stat-value" id="viewCompanyFilledSlots">-</span>
-                                            <span class="stat-label">Filled Slots</span>
-                                        </div>
-                                        <div class="stat-item">
-                                            <span class="stat-value" id="viewCompanyAvailableSlots">-</span>
-                                            <span class="stat-label">Available</span>
-                                        </div>
-                                        <div class="stat-item">
-                                            <span class="stat-value" id="viewCompanyUtilization">-</span>
-                                            <span class="stat-label">Utilization</span>
-                                        </div>
+                                    <div class="contact-item">
+                                        <div class="contact-label">Phone Number:</div>
+                                        <div class="contact-value" id="viewCompanyPhone">-</div>
+                                    </div>
+                                    <div class="contact-item">
+                                        <div class="contact-label">Email:</div>
+                                        <div class="contact-value" id="viewCompanyEmail">-</div>
+                                    </div>
+                                    <div class="contact-item">
+                                        <div class="contact-label">Website:</div>
+                                        <div class="contact-value" id="viewCompanyWebsite">-</div>
                                     </div>
                                 </div>
                             </div>
@@ -105,31 +99,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- BOTTOM SECTION - Students Section -->
-                <div class="students-section">
-                    <div class="students-header">
-                        <h3 class="students-title">
-                            <i class='bx bx-group'></i>
-                            Current OJT Students
-                        </h3>
-                        <span class="students-count" id="viewStudentsCount">0 students</span>
-                    </div>
-
-                    <div class="students-container">
-                        <div class="students-table-header">
-                            <div>Student Name</div>
-                            <div>Student ID</div>
-                            <div>Course</div>
-                            <div>Year & Section</div>
-                            <div>Duration</div>
-                            <div>Status</div>
-                        </div>
-                        <div class="students-list" id="viewCompanyStudentsList">
-                            <!-- Students will be populated here -->
                         </div>
                     </div>
                 </div>

@@ -330,9 +330,9 @@ function toggleUserTypeFields() {
             updateLabelRequired('id_cor_photo', true);
             // ID photo is optional for students
             updateLabelRequired('id_id_photo', false);
-
         }
         else if (['1','2','3','4','5','6','7','8','9','10','11','12','13'].includes(userType.value)) {
+            // OSAS Staff roles
             osasFields.style.display = 'block';
             setOsasFieldsRequired(true);
             personalInfoTitle.textContent = 'Staff Information';
@@ -345,6 +345,21 @@ function toggleUserTypeFields() {
             // COR is optional for OSAS staff
             updateLabelRequired('id_cor_photo', false);
         }
+        else if (userType.value === '16') { // OJT Adviser
+            // OJT Adviser - similar to OSAS staff but with different field requirements
+            osasFields.style.display = 'block';
+            setOsasFieldsRequired(false); // Don't require all OSAS fields
+            setOjtAdviserFieldsRequired(true);
+
+            personalInfoTitle.textContent = 'OJT Adviser Information';
+            personalInfoDescription.textContent = 'Personal details of the OJT Adviser';
+            firstNameLabel.textContent = 'First Name';
+            lastNameLabel.textContent = 'Last Name';
+
+            // Both optional for OJT Adviser
+            updateLabelRequired('id_id_photo', false);
+            updateLabelRequired('id_cor_photo', false);
+        }
         else {
             personalInfoTitle.textContent = 'Personal Information';
             personalInfoDescription.textContent = 'Basic personal details';
@@ -354,6 +369,20 @@ function toggleUserTypeFields() {
             // Both optional for other roles
             updateLabelRequired('id_id_photo', false);
             updateLabelRequired('id_cor_photo', false);
+        }
+    }
+}
+
+function setOjtAdviserFieldsRequired(required) {
+    document.getElementById('id_department').required = required;
+    document.getElementById('id_osas_position').required = false;
+
+    if (required) {
+        updateLabelRequired('id_department', true);
+        const positionLabel = document.querySelector('label[for="id_osas_position"]');
+        const existingAsterisk = positionLabel.querySelector('.required-asterisk');
+        if (existingAsterisk) {
+            existingAsterisk.remove();
         }
     }
 }
@@ -813,6 +842,28 @@ function setupRolePermissions() {
     // Super Admin gets all permissions
     if (role === '1') return false;
 
+    if (role === '16') {
+      if (permName.includes('OJT') || permName.includes('ojt') ||
+          permName.includes('On-the-Job') || permName.includes('on_the_job')) {
+        if (permName.includes('company') || permName.includes('Company')) {
+          return permName.includes('view') || permName.includes('add') ||
+                 permName.includes('change') || permName.includes('delete');
+        }
+        else if (permName.includes('application') || permName.includes('Application') ||
+                 permName.includes('report') || permName.includes('Report') ||
+                 permName.includes('requirement') || permName.includes('Requirement')) {
+          return permName.includes('view') && !permName.includes('add') &&
+                 !permName.includes('change') && !permName.includes('delete');
+        }
+        return true;
+      }
+      else if (permName.includes('announcement') || permName.includes('Announcement')) {
+        return permName.includes('view') && !permName.includes('add') &&
+               !permName.includes('change') && !permName.includes('delete');
+      }
+      return false;
+    }
+
      // Student Development Services (10) gets all organization permissions
     if (role === '10' && (permName.includes('organization') || permName.includes('Organization'))) {
       return true;
@@ -929,6 +980,9 @@ function setupRolePermissions() {
                permName.includes('student admission') ||
                permName.includes('NSTP Student') ||
                permName.includes('nstpstudentinfo');
+
+        case '16': // OJT Adviser
+            return permName.includes('view downloadable') || permName.includes('add downloadable');
 
       default:
         return permName.includes('view content type');
@@ -1209,27 +1263,74 @@ function openEditModal(userId) {
       if (user.user_type.toString() === '14') {
         // Student fields
         document.getElementById('edit_student_number').value = user.student_number || '';
+
         // Initialize course dropdown
         const courseSelect = document.getElementById('edit_course');
         courseSelect.innerHTML = '<option value="">Select Course</option>';
 
-        if (data.courses && data.courses.length > 0) {
+        // Check if courses data is available
+        if (data.courses && Array.isArray(data.courses)) {
           data.courses.forEach(course => {
             const option = document.createElement('option');
             option.value = course.id;
             option.textContent = course.name;
-            if (user.course && course.id === user.course) {
+
+            // Check if this course matches the user's course
+            let courseId = null;
+            if (user.course) {
+              if (typeof user.course === 'object' && user.course.id) {
+                courseId = user.course.id;
+              } else {
+                courseId = user.course; // Assuming it's already an ID
+              }
+            }
+
+            if (courseId && course.id == courseId) {
               option.selected = true;
             }
             courseSelect.appendChild(option);
+          });
+        } else {
+          // If no courses data in response, fetch courses separately
+          fetch('/get-courses/', {
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(response => response.json())
+          .then(coursesData => {
+            if (coursesData.courses && Array.isArray(coursesData.courses)) {
+              coursesData.courses.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course.id;
+                option.textContent = course.name;
+
+                let courseId = null;
+                if (user.course) {
+                  if (typeof user.course === 'object' && user.course.id) {
+                    courseId = user.course.id;
+                  } else {
+                    courseId = user.course;
+                  }
+                }
+
+                if (courseId && course.id == courseId) {
+                  option.selected = true;
+                }
+                courseSelect.appendChild(option);
+              });
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching courses:', error);
           });
         }
 
         document.getElementById('edit_year_level').value = user.year_level || '';
         document.getElementById('edit_section').value = user.section || '';
       }
-      else if (['1','2','3','4','5','6','7','8','9','10','11','12','13'].includes(user.user_type.toString())) {
-        // OSAS fields
+      else if (['1','2','3','4','5','6','7','8','9','10','11','12','13', '16'].includes(user.user_type.toString())) {
+        // OSAS fields (including OJT Adviser)
         document.getElementById('edit_department').value = user.department || '';
         document.getElementById('edit_osas_position').value = user.osas_position || '';
       }
@@ -1384,11 +1485,48 @@ function toggleEditUserTypeFields() {
       personalInfoDescription.textContent = 'Personal details of the student';
       firstNameLabel.textContent = 'First Name';
       lastNameLabel.textContent = 'Last Name';
+
+      // If course dropdown is empty, try to populate it
+      const courseSelect = document.getElementById('edit_course');
+      if (courseSelect && courseSelect.options.length <= 1) {
+        fetch('/get-courses/', {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(coursesData => {
+          if (coursesData.courses && Array.isArray(coursesData.courses)) {
+            // Clear existing options except first one
+            while (courseSelect.options.length > 1) {
+              courseSelect.remove(1);
+            }
+
+            coursesData.courses.forEach(course => {
+              const option = document.createElement('option');
+              option.value = course.id;
+              option.textContent = course.name;
+              courseSelect.appendChild(option);
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching courses:', error);
+        });
+      }
     }
     else if (['1','2','3','4','5','6','7','8','9','10','11','12','13'].includes(userType.value)) {
+      // OSAS Staff roles
       osasFields.style.display = 'block';
       personalInfoTitle.textContent = 'Staff Information';
       personalInfoDescription.textContent = 'Personal details of the staff member';
+      firstNameLabel.textContent = 'First Name';
+      lastNameLabel.textContent = 'Last Name';
+    }
+    else if (userType.value === '16') { // OJT Adviser
+      osasFields.style.display = 'block';
+      personalInfoTitle.textContent = 'OJT Adviser Information';
+      personalInfoDescription.textContent = 'Personal details of the OJT Adviser';
       firstNameLabel.textContent = 'First Name';
       lastNameLabel.textContent = 'Last Name';
     }
@@ -1407,6 +1545,44 @@ function setupEditRolePermissions(role, userPermissions = []) {
   function shouldCheckPermission(permName, role) {
     // Super Admin (user type 1) gets ALL permissions
     if (role === '1') return true;
+
+    // OJT Adviser (16) gets ALL announcement permissions
+    if (role === '16') {
+      // OJT Adviser gets ALL announcement permissions (view, add, change, delete)
+      if (permName.includes('announcement') || permName.includes('Announcement')) {
+        return true; // All announcement permissions
+      }
+
+      // OJT Adviser gets ALL OJT Company permissions
+      if (permName.includes('OJT') || permName.includes('ojt') ||
+          permName.includes('On-the-Job') || permName.includes('on_the_job')) {
+        // Full access to OJT Company model
+        if (permName.includes('company') || permName.includes('Company')) {
+          return permName.includes('view') || permName.includes('add') ||
+                 permName.includes('change') || permName.includes('delete');
+        }
+        // Limited access to other OJT models
+        else if (permName.includes('application') || permName.includes('Application') ||
+                 permName.includes('report') || permName.includes('Report') ||
+                 permName.includes('requirement') || permName.includes('Requirement')) {
+          return permName.includes('view') && !permName.includes('add') &&
+                 !permName.includes('change') && !permName.includes('delete');
+        }
+        return true;
+      }
+
+      // OJT Adviser gets ALL downloadable permissions
+      if (permName.includes('downloadable') || permName.includes('Downloadable')) {
+        return true; // All downloadable permissions
+      }
+
+      // View content type permission
+      if (permName.includes('view content type') || permName.includes('View content type')) {
+        return true;
+      }
+
+      return false;
+    }
 
     // Student Development Services (10) gets ALL organization permissions
     if (role === '10' && (permName.includes('organization') || permName.includes('Organization'))) {
@@ -1437,6 +1613,10 @@ function setupEditRolePermissions(role, userPermissions = []) {
           return true;
         }
       }
+      else if (role === '16') {
+        // Already handled above
+        return false;
+      }
       // Other roles - no OJT permissions
       else {
         return false;
@@ -1444,7 +1624,6 @@ function setupEditRolePermissions(role, userPermissions = []) {
     }
 
     // Organization permissions - for OSAS Staff (1) and Student Development Services (10)
-    // This ensures user type 10 gets ALL organization permissions
     if (permName.includes('organization') || permName.includes('Organization')) {
       return role === '1' || role === '10';
     }
@@ -1526,6 +1705,10 @@ function setupEditRolePermissions(role, userPermissions = []) {
                permName.includes('NSTP Student') ||
                permName.includes('nstpstudentinfo');
 
+      case '16': // OJT Adviser
+        // Already handled above - returns true for announcements, OJT, downloadables
+        return false;
+
       default:
         return false;
     }
@@ -1546,10 +1729,31 @@ function setupEditRolePermissions(role, userPermissions = []) {
     });
   }
 
+  // Special handling for role 10 (Student Development Services)
   if (role === '10') {
     allPermissionCheckboxes.forEach(checkbox => {
       const permName = checkbox.nextElementSibling.textContent.trim();
       if (permName.includes('organization') || permName.includes('Organization')) {
+        checkbox.checked = true;
+      }
+    });
+  }
+
+  // Special handling for role 16 (OJT Adviser)
+  if (role === '16') {
+    allPermissionCheckboxes.forEach(checkbox => {
+      const permName = checkbox.nextElementSibling.textContent.trim();
+      // Ensure all announcement permissions are checked
+      if (permName.includes('announcement') || permName.includes('Announcement')) {
+        checkbox.checked = true;
+      }
+      // Ensure all OJT Company permissions are checked
+      if ((permName.includes('OJT') || permName.includes('ojt')) &&
+          (permName.includes('company') || permName.includes('Company'))) {
+        checkbox.checked = true;
+      }
+      // Ensure all downloadable permissions are checked
+      if (permName.includes('downloadable') || permName.includes('Downloadable')) {
         checkbox.checked = true;
       }
     });
@@ -1565,6 +1769,37 @@ function setupEditRoleChangeHandlers() {
       if (this.checked) {
         toggleEditUserTypeFields();
         setupEditRolePermissions(this.value);
+
+        // If changing to student, ensure courses are loaded
+        if (this.value === '14') {
+          const courseSelect = document.getElementById('edit_course');
+          if (courseSelect && courseSelect.options.length <= 1) {
+            fetch('/get-courses/', {
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            })
+            .then(response => response.json())
+            .then(coursesData => {
+              if (coursesData.courses && Array.isArray(coursesData.courses)) {
+                // Clear existing options except first one
+                while (courseSelect.options.length > 1) {
+                  courseSelect.remove(1);
+                }
+
+                coursesData.courses.forEach(course => {
+                  const option = document.createElement('option');
+                  option.value = course.id;
+                  option.textContent = course.name;
+                  courseSelect.appendChild(option);
+                });
+              }
+            })
+            .catch(error => {
+              console.error('Error fetching courses:', error);
+            });
+          }
+        }
       }
     });
   });

@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{% static 'css/dashboard/nstp-files.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard/complaint.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard/calendar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/nstp-enlistment.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard/ojt-applications.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard/company-section.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard/complaint-section.css' %}">
@@ -86,14 +87,6 @@
 
                 <div id="ojt-company" class="content-section">
                     {% include 'osas/sections/ojt-company-section.html' %}        <!-- OJT Company Content Here -->
-                </div>
-
-                <div id="ojt-records" class="content-section">
-                    {% include 'osas/sections/ojt-applications-section.html' %}        <!-- OJT Applications Content Here -->
-                </div>
-
-                <div id="ojt-reports" class="content-section">
-                    {% include 'osas/sections/ojt-reports-section.html' %}        <!-- OJT Reports Content Here -->
                 </div>
 
                 <div id="scholarships" class="content-section">
@@ -205,21 +198,6 @@
     {% include 'osas/modals/edit-company.html' %}               <!-- Edit Modal -->
     {% include 'osas/modals/archive-company.html' %}            <!-- Archive Modal -->
     {% include 'osas/modals/export-company.html' %}             <!-- Export Modal -->
-
-<!-- OJT Application Management Modal -->
-    {% include 'osas/modals/approve-ojt-application.html' %}    <!-- Approve Modal -->
-    {% include 'osas/modals/view-ojt-application.html' %}       <!-- View Modal -->
-    {% include 'osas/modals/edit-ojt-application.html' %}       <!-- Edit Modal -->
-    {% include 'osas/modals/archive-ojt-application.html' %}    <!-- Archive Modal -->
-    {% include 'osas/modals/export-ojt-application.html' %}     <!-- Export Modal -->
-
-<!-- OJT Reports Management Modal -->
-    {% include 'osas/modals/create-ojt-report.html' %}          <!-- Create Modal -->
-    {% include 'osas/modals/view-ojt-report.html' %}            <!-- View Modal -->
-    {% include 'osas/modals/edit-ojt-report.html' %}            <!-- Edit Modal -->
-    {% include 'osas/modals/archive-ojt-report.html' %}         <!-- Archive Modal -->
-    {% include 'osas/modals/review-ojt-report.html' %}          <!-- Review Modal -->
-    {% include 'osas/modals/export-ojt-report.html' %}          <!-- Export Modal -->
 
 <!-- Organization Management Modal -->
     {% include 'osas/modals/approve-organization.html' %}         <!-- Approve Modal -->

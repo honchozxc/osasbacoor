@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .content { background-color: white; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .under-review { background-color: #e3f2fd; color: #1976d2; }
+        .hearing-scheduled { background-color: #fff3e0; color: #f57c00; }
+        .ongoing-hearing { background-color: #e8f5e8; color: #388e3c; }
+        .resolved { background-color: #e8f5e8; color: #388e3c; }
+        .canceled { background-color: #ffebee; color: #d32f2f; }
+        .hearing-details {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Office of Student Affairs</h2>
+            <p>Complaint Status Update Notification</p>
+        </div>
+
+        <div class="content">
+            <h3>Dear {{ complainant_name }},</h3>
+
+            <p>This is to inform you that the status of your complaint has been updated.</p>
+
+            <div class="status-info">
+                <p><strong>Complaint Reference:</strong> {{ reference_number }}</p>
+                <p><strong>Complaint Title:</strong> {{ complaint_title }}</p>
+                <p><strong>Previous Status:</strong> {{ old_status_display }}</p>
+                <p><strong>New Status:</strong>
+                    <span class="status-badge {{ new_status|slugify }}">
+                        {{ status_display }}
+                    </span>
+                </p>
+            </div>
+
+            {% if hearing_details %}
+            <div class="hearing-details">
+                <h4>📅 Hearing Details:</h4>
+                <p><strong>Hearing Type:</strong> {{ hearing_details.hearing_type }}</p>
+                <p><strong>Date:</strong> {{ hearing_details.date }}</p>
+                <p><strong>Time:</strong> {{ hearing_details.time }}</p>
+                <p><strong>Location:</strong> {{ hearing_details.location }}</p>
+                {% if hearing_details.description %}
+                <p><strong>Additional Information:</strong><br>{{ hearing_details.description }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if admin_notes %}
+            <div class="admin-notes">
+                <h4>📝 Admin Notes:</h4>
+                <p>{{ admin_notes }}</p>
+            </div>
+            {% endif %}
+
+            <p>You can log in to your account to view the complete details of your complaint.</p>
+
+            <p>Thank you for your patience and cooperation.</p>
+        </div>
+
+        <div class="footer">
+            <p>Best regards,<br>
+            <strong>Office of Student Affairs</strong><br>
+
+            <p style="font-size: 11px; color: #999;">
+                This is an automated message. Please do not reply to this email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

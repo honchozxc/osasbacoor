@@ -12,7 +12,17 @@
                 {% csrf_token %}
 
                 <div class="export-form-group">
-                    <label class="export-form-label">Export Options</label>
+                    <div class="export-info-box">
+                        <i class='bx bx-info-circle'></i>
+                        <div class="export-info-content">
+                            <h4>Export Options</h4>
+                            <p>Export scholarship applications to Excel format. Data will be exported using the standard template format.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="export-form-group">
+                    <label class="export-form-label">Export By</label>
                     <div class="export-radio-group">
                         <label class="export-radio-label">
                             <input type="radio" name="exportOption" value="all" checked>
@@ -47,6 +57,7 @@
                         <div class="export-form-col">
                             <label class="export-form-label">Select Scholarship</label>
                             <select name="scholarship_status" class="export-form-select">
+                                <option value="">All Scholarships</option>
                                 {% for scholarship in all_scholarships %}
                                 <option value="{{ scholarship.id }}">{{ scholarship.name }}</option>
                                 {% endfor %}
@@ -77,25 +88,21 @@
                 </div>
 
                 <div class="export-form-group">
-                    <label class="export-form-label">File Format</label>
-                    <div class="export-radio-group">
-                        <label class="export-radio-label">
-                            <input type="radio" name="format" value="excel" checked>
-                            <span class="export-radio-custom"></span>
-                            Excel (.xlsx)
+                    <label class="export-form-label">Include Incomplete Applications</label>
+                    <div class="export-checkbox-group">
+                        <label class="export-checkbox-label">
+                            <input type="checkbox" name="include_incomplete" value="1" checked>
+                            <span class="export-checkbox-custom"></span>
+                            Include applications with incomplete student information
                         </label>
-                        <label class="export-radio-label">
-                            <input type="radio" name="format" value="csv">
-                            <span class="export-radio-custom"></span>
-                            CSV (.csv)
-                        </label>
+                        <small class="export-form-help">When checked, exports all applications regardless of missing student data.</small>
                     </div>
                 </div>
 
                 <div class="export-modal-footer">
                     <button type="button" class="export-secondary-btn" onclick="closeExportApplicationsModal()">Cancel</button>
                     <button type="submit" class="export-primary-btn">
-                        <i class='bx bx-download'></i> Export
+                        <i class='bx bx-download'></i> Export Applications
                     </button>
                 </div>
             </form>

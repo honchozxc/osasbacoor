@@ -1,0 +1,78 @@
+#nstp-table.data-table td.actions {
+    display: table-cell !important;
+    min-width: 180px !important;
+    max-width: 180px !important;
+    width: 180px !important;
+    padding: 0.75rem 1.25rem !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    line-height: normal !important;
+}
+
+#nstp-table.data-table td.actions > .actions {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+}
+
+#nstp-table.data-table .actions .btn-icon {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    flex-shrink: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+}
+
+#nstp-table.data-table th:nth-child(7) {
+    min-width: 180px !important;
+    max-width: 180px !important;
+    width: 180px !important;
+    padding: 1rem 1.25rem !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+#nstp-table.data-table td {
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+#nstp-table.data-table .btn-action.approve-enlistment,
+#nstp-table.data-table .btn-icon.approve-enlistment {
+    color: #10B981 !important;
+    background-color: rgba(16, 185, 129, 0.1) !important;
+    border: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+#nstp-table.data-table .btn-icon.view {
+    color: var(--info) !important;
+    background-color: rgba(72, 149, 239, 0.1) !important;
+    border: 1px solid rgba(72, 149, 239, 0.2) !important;
+}
+
+#nstp-table.data-table .btn-icon.edit-enlistment {
+    color: var(--warning) !important;
+    background-color: rgba(248, 150, 30, 0.1) !important;
+    border: 1px solid rgba(248, 150, 30, 0.2) !important;
+}
+
+#nstp-table.data-table .btn-icon.archive-enlistment {
+    color: var(--archive) !important;
+    background-color: rgba(108, 117, 125, 0.1) !important;
+    border: 1px solid rgba(108, 117, 125, 0.2) !important;
+}

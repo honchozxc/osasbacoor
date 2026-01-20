@@ -1,5 +1,4 @@
 // ------------------------------------------------ Approve Function ---------------------------------------------------
-// Open the approve modal with application data
 function openApproveScholarshipApplicationModal(applicationId) {
     fetch(`/scholarships/applications/${applicationId}/edit/`, {
         headers: {
@@ -473,6 +472,7 @@ document.getElementById('exportApplicationsForm').addEventListener('submit', fun
     // Show loading state
     submitBtn.classList.add('btn-loading');
     submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bx bx-loader bx-spin"></i> Exporting...';
 
     // Get current filters and sorting
     const searchTerm = document.getElementById('application-search')?.value || '';
@@ -505,7 +505,7 @@ document.getElementById('exportApplicationsForm').addEventListener('submit', fun
     formData.append('sort', currentSortColumn);
     formData.append('direction', currentSortDirection);
 
-    console.log('Exporting with filters:', {
+    console.log('Exporting applications with filters:', {
         search: searchTerm,
         scholarship: scholarshipFilterValue,
         status: statusFilterValue,
@@ -523,9 +523,6 @@ document.getElementById('exportApplicationsForm').addEventListener('submit', fun
         }
     })
     .then(response => {
-        console.log('Response status:', response.status);
-
-        // Remove the 404 check - allow empty exports
         if (!response.ok) {
             return response.text().then(text => {
                 throw new Error(text || `Export failed with status: ${response.status}`);
@@ -535,11 +532,9 @@ document.getElementById('exportApplicationsForm').addEventListener('submit', fun
         // Check if response is a file download
         const contentType = response.headers.get('content-type');
         if (contentType && (contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') ||
-                            contentType.includes('text/csv') ||
                             contentType.includes('application/octet-stream'))) {
             return response.blob();
         } else {
-            // If it's not a file, it might be an error message
             return response.text().then(text => {
                 throw new Error(text || 'Unknown error occurred');
             });
@@ -551,12 +546,16 @@ document.getElementById('exportApplicationsForm').addEventListener('submit', fun
         const a = document.createElement('a');
         a.style.display = 'none';
 
-        // Determine filename based on content type
-        let filename = 'scholarship_applications.xlsx';
-        const contentType = blob.type;
-        if (contentType.includes('text/csv')) {
-            filename = 'scholarship_applications.csv';
-        }
+        // Create filename with timestamp
+        const now = new Date();
+        const timestamp = now.getFullYear().toString() +
+                         String(now.getMonth() + 1).padStart(2, '0') +
+                         String(now.getDate()).padStart(2, '0') + '_' +
+                         String(now.getHours()).padStart(2, '0') +
+                         String(now.getMinutes()).padStart(2, '0') +
+                         String(now.getSeconds()).padStart(2, '0');
+
+        const filename = `Scholarship_Applications_${timestamp}.xlsx`;
 
         a.href = url;
         a.download = filename;
@@ -577,6 +576,7 @@ document.getElementById('exportApplicationsForm').addEventListener('submit', fun
     .finally(() => {
         submitBtn.classList.remove('btn-loading');
         submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bx bx-download"></i> Export Applications';
     });
 });
 

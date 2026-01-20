@@ -149,7 +149,6 @@
                 <thead>
                     <tr>
                         <th>Organization Name</th>
-                        <th>Acronym</th>
                         <th>Type</th>
                         <th>Status</th>
                         <th>Valid Until</th>
@@ -176,7 +175,6 @@
                                 </div>
                             </div>
                         </td>
-                        <td>{{ organization.organization_acronym }}</td>
                         <td>
                             <span class="type-badge {% if organization.organization_type == 'student' %}student{% else %}sociocultural{% endif %}">
                                 {{ organization.get_organization_type_display }}

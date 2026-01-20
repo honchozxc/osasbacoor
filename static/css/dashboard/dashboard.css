@@ -1187,12 +1187,11 @@ main {
 .actions {
     display: flex;
     gap: 0.5rem;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
-    height: 100%;
-    min-height: 100%;
-    flex-wrap: wrap;
-    align-content: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    min-width: max-content;
 }
 
 .btn-icon {

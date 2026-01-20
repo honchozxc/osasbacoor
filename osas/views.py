@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import re
+import traceback
 import uuid
 from smtplib import SMTPException
 import pandas as pd
@@ -41,8 +42,9 @@ from .models import CustomUser, UserActivityLog, Downloadable, AnnouncementImage
     ComplaintImage, ComplaintDocument, Complaint, \
     FooterContent, StudentDisciplineContent, Scholarship, ScholarshipApplication, ScholarshipPageContent, \
     HomePageContent, StudentAdmission, AdmissionPageContent, NSTPStudentInfo, NSTPFile, \
-    NSTPPageContent, Course, ClinicPageContent, OJTCompany, OJTApplication, OJTRequirement, OJTReport, \
-    OJTReportAttachment, OJTPageContent, Organization, Certificate, SDSPageContent, AccomplishmentRecord, SupportingFile
+    NSTPPageContent, Course, ClinicPageContent, OJTCompany, \
+    OJTPageContent, Organization, Certificate, SDSPageContent, AccomplishmentRecord, \
+    SupportingFile, Hearing
 
 from .forms import CustomUserCreationForm, CustomAuthenticationForm, CustomUserUpdateForm, DownloadableForm, \
     CustomPasswordChangeForm, AccountInfoForm, UserProfileForm, AnnouncementForm, AnnouncementImageFormSet, \
@@ -50,7 +52,7 @@ from .forms import CustomUserCreationForm, CustomAuthenticationForm, CustomUserU
     StudentDisciplineForm, RegistrationForm, ScholarshipForm, ScholarshipApplicationForm, \
     ScholarshipApplicationEditForm, ScholarshipPageForm, HomePageForm, \
     StudentAdmissionForm, AdmissionPageForm, NSTPStudentInfoForm, NSTPFileForm, NSTPPageForm, CourseForm, \
-    ClinicPageForm, OJTCompanyForm, OJTApplicationForm, OJTRequirementForm, OJTReportForm, OJTPageForm, \
+    ClinicPageForm, OJTCompanyForm, OJTPageForm, \
     OrganizationCreateForm, OrganizationEditForm, SDSPageForm, AccomplishmentRecordForm
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib import messages
@@ -858,21 +860,22 @@ class OJTView(TemplateView):
         if not ojt_content:
             ojt_content = OJTPageContent.objects.create()
 
-        # Get top companies with approved OJT applications
         top_companies = OJTCompany.objects.filter(
             is_archived=False,
-            ojt_applications__status='approved',
-            ojt_applications__is_archived=False
-        ).annotate(
-            approved_count=Count('ojt_applications', filter=models.Q(
-                ojt_applications__status='approved',
-                ojt_applications__is_archived=False
-            ))
-        ).order_by('-approved_count')[:4]
+            status='active'
+        ).order_by('-created_at')[:4]
+
+        # You can also get some statistics if needed
+        total_companies = OJTCompany.objects.filter(is_archived=False).count()
+        active_companies = OJTCompany.objects.filter(is_archived=False, status='active').count()
+        inactive_companies = OJTCompany.objects.filter(is_archived=False, status='inactive').count()
 
         context.update({
             'ojt_content': ojt_content,
             'top_companies': top_companies,
+            'total_companies': total_companies,
+            'active_companies': active_companies,
+            'inactive_companies': inactive_companies,
             'footer_content': FooterContent.objects.first() or FooterContent.objects.create()
         })
 
@@ -1634,6 +1637,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             context['current_user_type'] = self.request.user.user_type
             context['is_superuser'] = self.request.user.is_superuser
 
+        from .models import Complaint
+        context['complaint_status_choices'] = Complaint.STATUS_CHOICES
+        context['respondent_type_choices'] = Complaint.RESPONDENT_TYPE_CHOICES
+
         self.add_organization_statistics(context)
         context['organizations'] = self.get_filtered_organizations()
 
@@ -1675,18 +1682,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # Scholarship Statistics
         self.add_scholarship_statistics(context)
-
+        
+        # Scholarship Application Statistics
+        self.add_scholarship_application_statistics(context)
+        
         # OJT Company Statistics
         self.add_ojt_statistics(context)
-
-        # OJT Application Statistics
-        self.add_ojt_applications_statistics(context)
-
-        # OJT Reports Statistics
-        self.add_ojt_reports_statistics(context)
-
-        # OJT Reports getting approved applications(used as dropdown choices in OJT Report Submittion)
-        self.add_ojt_context(context)
 
         # Organization Certificate
         self.add_certificates_data(context)
@@ -1694,23 +1695,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # Organization AR
         self.add_accomplishment_data(context)
         return context
-
-    def add_ojt_context(self, context):
-        # Get approved OJT applications for the current user (for dropdowns)
-        if self.request.user.user_type == 14:  # Student
-            context['approved_ojt_applications_list'] = OJTApplication.objects.filter(
-                student=self.request.user,
-                status='approved',
-                is_archived=False
-            ).select_related('company', 'student')
-        else:  # Admin/Staff can see all approved applications
-            context['approved_ojt_applications_list'] = OJTApplication.objects.filter(
-                status='approved',
-                is_archived=False
-            ).select_related('company', 'student')
-
-        # Add today's date for the report date field
-        context['today'] = timezone.now().date()
 
     def add_basic_context(self, context):
         context['COURSE_CHOICES'] = Announcement.COURSE_CHOICES
@@ -1742,10 +1726,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # OJT Companies
         context['ojt_companies'] = self.get_paginated_ojt_companies()
-        # OJT Application Records
-        context['ojt_applications'] = self.get_paginated_ojt_applications()
-        # OJT Reports
-        context['ojt_reports'] = self.get_paginated_ojt_reports()
 
         # Downloadables, Announcements, Scholarships
         context['downloadables'] = self.get_filtered_downloadables()
@@ -1769,12 +1749,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # OJT Specific archived data
         self.add_ojt_archived_data(context)
-
-        # OJT Applications Specific archived data
-        self.add_ojt_applications_archived_data(context)
-
-        # OJT Reports Specific archived data
-        self.add_ojt_reports_archived_data(context)
 
         # Organization Specific archived ata
         self.add_organizations_archived_data(context)
@@ -1896,50 +1870,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 is_archived=True,
                 archived_by=self.request.user
             ).order_by('-archived_at').select_related('archived_by')
-
-    def add_ojt_applications_archived_data(self, context):
-        try:
-            if self.request.user.is_superuser or self.request.user.user_type in [1, 13]:
-                # Admin/OJT coordinators can see all archived applications
-                context['archived_ojt_applications'] = OJTApplication.objects.filter(
-                    is_archived=True
-                ).order_by('-archived_at').select_related('student', 'company', 'archived_by')
-            elif self.request.user.user_type == 14:
-                # Students can only see their own archived applications
-                context['archived_ojt_applications'] = OJTApplication.objects.filter(
-                    is_archived=True,
-                    student=self.request.user
-                ).order_by('-archived_at').select_related('student', 'company', 'archived_by')
-            else:
-                # Other user types see nothing
-                context['archived_ojt_applications'] = OJTApplication.objects.none()
-        except Exception as e:
-            print(f"Error in add_ojt_applications_archived_data: {e}")
-            context['archived_ojt_applications'] = OJTApplication.objects.none()
-
-    def add_ojt_reports_archived_data(self, context):
-        try:
-            if self.request.user.is_superuser or self.request.user.user_type in [1, 13]:
-                # Admin/OJT coordinators can see all archived reports
-                context['archived_ojt_reports'] = OJTReport.objects.filter(
-                    is_archived=True
-                ).order_by('-archived_at').select_related(
-                    'application', 'submitted_by', 'archived_by', 'application__student', 'application__company'
-                )
-            elif self.request.user.user_type == 14:
-                # Students can only see their own archived reports
-                context['archived_ojt_reports'] = OJTReport.objects.filter(
-                    is_archived=True,
-                    submitted_by=self.request.user
-                ).order_by('-archived_at').select_related(
-                    'application', 'submitted_by', 'archived_by', 'application__student', 'application__company'
-                )
-            else:
-                # Other user types see nothing
-                context['archived_ojt_reports'] = OJTReport.objects.none()
-        except Exception as e:
-            print(f"Error in add_ojt_reports_archived_data: {e}")
-            context['archived_ojt_reports'] = OJTReport.objects.none()
 
     def add_organizations_archived_data(self, context):
         if self.request.user.is_superuser or self.request.user.user_type in [1, 10]:
@@ -2130,24 +2060,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         except EmptyPage:
             return paginator.page(paginator.num_pages)
 
-    def get_paginated_ojt_reports(self):
-        if self.request.user.is_superuser or self.request.user.user_type in [1, 13]:
-            # Admin/Staff can see all reports
-            reports_queryset = OJTReport.objects.filter(is_archived=False)
-        elif self.request.user.user_type == 14:
-            # Students can only see their own reports
-            reports_queryset = OJTReport.objects.filter(
-                submitted_by=self.request.user,
-                is_archived=False
-            )
-        else:
-            # Other user types see nothing
-            reports_queryset = OJTReport.objects.none()
-
-        return self.get_paginated_data(reports_queryset.select_related(
-            'application', 'submitted_by', 'reviewed_by', 'application__student', 'application__company'
-        ).order_by('-report_date', '-submitted_at'), 'ojt_report_page')
-
     def get_paginated_nstp_files(self):
         if self.request.user.is_superuser or self.request.user.user_type in [1, 2]:
             nstp_files_queryset = NSTPFile.objects.filter(is_archived=False).order_by('-created_at')
@@ -2201,20 +2113,39 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         return self.get_paginated_data(applications_queryset, 'scholarship_app_page')
 
-    def get_paginated_complaints(self, status):
-        if self.request.user.is_superuser or self.request.user.user_type in [1, 11]:
-            complaints_queryset = Complaint.objects.filter(
-                status=status,
-                is_archived=False
-            ).order_by('-created_at' if status == 'under_review' else '-updated_at')
+    def get_paginated_complaints(self, status='under_review'):
+        if status == 'resolved':
+            # For resolved complaints
+            if self.request.user.is_superuser or self.request.user.user_type in [1, 11]:
+                complaints_queryset = Complaint.objects.filter(
+                    status='resolved',
+                    is_archived=False
+                ).order_by('-updated_at')
+            else:
+                complaints_queryset = Complaint.objects.filter(
+                    status='resolved',
+                    is_archived=False,
+                    created_by=self.request.user
+                ).order_by('-updated_at')
+            page_param = 'resolved_page'
         else:
-            complaints_queryset = Complaint.objects.filter(
-                status=status,
-                is_archived=False,
-                created_by=self.request.user
-            ).order_by('-created_at' if status == 'under_review' else '-updated_at')
+            # For active complaints (all non-resolved statuses)
+            # Updated statuses to match new model
+            active_statuses = ['under_review', '1st_hearing', '2nd_hearing', 'other_hearing', 'ongoing_hearing',
+                               'canceled']
+            if self.request.user.is_superuser or self.request.user.user_type in [1, 11]:
+                complaints_queryset = Complaint.objects.filter(
+                    status__in=active_statuses,
+                    is_archived=False
+                ).order_by('-created_at')
+            else:
+                complaints_queryset = Complaint.objects.filter(
+                    status__in=active_statuses,
+                    is_archived=False,
+                    created_by=self.request.user
+                ).order_by('-created_at')
+            page_param = 'under_review_page'
 
-        page_param = 'under_review_page' if status == 'under_review' else 'resolved_page'
         return self.get_paginated_data(complaints_queryset, page_param)
 
     def get_filtered_announcements(self):
@@ -2354,10 +2285,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 return self.get_filtered_applications(request)
             if 'get_filtered_ojt_companies' in request.GET:
                 return self.get_filtered_ojt_companies(request)
-            if 'get_filtered_ojt_applications' in request.GET:
-                return self.get_filtered_ojt_applications(request)
-            if 'get_filtered_ojt_reports' in request.GET:
-                return self.get_filtered_ojt_reports(request)
             if 'get_home_announcements' in request.GET:
                 return self.get_home_announcements_ajax(request)
             if 'get_filtered_organizations' in request.GET:
@@ -2762,21 +2689,39 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         page_number = request.GET.get(f'{status}_page', 1)
         per_page = int(request.GET.get('per_page', 10))
 
-        # Debug print
         print(f"Filtering complaints - Status: {status}, Search: {search_term}, Date Filter: {date_filter}")
 
         # Start with base queryset
-        if request.user.is_superuser or request.user.user_type in [1, 11]:
-            complaints = Complaint.objects.filter(
-                status=status,
-                is_archived=False
-            )
+        if status == 'resolved':
+            # For resolved complaints
+            if request.user.is_superuser or request.user.user_type in [1, 11]:
+                complaints = Complaint.objects.filter(
+                    status='resolved',
+                    is_archived=False
+                )
+            else:
+                complaints = Complaint.objects.filter(
+                    status='resolved',
+                    is_archived=False,
+                    created_by=request.user
+                )
+            page_param = 'resolved_page'
         else:
-            complaints = Complaint.objects.filter(
-                status=status,
-                is_archived=False,
-                created_by=request.user
-            )
+            # For active complaints (all non-resolved statuses)
+            active_statuses = ['under_review', '1st_hearing', '2nd_hearing', 'other_hearing', 'ongoing_hearing',
+                               'canceled']
+            if request.user.is_superuser or request.user.user_type in [1, 11]:
+                complaints = Complaint.objects.filter(
+                    status__in=active_statuses,
+                    is_archived=False
+                )
+            else:
+                complaints = Complaint.objects.filter(
+                    status__in=active_statuses,
+                    is_archived=False,
+                    created_by=request.user
+                )
+            page_param = 'under_review_page'
 
         # Apply search filter
         if search_term:
@@ -2808,21 +2753,21 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 else:
                     complaints = complaints.filter(updated_at__month=now.month, updated_at__year=now.year)
             elif date_filter == 'this_year':
-                if status == 'under_review':
-                    complaints = complaints.filter(incident_date__year=now.year)
-                else:
+                if status == 'resolved':
                     complaints = complaints.filter(updated_at__year=now.year)
-            elif date_filter == 'last_year':
-                if status == 'under_review':
-                    complaints = complaints.filter(incident_date__year=now.year - 1)
                 else:
+                    complaints = complaints.filter(incident_date__year=now.year)
+            elif date_filter == 'last_year':
+                if status == 'resolved':
                     complaints = complaints.filter(updated_at__year=now.year - 1)
+                else:
+                    complaints = complaints.filter(incident_date__year=now.year - 1)
             elif date_filter.isdigit():
                 year = int(date_filter)
-                if status == 'under_review':
-                    complaints = complaints.filter(incident_date__year=year)
-                else:
+                if status == 'resolved':
                     complaints = complaints.filter(updated_at__year=year)
+                else:
+                    complaints = complaints.filter(incident_date__year=year)
             elif date_filter == 'oldest_resolved' or date_filter == 'incident_oldest':
                 sort_column = 'updated_at' if status == 'resolved' else 'incident_date'
                 sort_direction = 'asc'
@@ -2837,7 +2782,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'complainant': 'complainant_first_name',
             'incident_date': 'incident_date',
             'created_at': 'created_at',
-            'updated_at': 'updated_at'
+            'updated_at': 'updated_at',
+            'next_hearing_date': 'next_hearing_date'
         }
 
         if sort_column in sort_mapping:
@@ -2847,7 +2793,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             complaints = complaints.order_by(sort_field)
         else:
             # Default sorting
-            complaints = complaints.order_by('-created_at' if status == 'under_review' else '-updated_at')
+            if status == 'resolved':
+                complaints = complaints.order_by('-updated_at')
+            else:
+                complaints = complaints.order_by('-created_at')
 
         # Create paginator
         paginator = Paginator(complaints, per_page)
@@ -2862,6 +2811,34 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # Prepare data for JSON response
         complaint_data = []
         for complaint in page_obj.object_list:
+            # Get the latest hearing for this complaint
+            latest_hearing = complaint.hearings.order_by('-schedule_date', '-schedule_time').first()
+
+            # Determine status display - Now using the complaint's status directly
+            status_display = complaint.get_status_display()
+
+            # Get next hearing info
+            next_hearing = complaint.next_hearing
+            next_hearing_display = None
+            if next_hearing:
+                next_hearing_display = f"{next_hearing.schedule_date.strftime('%b %d, %Y')} {next_hearing.schedule_time.strftime('%I:%M %p')}"
+
+            # Determine permission flags
+            is_owner = complaint.created_by == request.user
+            is_admin_user = request.user.is_superuser or request.user.user_type in [1, 11]
+
+            # View permission: everyone can view their own complaints or admin can view all
+            can_view = is_owner or is_admin_user
+
+            # Edit permission: owners can edit their complaints, admins can edit all
+            can_edit = is_owner or is_admin_user
+
+            # Delete/Archive permission: owners can archive their complaints, admins can archive all
+            can_delete = is_owner or is_admin_user
+
+            # Resolve permission: only admins can resolve complaints (for user_type 14, this should be false)
+            can_resolve = is_admin_user and status != 'resolved'
+
             complaint_data.append({
                 'id': complaint.id,
                 'reference_number': complaint.reference_number,
@@ -2871,13 +2848,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 'incident_date': complaint.incident_date.isoformat() if complaint.incident_date else None,
                 'created_at': complaint.created_at.isoformat(),
                 'updated_at': complaint.updated_at.isoformat(),
-                'can_view': request.user.has_perm('osas.view_complaint'),
-                'can_edit': (request.user.has_perm('osas.change_complaint') and
-                             (request.user.is_superuser or request.user.user_type in [1, 11])),
-                'can_delete': (request.user.has_perm('osas.delete_complaint') and
-                               (request.user.is_superuser or request.user.user_type in [1, 11])),
-                'can_resolve': (status == 'under_review' and
-                                (request.user.is_superuser or request.user.user_type in [1, 11]))
+                'status': complaint.status,
+                'status_display': status_display,
+                'next_hearing_display': next_hearing_display,
+                'hearing_count': complaint.hearing_count if hasattr(complaint, 'hearing_count') else 0,
+                'can_view': can_view,
+                'can_edit': can_edit,
+                'can_delete': can_delete,
+                'can_resolve': can_resolve
             })
 
         return JsonResponse({
@@ -2897,34 +2875,129 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         if self.request.user.is_superuser or self.request.user.user_type in [1, 11]:
             # Superusers and complaint managers can see all complaints
             total_complaints = Complaint.objects.filter(is_archived=False).count()
+
+            # Count all non-resolved statuses as "Active"
+            active_statuses = ['under_review', '1st_hearing', '2nd_hearing', 'other_hearing', 'ongoing_hearing',
+                               'canceled']
             under_review_count = Complaint.objects.filter(
-                status='under_review',
+                status__in=active_statuses,
                 is_archived=False
             ).count()
+
             resolved_count = Complaint.objects.filter(
                 status='resolved',
                 is_archived=False
             ).count()
+
+            # Count 1st Hearing complaints - Now based on status, not hearing_type
+            first_hearing_count = Complaint.objects.filter(
+                status='1st_hearing',
+                is_archived=False
+            ).count()
+
+            # Count 2nd Hearing complaints - Now based on status, not hearing_type
+            second_hearing_count = Complaint.objects.filter(
+                status='2nd_hearing',
+                is_archived=False
+            ).count()
+
+            # Count Other Hearing complaints - Now based on status, not hearing_type
+            other_hearing_count = Complaint.objects.filter(
+                status='other_hearing',
+                is_archived=False
+            ).count()
+
+            # Count ongoing hearings
+            ongoing_hearing_count = Complaint.objects.filter(
+                status='ongoing_hearing',
+                is_archived=False
+            ).count()
+
+            # Count canceled complaints
+            canceled_count = Complaint.objects.filter(
+                status='canceled',
+                is_archived=False
+            ).count()
+
+            # Count under review (not hearing scheduled)
+            pure_under_review_count = Complaint.objects.filter(
+                status='under_review',
+                is_archived=False
+            ).count()
+
         else:
             # Regular users can only see their own complaints
             total_complaints = Complaint.objects.filter(
                 created_by=self.request.user,
                 is_archived=False
             ).count()
+
+            active_statuses = ['under_review', '1st_hearing', '2nd_hearing', 'other_hearing', 'ongoing_hearing',
+                               'canceled']
             under_review_count = Complaint.objects.filter(
                 created_by=self.request.user,
-                status='under_review',
+                status__in=active_statuses,
                 is_archived=False
             ).count()
+
             resolved_count = Complaint.objects.filter(
                 created_by=self.request.user,
                 status='resolved',
                 is_archived=False
             ).count()
 
+            # Count 1st Hearing complaints for regular users - Now based on status
+            first_hearing_count = Complaint.objects.filter(
+                created_by=self.request.user,
+                status='1st_hearing',
+                is_archived=False
+            ).count()
+
+            # Count 2nd Hearing complaints for regular users - Now based on status
+            second_hearing_count = Complaint.objects.filter(
+                created_by=self.request.user,
+                status='2nd_hearing',
+                is_archived=False
+            ).count()
+
+            # Count Other Hearing complaints for regular users - Now based on status
+            other_hearing_count = Complaint.objects.filter(
+                created_by=self.request.user,
+                status='other_hearing',
+                is_archived=False
+            ).count()
+
+            # Count ongoing hearings for regular users
+            ongoing_hearing_count = Complaint.objects.filter(
+                created_by=self.request.user,
+                status='ongoing_hearing',
+                is_archived=False
+            ).count()
+
+            # Count canceled complaints for regular users
+            canceled_count = Complaint.objects.filter(
+                created_by=self.request.user,
+                status='canceled',
+                is_archived=False
+            ).count()
+
+            # Count under review (not hearing scheduled) for regular users
+            pure_under_review_count = Complaint.objects.filter(
+                created_by=self.request.user,
+                status='under_review',
+                is_archived=False
+            ).count()
+
+        # Add all counts to context
         context['total_complaints'] = total_complaints
         context['under_review_count'] = under_review_count
         context['resolved_count'] = resolved_count
+        context['first_hearing_count'] = first_hearing_count
+        context['second_hearing_count'] = second_hearing_count
+        context['other_hearing_count'] = other_hearing_count
+        context['ongoing_hearing_count'] = ongoing_hearing_count
+        context['canceled_count'] = canceled_count
+        context['pure_under_review_count'] = pure_under_review_count
 
     def get_filtered_nstp_enlistments(self, request):
         search_term = request.GET.get('search', '').lower()
@@ -3182,24 +3255,16 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         page_number = request.GET.get('scholarship_page', 1)
         per_page = int(request.GET.get('per_page', 10))
 
-        print(
-            f"DEBUG Scholarships - Search: '{search_term}', Type: '{scholarship_type_filter}', Status: '{status_filter}'")
-
         if request.user.is_superuser or request.user.user_type == 1:
             scholarships = Scholarship.objects.filter(is_archived=False)
-            print(f"DEBUG: Admin user - showing all non-archived scholarships")
         elif request.user.user_type == 14:  # Student
             today = timezone.now().date()
             scholarships = Scholarship.objects.filter(is_active=True, is_archived=False)
-            print(f"DEBUG: Student user - showing active non-archived scholarships")
         else:
             scholarships = Scholarship.objects.filter(
                 Q(created_by=request.user) | Q(is_active=True),
                 is_archived=False
             )
-            print(f"DEBUG: Other user - showing created_by or active non-archived scholarships")
-
-        print(f"DEBUG: Initial queryset count: {scholarships.count()}")
 
         # Apply search filter
         if search_term:
@@ -3207,18 +3272,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 Q(name__icontains=search_term) |
                 Q(description__icontains=search_term)
             )
-            print(f"DEBUG: After search filter count: {scholarships.count()}")
 
         # Apply scholarship type filter
         if scholarship_type_filter != 'all':
             scholarships = scholarships.filter(scholarship_type=scholarship_type_filter)
-            print(f"DEBUG: After type filter count: {scholarships.count()}")
 
         # Apply status filter
         if status_filter != 'all':
             is_active = status_filter == 'active'
             scholarships = scholarships.filter(is_active=is_active)
-            print(f"DEBUG: After status filter count: {scholarships.count()}")
 
         sort_mapping = {
             'name': 'name',
@@ -3236,8 +3298,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             # Default sorting
             scholarships = scholarships.order_by('-created_at')
 
-        print(f"DEBUG: Final queryset count before pagination: {scholarships.count()}")
-
         # Create paginator
         paginator = Paginator(scholarships.select_related('created_by', 'application_form'), per_page)
 
@@ -3247,9 +3307,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             page_obj = paginator.page(1)
         except EmptyPage:
             page_obj = paginator.page(paginator.num_pages)
-
-        print(f"DEBUG: Pagination - Page {page_obj.number} of {paginator.num_pages}")
-        print(f"DEBUG: Results on page: {page_obj.object_list.count()}")
 
         scholarship_data = []
         for scholarship in page_obj.object_list:
@@ -3388,88 +3445,61 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             }
         })
 
-    def add_scholarship_statistics(self, context):
-        # Get all non-archived scholarships
-        scholarships = Scholarship.objects.filter(is_archived=False)
-
-        # Count by type
-        context['total_scholarships'] = scholarships.count()
-        context['public_scholarships_count'] = scholarships.filter(scholarship_type='public').count()
-        context['private_scholarships_count'] = scholarships.filter(scholarship_type='private').count()
-
-        # Count by status
-        context['active_scholarships_count'] = scholarships.filter(is_active=True).count()
-        context['inactive_scholarships_count'] = scholarships.filter(is_active=False).count()
-
-        # Add application statistics
+    def add_scholarship_application_statistics(self, context):
         if self.request.user.is_superuser or self.request.user.user_type in [1, 5]:
+            # Admin/Staff can see all applications
             applications = ScholarshipApplication.objects.filter(is_archived=False)
+            context['scholarship_total_applications'] = applications.count()
+            context['scholarship_approved_applications'] = applications.filter(status='approved').count()
+            context['scholarship_pending_applications'] = applications.filter(status='pending').count()
+            context['scholarship_rejected_applications'] = applications.filter(status='rejected').count()
+
         elif self.request.user.user_type == 14:  # Student
+            # Students can only see their own applications
             applications = ScholarshipApplication.objects.filter(
                 student=self.request.user,
                 is_archived=False
             )
+            context['total_applications'] = applications.count()
+            context['approved_applications'] = applications.filter(status='approved').count()
+            context['pending_applications'] = applications.filter(status='pending').count()
+            context['rejected_applications'] = applications.filter(status='rejected').count()
+
         else:
-            applications = ScholarshipApplication.objects.none()
-
-        context['total_applications'] = applications.count()
-        context['approved_applications'] = applications.filter(status='approved').count()
-        context['pending_applications'] = applications.filter(status='pending').count()
-        context['rejected_applications'] = applications.filter(status='rejected').count()
-
-    def add_ojt_statistics(self, context):
-        # Total companies (including archived)
-        context['total_companies'] = OJTCompany.objects.count()
-
-        # Archived companies count
-        context['archived_companies'] = OJTCompany.objects.filter(is_archived=True).count()
-
-        # Active companies (non-archived)
-        active_companies = OJTCompany.objects.filter(is_archived=False)
-
-        available_count = 0
-        for company in active_companies:
-            if company.remaining_slots > 0:
-                available_count += 1
-
-        context['available_for_ojt'] = available_count
-        context['not_available_for_ojt'] = active_companies.count() - available_count
+            # Other user types - set all to 0
+            context['total_applications'] = 0
+            context['approved_applications'] = 0
+            context['pending_applications'] = 0
+            context['rejected_applications'] = 0
 
     def get_paginated_ojt_companies(self):
-        companies_queryset = OJTCompany.objects.all().order_by('name')
-        return self.get_paginated_data(companies_queryset, 'company_page')
+        companies_queryset = OJTCompany.objects.filter(is_archived=False)
+
+        # For students (user_type 14), hide inactive companies
+        if self.request.user.user_type == 14:  # Student
+            companies_queryset = companies_queryset.filter(status='active')
+
+        return self.get_paginated_data(companies_queryset.order_by('-created_at'), 'company_page')
 
     def get_filtered_ojt_companies(self, request):
         search_term = request.GET.get('search', '').lower()
-        availability_filter = request.GET.get('availability_filter', '')
-        student_count_filter = request.GET.get('student_count_filter', '')
-        sort_order = request.GET.get('sort_order', 'name_asc')
+        status_filter = request.GET.get('status_filter', '')
+        sort_order = request.GET.get('sort_order', 'created_desc')
         page_number = request.GET.get('page', 1)
         per_page = 10
 
-        companies = OJTCompany.objects.annotate(
-            student_count=Count('ojt_applications',
-                                filter=Q(ojt_applications__status='approved',
-                                         ojt_applications__is_archived=False))
-        )
+        companies = OJTCompany.objects.all()
 
-        # Apply archive filter
-        if availability_filter == 'archived':
+        # Apply status filter
+        if status_filter == 'archived':
             companies = companies.filter(is_archived=True)
+        elif status_filter == 'active':
+            companies = companies.filter(is_archived=False, status='active')
+        elif status_filter == 'inactive':
+            companies = companies.filter(is_archived=False, status='inactive')
         else:
+            # Default: show all non-archived companies
             companies = companies.filter(is_archived=False)
-
-            # Apply availability filter for non-archived companies
-            if availability_filter == 'available':
-                # Available: remaining slots > 0
-                companies = companies.filter(
-                    available_slots__gt=F('student_count')
-                )
-            elif availability_filter == 'not_available':
-                # Not available: remaining slots == 0
-                companies = companies.filter(
-                    available_slots__lte=F('student_count')
-                )
 
         # Apply search filter
         if search_term:
@@ -3477,34 +3507,27 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 Q(name__icontains=search_term) |
                 Q(address__icontains=search_term) |
                 Q(contact_number__icontains=search_term) |
-                Q(description__icontains=search_term)
+                Q(description__icontains=search_term) |
+                Q(email__icontains=search_term)
             )
-
-        # Apply student count filter
-        if student_count_filter:
-            if student_count_filter == '0':
-                companies = companies.filter(student_count=0)
-            elif student_count_filter == '1-5':
-                companies = companies.filter(student_count__range=[1, 5])
-            elif student_count_filter == '6-10':
-                companies = companies.filter(student_count__range=[6, 10])
-            elif student_count_filter == '11+':
-                companies = companies.filter(student_count__gte=11)
 
         # Apply sorting
         sort_mapping = {
             'name_asc': 'name',
             'name_desc': '-name',
-            'available_asc': 'available_slots',
-            'available_desc': '-available_slots',
-            'students_asc': 'student_count',
-            'students_desc': '-student_count'
+            'created_asc': 'created_at',
+            'created_desc': '-created_at',
+            'updated_asc': 'updated_at',
+            'updated_desc': '-updated_at',
+            'status_asc': 'status',
+            'status_desc': '-status'
         }
 
         if sort_order in sort_mapping:
             companies = companies.order_by(sort_mapping[sort_order])
         else:
-            companies = companies.order_by('name')
+            # Default to newest first
+            companies = companies.order_by('-created_at')
 
         # Create paginator
         paginator = Paginator(companies, per_page)
@@ -3519,45 +3542,32 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # Prepare data for JSON response
         company_data = []
         for company in page_obj.object_list:
-            remaining_slots = max(0, company.available_slots - company.student_count)
-
-            # Determine status
-            if company.is_archived:
-                status = "Archived"
-            elif remaining_slots == 0:
-                status = "Full"
-            elif remaining_slots <= 2:
-                status = "Limited"
-            else:
-                status = "Available"
-
             # Check user permissions for actions
             user_type = request.user.user_type
             is_superuser = request.user.is_superuser
 
-            # User type 1 (Super Admin) and 13 (Job Placement) can edit/archive
+            # User type 1 (Super Admin) and 13 (Job Placement) can edit/archive/change status
             can_edit = is_superuser or user_type in [1, 13]
             can_archive = is_superuser or user_type in [1, 13]
+            can_change_status = is_superuser or user_type in [1, 13]
 
             company_data.append({
                 'id': company.id,
                 'name': company.name,
                 'address': company.address,
                 'contact_number': company.contact_number,
-                'available_slots': company.available_slots,
-                'student_count': company.student_count,
-                'filled_slots': company.student_count,
-                'remaining_slots': remaining_slots,
-                'utilization_rate': company.utilization_rate,
-                'status': status,
-                'is_archived': company.is_archived,
+                'email': company.email or '',
                 'description': company.description or '',
                 'website': company.website or '',
-                'email': company.email or '',
+                'status': company.status,
+                'status_display': company.get_status_display(),  # Add this line
+                'is_archived': company.is_archived,
+                'created_at': company.created_at.isoformat() if company.created_at else None,
+                'updated_at': company.updated_at.isoformat() if company.updated_at else None,
                 'can_edit': can_edit,
-                'can_delete': can_archive,
-                'can_view': True,
                 'can_archive': can_archive,
+                'can_change_status': can_change_status,
+                'can_view': True,
                 'current_user_type': user_type,
                 'is_superuser': is_superuser
             })
@@ -3577,391 +3587,24 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'is_superuser': request.user.is_superuser
         })
 
-    def add_ojt_applications_statistics(self, context):
-        # Admin/Staff statistics (all applications)
-        if self.request.user.is_superuser or self.request.user.user_type in [1, 13]:
-            ojt_applications = OJTApplication.objects.filter(is_archived=False)
-            context['total_ojt_applications'] = ojt_applications.count()
-            context['approved_applications'] = ojt_applications.filter(status='approved').count()
-            context['submitted_applications'] = ojt_applications.filter(status='submitted').count()
-            context['rejected_applications'] = ojt_applications.filter(status='rejected').count()
-            context['draft_applications'] = ojt_applications.filter(status='draft').count()
+    def add_ojt_statistics(self, context):
+        # Total companies (including archived)
+        context['total_companies'] = OJTCompany.objects.count()
 
-        # Student-specific statistics
-        elif self.request.user.user_type == 14:
-            user_applications = OJTApplication.objects.filter(
-                student=self.request.user,
-                is_archived=False
-            )
-            context['user_total_applications'] = user_applications.count()
-            context['user_approved_applications'] = user_applications.filter(status='approved').count()
-            context['user_submitted_applications'] = user_applications.filter(status='submitted').count()
-            context['user_rejected_applications'] = user_applications.filter(status='rejected').count()
-            context['user_draft_applications'] = user_applications.filter(status='draft').count()
+        # Archived companies count
+        context['archived_companies'] = OJTCompany.objects.filter(is_archived=True).count()
 
-            # Set admin stats to 0 for students
-            context['total_ojt_applications'] = 0
-            context['approved_applications'] = 0
-            context['submitted_applications'] = 0
-            context['rejected_applications'] = 0
-            context['draft_applications'] = 0
+        # Active companies (non-archived and status = active)
+        context['active_companies'] = OJTCompany.objects.filter(
+            is_archived=False,
+            status='active'
+        ).count()
 
-        # For other user types
-        else:
-            context['total_ojt_applications'] = 0
-            context['approved_applications'] = 0
-            context['submitted_applications'] = 0
-            context['rejected_applications'] = 0
-            context['draft_applications'] = 0
-            context['user_total_applications'] = 0
-            context['user_approved_applications'] = 0
-            context['user_submitted_applications'] = 0
-            context['user_rejected_applications'] = 0
-            context['user_draft_applications'] = 0
-
-    def get_paginated_ojt_applications(self):
-        if self.request.user.is_superuser or self.request.user.user_type in [1, 13]:
-            # Admin/Staff can see all applications
-            ojt_applications_queryset = OJTApplication.objects.filter(is_archived=False)
-        elif self.request.user.user_type == 14:
-            # Students can only see their own applications
-            ojt_applications_queryset = OJTApplication.objects.filter(
-                student=self.request.user,
-                is_archived=False
-            )
-        else:
-            # Other user types see nothing
-            ojt_applications_queryset = OJTApplication.objects.none()
-
-        return self.get_paginated_data(ojt_applications_queryset.select_related(
-            'student', 'company', 'approved_by', 'reviewed_by'
-        ).order_by('-application_date'), 'ojt_application_page')
-
-    def get_filtered_ojt_applications(self, request):
-        search_term = request.GET.get('search', '').strip()
-        status_filter = request.GET.get('status', '')
-        company_filter = request.GET.get('company', '')
-        page_number = request.GET.get('page', 1)
-        per_page = 10
-
-        print(f"DEBUG: Search term: '{search_term}'")
-        print(f"DEBUG: Status filter: '{status_filter}'")
-        print(f"DEBUG: Company filter: '{company_filter}'")
-
-        # Start with base queryset based on user type
-        if request.user.is_superuser or request.user.user_type in [1, 13]:
-            ojt_applications = OJTApplication.objects.filter(is_archived=False)
-        elif request.user.user_type == 14:
-            ojt_applications = OJTApplication.objects.filter(
-                student=request.user,
-                is_archived=False
-            )
-        else:
-            ojt_applications = OJTApplication.objects.none()
-
-        print(f"DEBUG: Initial queryset count: {ojt_applications.count()}")
-
-        # Apply search filter
-        if search_term:
-            print(f"DEBUG: Applying search filter for: '{search_term}'")
-            ojt_applications = ojt_applications.filter(
-                Q(student__first_name__icontains=search_term) |
-                Q(student__last_name__icontains=search_term) |
-                Q(student__username__icontains=search_term) |
-                Q(company__name__icontains=search_term) |
-                Q(student__course__name__icontains=search_term)
-            )
-            print(f"DEBUG: After search filter count: {ojt_applications.count()}")
-
-        # Apply status filter
-        if status_filter and status_filter != 'all':
-            ojt_applications = ojt_applications.filter(status=status_filter)
-            print(f"DEBUG: After status filter count: {ojt_applications.count()}")
-
-        # Apply company filter (only for admin/staff)
-        if company_filter and company_filter != 'all' and (
-                request.user.is_superuser or request.user.user_type in [1, 13]):
-            try:
-                company_id = int(company_filter)
-                ojt_applications = ojt_applications.filter(company_id=company_id)
-                print(f"DEBUG: After company filter count: {ojt_applications.count()}")
-            except (ValueError, TypeError):
-                print(f"DEBUG: Invalid company filter: {company_filter}")
-                pass
-
-        # Apply default sorting (newest first)
-        ojt_applications = ojt_applications.order_by('-application_date')
-
-        print(f"DEBUG: Final queryset count before pagination: {ojt_applications.count()}")
-
-        # Create paginator
-        paginator = Paginator(ojt_applications.select_related(
-            'student',
-            'company',
-            'approved_by',
-            'reviewed_by',
-            'student__course'
-        ), per_page)
-
-        try:
-            page_obj = paginator.page(page_number)
-        except PageNotAnInteger:
-            page_obj = paginator.page(1)
-        except EmptyPage:
-            page_obj = paginator.page(paginator.num_pages)
-
-        print(f"DEBUG: Pagination - Page {page_obj.number} of {paginator.num_pages}")
-        print(f"DEBUG: Results on page: {page_obj.object_list.count()}")
-
-        # Prepare data for JSON response
-        ojt_application_data = []
-        for application in page_obj.object_list:
-            # Calculate duration
-            duration_days = application.duration_days if application.proposed_start_date and application.proposed_end_date else 0
-
-            # Get student information safely
-            student = application.student
-            student_course = student.course.name if student.course else "Not specified"
-            student_section = student.section or "N/A"
-
-            # Determine permission flags
-            is_owner = student.id == request.user.id
-            is_student = request.user.user_type == 14
-            is_admin_user = request.user.is_superuser or request.user.user_type in [1, 13]
-
-            can_edit = is_admin_user or (is_student and is_owner and application.status == 'draft')
-            can_archive = is_admin_user or (
-                    is_student and is_owner and application.status in ['draft', 'submitted', 'under_review'])
-            can_approve = is_admin_user and application.status in ['submitted', 'under_review']
-
-            ojt_application_data.append({
-                'id': application.id,
-                'student_name': f"{student.first_name} {student.last_name}",
-                'student_id': student.username,
-                'company_name': application.company.name,
-                'student_course': student_course,
-                'student_section': student_section,
-                'proposed_start_date': application.proposed_start_date.isoformat() if application.proposed_start_date else '',
-                'proposed_end_date': application.proposed_end_date.isoformat() if application.proposed_end_date else '',
-                'proposed_hours': application.proposed_hours,
-                'duration_days': duration_days,
-                'status': application.status,
-                'status_display': application.get_status_display(),
-                'application_date': application.application_date.isoformat(),
-                'requirements_submitted': application.requirements_submitted,
-                'total_requirements': application.total_requirements,
-                'requirements_complete': application.requirements_complete,
-                'can_edit': can_edit,
-                'can_archive': can_archive,
-                'can_view': True,
-                'can_approve': can_approve,
-                'company_has_slots': application.company.can_accept_more_students()
-            })
-
-        return JsonResponse({
-            'ojt_applications': ojt_application_data,
-            'pagination': {
-                'has_previous': page_obj.has_previous(),
-                'has_next': page_obj.has_next(),
-                'current_page': page_obj.number,
-                'num_pages': paginator.num_pages,
-                'count': paginator.count,
-                'start_index': page_obj.start_index(),
-                'end_index': page_obj.end_index(),
-            }
-        })
-
-    def add_ojt_reports_statistics(self, context):
-        if self.request.user.is_superuser or self.request.user.user_type in [1, 13]:
-            # Admin/Staff can see all reports
-            reports = OJTReport.objects.filter(is_archived=False)
-            context['total_ojt_reports'] = reports.count()
-            context['submitted_reports'] = reports.filter(status='submitted').count()
-            context['reviewed_reports'] = reports.filter(status='reviewed').count()
-
-            # Report type statistics
-            context['weekly_reports'] = reports.filter(report_type='weekly').count()
-            context['monthly_reports'] = reports.filter(report_type='monthly').count()
-            context['final_reports'] = reports.filter(report_type='final').count()
-            context['incident_reports'] = reports.filter(report_type='incident').count()
-            context['complaint_reports'] = reports.filter(report_type='complaint').count()
-
-            # Set user-specific stats to same as admin for consistency
-            context['user_total_reports'] = context['total_ojt_reports']
-            context['user_submitted_reports'] = context['submitted_reports']
-            context['user_reviewed_reports'] = context['reviewed_reports']
-            context['user_weekly_reports'] = context['weekly_reports']
-            context['user_monthly_reports'] = context['monthly_reports']
-            context['user_final_reports'] = context['final_reports']
-            context['user_incident_reports'] = context['incident_reports']
-            context['user_complaint_reports'] = context['complaint_reports']
-
-        elif self.request.user.user_type == 14:
-            # Students can only see their own reports
-            user_reports = OJTReport.objects.filter(
-                submitted_by=self.request.user,
-                is_archived=False
-            )
-            context['user_total_reports'] = user_reports.count()
-            context['user_submitted_reports'] = user_reports.filter(status='submitted').count()
-            context['user_reviewed_reports'] = user_reports.filter(status='reviewed').count()
-
-            # User-specific report type statistics
-            context['user_weekly_reports'] = user_reports.filter(report_type='weekly').count()
-            context['user_monthly_reports'] = user_reports.filter(report_type='monthly').count()
-            context['user_final_reports'] = user_reports.filter(report_type='final').count()
-            context['user_incident_reports'] = user_reports.filter(report_type='incident').count()
-            context['user_complaint_reports'] = user_reports.filter(report_type='complaint').count()
-
-            # Set admin stats to 0 for students (they shouldn't see admin data)
-            context['total_ojt_reports'] = 0
-            context['submitted_reports'] = 0
-            context['reviewed_reports'] = 0
-            context['weekly_reports'] = 0
-            context['monthly_reports'] = 0
-            context['final_reports'] = 0
-            context['incident_reports'] = 0
-            context['complaint_reports'] = 0
-
-        else:
-            # Other user types - set all to 0
-            context['total_ojt_reports'] = 0
-            context['submitted_reports'] = 0
-            context['reviewed_reports'] = 0
-            context['weekly_reports'] = 0
-            context['monthly_reports'] = 0
-            context['final_reports'] = 0
-            context['incident_reports'] = 0
-            context['complaint_reports'] = 0
-            context['user_total_reports'] = 0
-            context['user_submitted_reports'] = 0
-            context['user_reviewed_reports'] = 0
-            context['user_weekly_reports'] = 0
-            context['user_monthly_reports'] = 0
-            context['user_final_reports'] = 0
-            context['user_incident_reports'] = 0
-            context['user_complaint_reports'] = 0
-
-    def get_filtered_ojt_reports(self, request):
-        search_term = request.GET.get('search', '').strip()
-        status_filter = request.GET.get('status', '')
-        type_filter = request.GET.get('type', '')
-        page_number = request.GET.get('page', 1)
-        per_page = 10  # Changed from 1 to 10 for better testing
-
-        print(f"DEBUG OJT Reports - Search: '{search_term}', Status: '{status_filter}', Type: '{type_filter}'")
-
-        # Start with base queryset based on user type
-        if request.user.is_superuser or request.user.user_type in [1, 13]:
-            reports = OJTReport.objects.filter(is_archived=False)
-        elif request.user.user_type == 14:
-            reports = OJTReport.objects.filter(
-                submitted_by=request.user,
-                is_archived=False
-            )
-        else:
-            reports = OJTReport.objects.none()
-
-        print(f"DEBUG: Initial queryset count: {reports.count()}")
-
-        # Apply search filter
-        if search_term:
-            reports = reports.filter(
-                Q(title__icontains=search_term) |
-                Q(description__icontains=search_term) |
-                Q(application__student__first_name__icontains=search_term) |
-                Q(application__student__last_name__icontains=search_term) |
-                Q(application__company__name__icontains=search_term)
-            )
-            print(f"DEBUG: After search filter count: {reports.count()}")
-
-        # Apply status filter - FIXED: Check for empty string instead of 'all'
-        if status_filter and status_filter != 'all':
-            reports = reports.filter(status=status_filter)
-            print(f"DEBUG: After status filter '{status_filter}' count: {reports.count()}")
-
-        # Apply type filter - FIXED: Check for empty string instead of 'all'
-        if type_filter and type_filter != 'all':
-            reports = reports.filter(report_type=type_filter)
-            print(f"DEBUG: After type filter '{type_filter}' count: {reports.count()}")
-
-        # Apply default sorting
-        reports = reports.order_by('-report_date', '-submitted_at')
-
-        print(f"DEBUG: Final queryset count before pagination: {reports.count()}")
-
-        # Create paginator
-        paginator = Paginator(reports.select_related(
-            'application',
-            'submitted_by',
-            'reviewed_by',
-            'application__student',
-            'application__company'
-        ), per_page)
-
-        try:
-            page_obj = paginator.page(page_number)
-        except PageNotAnInteger:
-            page_obj = paginator.page(1)
-        except EmptyPage:
-            page_obj = paginator.page(paginator.num_pages)
-
-        print(f"DEBUG: Pagination - Page {page_obj.number} of {paginator.num_pages}")
-        print(f"DEBUG: Results on page: {page_obj.object_list.count()}")
-
-        # Prepare data for JSON response
-        report_data = []
-        for report in page_obj.object_list:
-            # Determine permission flags based on your requirements
-            is_owner = report.submitted_by.id == request.user.id
-            is_student = request.user.user_type == 14
-            is_admin_user = request.user.is_superuser or request.user.user_type in [1, 13]
-
-            # Edit permissions: admin OR (student owner AND status is submitted)
-            can_edit = is_admin_user or (is_student and is_owner and report.status == 'submitted')
-
-            # Archive permissions: admin OR student owner (but not if reviewed)
-            can_archive = is_admin_user or (is_student and is_owner and report.status == 'submitted')
-
-            # Review permissions: only admin for submitted reports
-            can_review = is_admin_user and report.status == 'submitted'
-
-            report_data.append({
-                'id': report.id,
-                'title': report.title,
-                'report_type': report.report_type,
-                'report_type_display': report.get_report_type_display(),
-                'student_name': report.student_name,
-                'company_name': report.company_name,
-                'report_date': report.report_date.isoformat(),
-                'period_start': report.period_start.isoformat() if report.period_start else '',
-                'period_end': report.period_end.isoformat() if report.period_end else '',
-                'status': report.status,
-                'status_display': report.get_status_display(),
-                'submitted_by': report.submitted_by.get_full_name(),
-                'submitted_at': report.submitted_at.isoformat(),
-                'reviewed_by': report.reviewed_by.get_full_name() if report.reviewed_by else '',
-                'reviewed_at': report.reviewed_at.isoformat() if report.reviewed_at else '',
-                'has_attachment': report.attachments.exists(),
-                'is_complaint_report': report.is_complaint_report,
-                'can_edit': can_edit,
-                'can_review': can_review,
-                'can_archive': can_archive,
-                'can_view': True,
-            })
-
-        return JsonResponse({
-            'ojt_reports': report_data,
-            'pagination': {
-                'has_previous': page_obj.has_previous(),
-                'has_next': page_obj.has_next(),
-                'current_page': page_obj.number,
-                'num_pages': paginator.num_pages,
-                'count': paginator.count,
-                'start_index': page_obj.start_index(),
-                'end_index': page_obj.end_index(),
-            }
-        })
+        # Inactive companies (non-archived and status = inactive)
+        context['inactive_companies'] = OJTCompany.objects.filter(
+            is_archived=False,
+            status='inactive'
+        ).count()
 
     def add_organization_statistics(self, context):
         from django.db.models import Sum
@@ -4618,6 +4261,17 @@ class CustomPasswordChangeView(PasswordChangeView):
             return super().form_invalid(form)
 
 
+# ------------------------------------------------------ API Course ----------------------------------------------------
+def get_courses(request):
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        courses = Course.objects.all().values('id', 'name')
+        return JsonResponse({
+            'success': True,
+            'courses': list(courses)
+        })
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
+
 # ------------------------------------------------- User Management Section --------------------------------------------
 class ApproveUserView(View):
     @method_decorator(login_required)
@@ -4697,16 +4351,25 @@ class ApproveUserView(View):
                 return role in [1, 10]
 
             # Students (#14) get NO announcement permissions at all
-            if role == 14 and ('announcement' in perm_name):
+            if role == 14 and ('announcement' in perm_name or 'announcement' in content_type):
                 return False
 
-            # Common permissions for all non-superadmin roles (except students)
-            if role != 14 and ('announcement' in perm_name):
+            # OJT Adviser (16) gets ALL announcement permissions (view, add, change, delete)
+            if role == 16 and ('announcement' in perm_name or 'announcement' in content_type):
+                return True  # Give all announcement permissions
+
+            # Common permissions for all non-superadmin roles (except students and OJT Adviser)
+            if role != 14 and ('announcement' in perm_name or 'announcement' in content_type):
+                # Other OSAS roles get announcement permissions too
                 return True
 
             # OJT Permissions
-            if ('ojt' in perm_name or 'ojt' in codename or 'on-the-job' in perm_name or 'on_the_job' in codename):
-                if role in [1, 13]:
+            if ('ojt' in perm_name or 'ojt' in codename or
+                    'on-the-job' in perm_name or 'on_the_job' in codename or
+                    'ojtcompany' in content_type or 'ojtapplication' in content_type or
+                    'ojtreport' in content_type or 'ojtrequirement' in content_type):
+
+                if role in [1, 13, 16]:  # Super Admin, Job Placement, OJT Adviser
                     return True
 
                 # Student (type 14) permissions
@@ -4730,7 +4393,6 @@ class ApproveUserView(View):
                     else:
                         return False
 
-                # Other roles - no OJT permissions by default
                 else:
                     return False
 
@@ -4753,7 +4415,21 @@ class ApproveUserView(View):
             if 'nstpfile' in codename:
                 return role in [1, 2]
 
-            # Role-specific permissions
+            # OJT Adviser permissions - FULL access
+            if role == 16:
+                # OJT Adviser gets ALL permissions for downloadables (view, add, change, delete)
+                if 'downloadable' in perm_name or 'downloadable' in content_type:
+                    return True
+
+                # Also give access to other common features
+                # View content type permission (if exists)
+                if 'view content type' in perm_name:
+                    return True
+
+                # Return True for other relevant permissions
+                # You can add more permissions here as needed
+
+            # Role-specific permissions for other roles
             if role == 2:  # NSTP
                 return ('downloadable' in perm_name and ('view' in perm_name or 'add' in perm_name))
             elif role == 3:  # Clinic
@@ -4761,6 +4437,9 @@ class ApproveUserView(View):
             elif role == 4:  # Alumni
                 return ('downloadable' in perm_name and ('view' in perm_name or 'add' in perm_name))
             elif role == 5:  # Scholarship
+                # Scholarship gets ALL downloadable permissions
+                if 'downloadable' in perm_name or 'downloadable' in content_type:
+                    return True
                 return ('downloadable' in perm_name and ('view' in perm_name or 'add' in perm_name))
             elif role == 6:  # Culture and Arts
                 return ('downloadable' in perm_name and ('view' in perm_name or 'add' in perm_name))
@@ -4771,12 +4450,18 @@ class ApproveUserView(View):
             elif role == 9:  # Student Welfare Services
                 return ('downloadable' in perm_name and ('view' in perm_name or 'add' in perm_name))
             elif role == 10:  # Student Development Services
+                # SDS gets all downloadable permissions plus organization (handled above)
+                if 'downloadable' in perm_name or 'downloadable' in content_type:
+                    return True
                 return ('downloadable' in perm_name and ('view' in perm_name or 'add' in perm_name))
             elif role == 11:  # Misdeamenor
                 return ('downloadable' in perm_name and ('view' in perm_name or 'add' in perm_name))
             elif role == 12:  # Admission
                 return ('downloadable' in perm_name and ('view' in perm_name or 'add' in perm_name))
             elif role == 13:  # Job Placement
+                # Job Placement gets all downloadable permissions
+                if 'downloadable' in perm_name or 'downloadable' in content_type:
+                    return True
                 return ('downloadable' in perm_name and ('view' in perm_name or 'add' in perm_name))
             elif role == 14:  # Student
                 return (('downloadable' in perm_name and 'view' in perm_name) or
@@ -4790,8 +4475,8 @@ class ApproveUserView(View):
             if should_assign_permission(perm, user.user_type):
                 user.user_permissions.add(perm)
 
-        # Staff status for OSAS units (non-student, non-superadmin)
-        if user.user_type in range(2, 14):
+        # Staff status for OSAS units and OJT Adviser (non-student, non-superadmin)
+        if user.user_type in range(2, 14) or user.user_type == 16:
             user.is_staff = True
             user.save()
 
@@ -5024,6 +4709,7 @@ class UserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         self.object = self.get_object()
         permission_ids = list(self.object.user_permissions.values_list('id', flat=True))
 
+        # Get all courses
         courses = Course.objects.all().values('id', 'name')
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -5045,7 +4731,7 @@ class UserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     'phone_number': self.object.phone_number,
                     'address': self.object.address,
                     'student_number': self.object.student_number,
-                    'course': self.object.course.id if self.object.course else None,
+                    'course': self.object.course.id if self.object.course else None,  # Send course ID
                     'year_level': self.object.year_level,
                     'section': self.object.section,
                     'department': self.object.department,
@@ -5055,7 +4741,7 @@ class UserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     'cor_photo': self.object.cor_photo.url if self.object.cor_photo else None,
                     'cor_photo_name': os.path.basename(self.object.cor_photo.name) if self.object.cor_photo else None,
                 },
-                'courses': list(courses)
+                'courses': list(courses)  # Make sure this is included
             }
             return JsonResponse(user_data)
         return super().get(request, *args, **kwargs)
@@ -5101,6 +4787,14 @@ class UserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 if not form.cleaned_data.get('osas_position'):
                     user.osas_position = None
 
+            elif original_user_type == 16 and new_user_type != 16:  # OJT Adviser to non-OJT Adviser
+                # OJT Adviser might have department, keep it if changing to OSAS role
+                if new_user_type not in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']:
+                    if not form.cleaned_data.get('department'):
+                        user.department = None
+                    if not form.cleaned_data.get('osas_position'):
+                        user.osas_position = None
+
         # Handle superuser status
         if new_user_type == '1':  # OSAS Staff
             user.is_superuser = True
@@ -5117,21 +4811,54 @@ class UserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         # Save the user first
         user.save()
 
-        # Then handle permissions
-        if 'permissions' in self.request.POST and not (original_user_type == 1 and new_user_type != 1):
-            selected_permissions = self.request.POST.getlist('permissions')
-            user.user_permissions.clear()
+        if new_user_type == '16' or 'permissions' in self.request.POST:
+            selected_permissions = self.request.POST.getlist('permissions', [])
 
-            # If user type is 10 (Student Development Services), ensure organization permissions are included
+            if original_user_type == 1 and new_user_type != 1:
+                user.user_permissions.clear()
+
             if new_user_type == '10':
                 # Get all organization permissions
                 org_permissions = Permission.objects.filter(
                     codename__contains='organization'
                 )
-                # Add organization permissions to selected permissions
+
                 for perm in org_permissions:
                     if str(perm.id) not in selected_permissions:
                         selected_permissions.append(str(perm.id))
+
+            if new_user_type == '16':
+                # Get all OJT Company permissions
+                ojt_company_permissions = Permission.objects.filter(
+                    codename__contains='ojtcompany'
+                )
+                # Add OJT Company permissions to selected permissions
+                for perm in ojt_company_permissions:
+                    if str(perm.id) not in selected_permissions:
+                        selected_permissions.append(str(perm.id))
+
+                # Get all Announcement permissions
+                announcement_permissions = Permission.objects.filter(
+                    codename__contains='announcement'
+                )
+                # Add Announcement permissions to selected permissions
+                for perm in announcement_permissions:
+                    if str(perm.id) not in selected_permissions:
+                        selected_permissions.append(str(perm.id))
+
+                # Get all Downloadable permissions
+                downloadable_permissions = Permission.objects.filter(
+                    codename__contains='downloadable'
+                )
+                # Add Downloadable permissions to selected permissions
+                for perm in downloadable_permissions:
+                    if str(perm.id) not in selected_permissions:
+                        selected_permissions.append(str(perm.id))
+
+            # Also set staff status for OJT Adviser
+            if new_user_type == '16':
+                user.is_staff = True
+                user.save()
 
             if selected_permissions:
                 user.user_permissions.set(selected_permissions)
@@ -5143,6 +4870,8 @@ class UserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 activity_msg += " (granted superuser as OSAS Staff)"
             elif original_user_type == 1 and new_user_type != '1':
                 activity_msg += " (removed superuser status)"
+            elif new_user_type == '16':
+                activity_msg += " (assigned as OJT Adviser with full OJT, Announcement, and Downloadable access)"
 
         UserActivityLog.objects.create(
             user=self.request.user,
@@ -5156,7 +4885,8 @@ class UserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 'username': user.username,
                 'email': user.email,
                 'user_type': user.get_user_type_display(),
-                'is_superuser': user.is_superuser
+                'is_superuser': user.is_superuser,
+                'is_staff': user.is_staff
             })
         return super().form_valid(form)
 
@@ -5258,6 +4988,7 @@ class UserArchiveView(View):
                 'error': str(e) if str(e) else 'An error occurred while archiving the user'
             }, status=500)
 
+
 @require_POST
 def export_users(request):
     if request.method == 'POST':
@@ -5339,40 +5070,112 @@ def export_users(request):
                     # Handle invalid date format
                     pass
 
-            # Prepare data for export
-            data = []
-            for user in users:
-                data.append({
-                    'ID': user.id,
-                    'First Name': user.first_name,
-                    'Last Name': user.last_name,
-                    'Username': user.username,
-                    'Email': user.email,
-                    'Unit': user.get_user_type_display(),
-                    'Position': user.get_position_display() if user.position else '',
-                    'Verified': 'Yes' if user.is_verified else 'No',
-                    'Status': 'Active' if user.is_active else 'Inactive',
-                    'Date Joined': user.date_joined.strftime('%Y-%m-%d %H:%M'),
-                    'Last Login': user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else '',
-                    'Gender': user.get_gender_display() if user.gender else '',
-                    'Phone Number': user.phone_number or '',
-                })
+            # Check if Excel format is selected
+            if file_format == 'excel':
+                # Load the template
+                template_path = os.path.join(settings.STATICFILES_DIRS[0], 'templates', 'UserTemplate.xlsx')
 
-            # Create DataFrame
-            df = pd.DataFrame(data)
+                # If staticfiles_dirs doesn't work, try alternative path
+                if not os.path.exists(template_path):
+                    template_path = os.path.join(settings.BASE_DIR, 'static', 'templates', 'UserTemplate.xlsx')
 
-            # Export based on format
-            if file_format == 'csv':
+                if not os.path.exists(template_path):
+                    return HttpResponse("Template file not found", status=500)
+
+                # Load workbook
+                wb = load_workbook(template_path)
+                ws = wb.active  # Get the active sheet (Sheet1)
+
+                print(f"Row 7 headers: {ws['A7'].value}, {ws['B7'].value}, {ws['C7'].value}")
+                print(f"Row 8 content before: {ws['A8'].value}, {ws['B8'].value}")
+
+                max_row = ws.max_row
+
+                # Clear rows 8 and below (where data should go)
+                for row in range(8, max_row + 1):
+                    for col in range(1, 14):  # Columns A to M (1-13)
+                        ws.cell(row=row, column=col, value=None)
+
+                # Now write data starting from row 8
+                start_row = 8
+
+                # Write user data to the template
+                for i, user in enumerate(users, start=start_row):
+                    # Write the user data
+                    ws.cell(row=i, column=1, value=user.id)
+                    ws.cell(row=i, column=2, value=user.first_name or '')
+                    ws.cell(row=i, column=3, value=user.last_name or '')
+                    ws.cell(row=i, column=4, value=user.get_gender_display() if user.gender else '')
+                    ws.cell(row=i, column=5, value=user.email or '')
+                    ws.cell(row=i, column=6, value=user.phone_number or '')
+                    ws.cell(row=i, column=7, value=user.username or '')
+                    ws.cell(row=i, column=8, value=user.get_user_type_display() if user.user_type else '')
+
+                    # Get position display value
+                    if user.is_osas_unit:
+                        position_display = user.get_position_display()
+                    else:
+                        position_display = user.get_position_display() if hasattr(user, 'get_position_display') else ''
+                    ws.cell(row=i, column=9, value=position_display)
+
+                    ws.cell(row=i, column=10, value='Yes' if user.is_verified else 'No')
+                    ws.cell(row=i, column=11, value='Active' if user.is_active else 'Inactive')
+
+                    # Format dates properly
+                    if user.date_joined:
+                        ws.cell(row=i, column=12, value=user.date_joined.strftime('%Y-%m-%d %H:%M'))
+                    else:
+                        ws.cell(row=i, column=12, value='')
+
+                    if user.last_login:
+                        ws.cell(row=i, column=13, value=user.last_login.strftime('%Y-%m-%d %H:%M'))
+                    else:
+                        ws.cell(row=i, column=13, value='')
+
+                # Debug: Check what we wrote
+                print(f"First data row (row 8): {ws['A8'].value}, {ws['B8'].value}, {ws['C8'].value}")
+
+                # Save workbook to a BytesIO object
+                output = BytesIO()
+                wb.save(output)
+                output.seek(0)
+
+                # Create response with template
+                response = HttpResponse(
+                    output.read(),
+                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                )
+                response['Content-Disposition'] = 'attachment; filename="users_export.xlsx"'
+
+                return response
+
+            elif file_format == 'csv':
+                data = []
+                for user in users:
+                    data.append({
+                        'ID': user.id,
+                        'First Name': user.first_name,
+                        'Last Name': user.last_name,
+                        'Username': user.username,
+                        'Email': user.email,
+                        'Unit': user.get_user_type_display(),
+                        'Position': user.get_position_display() if user.position else '',
+                        'Verified': 'Yes' if user.is_verified else 'No',
+                        'Status': 'Active' if user.is_active else 'Inactive',
+                        'Date Joined': user.date_joined.strftime('%Y-%m-%d %H:%M'),
+                        'Last Login': user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else '',
+                        'Gender': user.get_gender_display() if user.gender else '',
+                        'Phone Number': user.phone_number or '',
+                    })
+
+                # Create DataFrame
+                df = pd.DataFrame(data)
+
                 response = HttpResponse(content_type='text/csv')
                 response['Content-Disposition'] = 'attachment; filename="users_export.csv"'
                 df.to_csv(response, index=False, encoding='utf-8')
-            else:  # excel
-                response = HttpResponse(
-                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-                response['Content-Disposition'] = 'attachment; filename="users_export.xlsx"'
-                df.to_excel(response, index=False, engine='openpyxl')
 
-            return response
+                return response
 
         except Exception as e:
             # Log the error for debugging
@@ -6351,7 +6154,7 @@ def download_complaint_pdf(request, complaint_id):
     return response
 
 
-class ResolveComplaintView(LoginRequiredMixin, PermissionRequiredMixin, View):
+class UpdateComplaintStatusView(LoginRequiredMixin, PermissionRequiredMixin, View):
     permission_required = 'osas.change_complaint'
 
     @method_decorator(csrf_exempt)
@@ -6360,29 +6163,167 @@ class ResolveComplaintView(LoginRequiredMixin, PermissionRequiredMixin, View):
 
     def post(self, request, pk):
         try:
+            # Parse JSON data
+            data = json.loads(request.body)
+            status = data.get('status')
+            notes = data.get('notes', '')
+            hearing_data = data.get('hearing_data')
+            clear_existing_hearings = data.get('clear_existing_hearings', False)
+
+            print(f"Received data: {data}")  # Debug log
+
+            if not status:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Status is required'
+                }, status=400)
+
             complaint = Complaint.objects.get(pk=pk)
 
-            # Update the complaint status and notes
-            complaint.status = 'resolved'
-            if request.POST.get('notes'):
-                complaint.notes = request.POST.get('notes')
+            # Store old status for comparison
+            old_status = complaint.status
+            old_status_display = complaint.get_status_display()
+
+            # Update complaint status
+            complaint.status = status
+
+            # Handle "under_review" status - clear next hearing date
+            if status == 'under_review':
+                # Delete any upcoming hearings for this complaint
+                upcoming_hearings = complaint.hearings.filter(
+                    schedule_date__gte=timezone.now().date()
+                )
+                upcoming_hearings.delete()
+                print(f"Cleared upcoming hearings for complaint {complaint.reference_number}")
+
+            # Update notes if provided
+            if notes:
+                if complaint.notes:
+                    complaint.notes += f"\n\n[{datetime.now().strftime('%Y-%m-%d %H:%M')}] {notes}"
+                else:
+                    complaint.notes = f"[{datetime.now().strftime('%Y-%m-%d %H:%M')}] {notes}"
+
+            complaint.updated_at = datetime.now()
+
+            # Handle hearing creation if applicable (for hearing statuses)
+            hearing = None
+            if hearing_data and status in ['1st_hearing', '2nd_hearing', 'other_hearing', 'ongoing_hearing']:
+                # Convert string to date/time objects
+                schedule_date_str = hearing_data.get('schedule_date')
+                schedule_time_str = hearing_data.get('schedule_time')
+
+                if schedule_date_str and schedule_time_str:
+                    # IMPORTANT: Clear existing hearings before creating new one
+                    # This ensures only one hearing exists at a time
+                    complaint.hearings.all().delete()
+                    print(f"Cleared all existing hearings for complaint {complaint.reference_number}")
+
+                    # Convert to proper Python date/time objects
+                    try:
+                        schedule_date = datetime.strptime(schedule_date_str, '%Y-%m-%d').date()
+                        schedule_time = datetime.strptime(schedule_time_str, '%H:%M').time()
+
+                        # Create new hearing
+                        hearing = Hearing.objects.create(
+                            complaint=complaint,
+                            schedule_date=schedule_date,
+                            schedule_time=schedule_time,
+                            location=hearing_data.get('location'),
+                            description=hearing_data.get('description', ''),
+                            created_by=request.user
+                        )
+                        print(f"New hearing created: {hearing}")
+                    except ValueError as e:
+                        print(f"Error parsing date/time: {e}")
+                        return JsonResponse({
+                            'success': False,
+                            'error': f'Invalid date/time format: {str(e)}'
+                        }, status=400)
+                else:
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Hearing date and time are required for hearing statuses'
+                    }, status=400)
+
+            # Save complaint after all updates
             complaint.save()
+
+            # Send email notification
+            try:
+                self.send_email_notification(complaint, old_status, old_status_display, hearing, notes)
+            except Exception as email_error:
+                print(f"Email error (non-critical): {email_error}")
+                traceback.print_exc()
 
             return JsonResponse({
                 'success': True,
-                'message': 'Complaint marked as resolved successfully'
+                'message': f'Complaint status updated to {complaint.get_status_display()} successfully'
             })
+
         except Complaint.DoesNotExist:
             return JsonResponse({
                 'success': False,
                 'error': 'Complaint not found'
             }, status=404)
         except Exception as e:
+            print(f"Error in UpdateComplaintStatusView: {str(e)}")
+            traceback.print_exc()
             return JsonResponse({
                 'success': False,
                 'error': str(e)
             }, status=500)
 
+    def send_email_notification(self, complaint, old_status, old_status_display, hearing=None, admin_notes=None):
+        try:
+            # Prepare context for email template
+            context = {
+                'complainant_name': f"{complaint.complainant_first_name} {complaint.complainant_last_name}",
+                'reference_number': complaint.reference_number,
+                'complaint_title': complaint.title,
+                'new_status': complaint.status,
+                'status_display': complaint.get_status_display(),
+                'old_status': old_status,
+                'old_status_display': old_status_display,
+                'admin_notes': admin_notes,
+                'hearing_details': None,
+            }
+
+            # Add hearing details if applicable
+            if hearing:
+                # Format date and time
+                context['hearing_details'] = {
+                    'hearing_type': complaint.get_hearing_type_display(),
+                    'date': hearing.schedule_date.strftime('%B %d, %Y'),
+                    'time': hearing.schedule_time.strftime('%I:%M %p'),
+                    'location': hearing.location,
+                    'description': hearing.description,
+                }
+
+            print(f"Email context prepared for {complaint.complainant_email}")
+
+            # Render email template
+            html_message = render_to_string('emails/complaint_status_update.html', context)
+            plain_message = strip_tags(html_message)
+
+            # Email subject
+            subject = f"Status Update: Complaint #{complaint.reference_number} - {complaint.get_status_display()}"
+
+            # Send email
+            send_mail(
+                subject=subject,
+                message=plain_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[complaint.complainant_email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+
+            print(f"Email sent successfully to {complaint.complainant_email}")
+
+        except Exception as e:
+            print(f"Failed to send email notification: {e}")
+            traceback.print_exc()
+            
 
 class ComplaintDetailView(LoginRequiredMixin, PermissionRequiredMixin, View):
     permission_required = 'osas.view_complaint'
@@ -6487,7 +6428,8 @@ class ComplaintEditView(LoginRequiredMixin, PermissionRequiredMixin, View):
                         'respondent_year': complaint.respondent_year or '',
                         'respondent_section': complaint.respondent_section or '',
                         'respondent_department': complaint.respondent_department or '',
-                        'incident_date': complaint.incident_date.strftime('%Y-%m-%d') if complaint.incident_date else '',
+                        'incident_date': complaint.incident_date.strftime(
+                            '%Y-%m-%d') if complaint.incident_date else '',
                         'incident_time': complaint.incident_time.strftime('%H:%M') if complaint.incident_time else '',
                         'incident_location': complaint.incident_location,
                         'statement': complaint.statement,
@@ -6525,8 +6467,11 @@ class ComplaintEditView(LoginRequiredMixin, PermissionRequiredMixin, View):
         try:
             complaint = get_object_or_404(Complaint, pk=pk)
 
+            old_status = complaint.status
+            new_status = request.POST.get('status', complaint.status)
+
             # Handle form data
-            complaint.status = request.POST.get('status', complaint.status)
+            complaint.status = new_status
             complaint.title = request.POST.get('title', complaint.title)
 
             # Complainant info
@@ -6547,10 +6492,10 @@ class ComplaintEditView(LoginRequiredMixin, PermissionRequiredMixin, View):
                 complaint.respondent_course = Course.objects.get(id=course_id) if course_id else None
                 complaint.respondent_year = request.POST.get('respondent_year', '')
                 complaint.respondent_section = request.POST.get('respondent_section', '')
-                complaint.respondent_department = ''  # Clear department if switching to student
+                complaint.respondent_department = ''
             else:
                 complaint.respondent_department = request.POST.get('respondent_department', '')
-                complaint.respondent_course = None  # Clear course
+                complaint.respondent_course = None
                 complaint.respondent_year = ''
                 complaint.respondent_section = ''
 
@@ -6568,6 +6513,26 @@ class ComplaintEditView(LoginRequiredMixin, PermissionRequiredMixin, View):
             complaint.statement = request.POST.get('statement', '')
             complaint.witnesses = request.POST.get('witnesses', '')
             complaint.notes = request.POST.get('notes', '')
+
+            if old_status != 'under_review' and new_status == 'under_review':
+                upcoming_hearings = complaint.hearings.filter(
+                    schedule_date__gte=timezone.now().date()
+                )
+                hearing_count = upcoming_hearings.count()
+                upcoming_hearings.delete()
+                print(
+                    f"Cleared {hearing_count} upcoming hearings for complaint {complaint.reference_number} when changing to under_review")
+
+            if old_status in ['1st_hearing', '2nd_hearing', 'other_hearing', 'ongoing_hearing'] and \
+                    new_status in ['resolved', 'canceled']:
+                # Delete any upcoming hearings for this complaint
+                upcoming_hearings = complaint.hearings.filter(
+                    schedule_date__gte=timezone.now().date()
+                )
+                hearing_count = upcoming_hearings.count()
+                upcoming_hearings.delete()
+                print(
+                    f"Cleared {hearing_count} upcoming hearings for complaint {complaint.reference_number} when changing to {new_status}")
 
             complaint.save()
 
@@ -6660,11 +6625,17 @@ def export_complaints(request):
             file_format = request.POST.get('format', 'excel')
             source_section = request.POST.get('source_section', 'under_review')
 
-            complaints = Complaint.objects.all().select_related('respondent_course', 'created_by')
+            # Start with all complaints
+            complaints = Complaint.objects.all().select_related(
+                'respondent_course',
+                'created_by',
+                'archived_by'
+            )
 
             # Apply filters based on export options
             if export_option == 'all_statuses':
-                pass  # No additional filter needed
+                # No additional filter needed for status
+                pass
             elif export_option == 'by_status':
                 status = request.POST.get('status', 'all')
                 if status != 'all':
@@ -6673,56 +6644,271 @@ def export_complaints(request):
                 respondent_type = request.POST.get('respondent_type', 'all')
                 if respondent_type != 'all':
                     complaints = complaints.filter(respondent_type=respondent_type)
+            elif export_option == 'custom':
+                # Apply multiple custom filters
+                custom_status = request.POST.get('custom_status', '')
+                custom_respondent_type = request.POST.get('custom_respondent_type', '')
+                include_archived = request.POST.get('include_archived', 'no')
+                has_hearing = request.POST.get('has_hearing', '')
+
+                # Apply status filter
+                if custom_status:
+                    complaints = complaints.filter(status=custom_status)
+
+                # Apply respondent type filter
+                if custom_respondent_type:
+                    complaints = complaints.filter(respondent_type=custom_respondent_type)
+
+                # Apply archived filter
+                if include_archived == 'no':
+                    complaints = complaints.filter(is_archived=False)
+                elif include_archived == 'archived_only':
+                    complaints = complaints.filter(is_archived=True)
+                # 'yes' includes both archived and non-archived
+
+                # Apply hearing filter
+                if has_hearing == 'yes':
+                    # Get complaints that have at least one hearing
+                    complaints = complaints.filter(hearings__isnull=False).distinct()
+                elif has_hearing == 'no':
+                    # Get complaints that have no hearings
+                    complaints = complaints.filter(hearings__isnull=True)
 
             # Apply date range if provided
             start_date = request.POST.get('start_date')
             end_date = request.POST.get('end_date')
+            date_type = request.POST.get('date_type', 'incident')
 
             if start_date:
-                complaints = complaints.filter(incident_date__gte=start_date)
+                if date_type == 'incident':
+                    complaints = complaints.filter(incident_date__gte=start_date)
+                elif date_type == 'submission':
+                    complaints = complaints.filter(created_at__gte=start_date)
+                elif date_type == 'updated':
+                    complaints = complaints.filter(updated_at__gte=start_date)
+
             if end_date:
-                complaints = complaints.filter(incident_date__lte=end_date)
+                try:
+                    # Add one day to include the entire end date
+                    end_date_obj = timezone.datetime.strptime(end_date, '%Y-%m-%d')
+                    end_date_obj = end_date_obj + timezone.timedelta(days=1)
 
-            # Prepare data for export
-            data = []
-            for complaint in complaints:
-                data.append({
-                    'Reference Number': complaint.reference_number,
-                    'Title': complaint.title,
-                    'Complainant': f"{complaint.complainant_last_name}, {complaint.complainant_first_name}",
-                    'Complainant Email': complaint.complainant_email,
-                    'Complainant Phone': complaint.complainant_phone,
-                    'Respondent Type': complaint.get_respondent_type_display(),
-                    'Respondent': f"{complaint.respondent_last_name}, {complaint.respondent_first_name}",
-                    'Respondent Course': str(complaint.respondent_course) if complaint.respondent_course else '',
-                    'Respondent Year': complaint.respondent_year or '',
-                    'Respondent Section': complaint.respondent_section or '',
-                    'Respondent Department': complaint.respondent_department or '',
-                    'Incident Date': complaint.incident_date.strftime('%Y-%m-%d'),
-                    'Incident Time': complaint.incident_time.strftime('%H:%M') if complaint.incident_time else '',
-                    'Incident Location': complaint.incident_location,
-                    'Status': complaint.get_status_display(),
-                    'Date Submitted': complaint.created_at.strftime('%Y-%m-%d %H:%M'),
-                    'Date Resolved': complaint.updated_at.strftime('%Y-%m-%d %H:%M') if complaint.status == 'resolved' else '',
-                    'Created By': f"{complaint.created_by.last_name}, {complaint.created_by.first_name}" if complaint.created_by else '',
-                    'Archived Status': 'Yes' if complaint.is_archived else 'No'
-                })
+                    if date_type == 'incident':
+                        complaints = complaints.filter(incident_date__lte=end_date_obj)
+                    elif date_type == 'submission':
+                        complaints = complaints.filter(created_at__lte=end_date_obj)
+                    elif date_type == 'updated':
+                        complaints = complaints.filter(updated_at__lte=end_date_obj)
+                except ValueError:
+                    # Handle invalid date format
+                    pass
 
-            # Create DataFrame
-            df = pd.DataFrame(data)
+            # Check if Excel format is selected
+            if file_format == 'excel':
+                # Load the template
+                template_path = os.path.join(settings.STATICFILES_DIRS[0], 'templates', 'ComplaintTemplate.xlsx')
 
-            # Export based on format
-            if file_format == 'csv':
+                # If staticfiles_dirs doesn't work, try alternative path
+                if not os.path.exists(template_path):
+                    template_path = os.path.join(settings.BASE_DIR, 'static', 'templates', 'ComplaintTemplate.xlsx')
+
+                if not os.path.exists(template_path):
+                    return HttpResponse("Template file not found", status=500)
+
+                # Load workbook
+                wb = load_workbook(template_path)
+                ws = wb.active  # Get the active sheet (Sheet1)
+
+                # Clear rows 8 and below for data
+                max_row = ws.max_row
+                for row in range(8, max_row + 1):
+                    for col in range(1, 17):  # Columns A to P (1-16)
+                        ws.cell(row=row, column=col, value=None)
+
+                # Start writing data at row 8
+                start_row = 8
+
+                # Write complaint data to the template
+                for i, complaint in enumerate(complaints, start=start_row):
+                    # Get respondent course
+                    respondent_course = str(complaint.respondent_course) if complaint.respondent_course else ''
+
+                    # Get respondent department
+                    respondent_department = complaint.respondent_department or ''
+
+                    # Format incident time
+                    incident_time = ''
+                    if complaint.incident_time:
+                        incident_time = complaint.incident_time.strftime('%H:%M')
+
+                    # Column A: Reference No
+                    ws.cell(row=i, column=1, value=complaint.reference_number or '')
+
+                    # Column B: Complainant Name
+                    complainant_name = f"{complaint.complainant_last_name}, {complaint.complainant_first_name}"
+                    ws.cell(row=i, column=2, value=complainant_name)
+
+                    # Column C: Complainant Email
+                    ws.cell(row=i, column=3, value=complaint.complainant_email or '')
+
+                    # Column D: Complainant Phone
+                    ws.cell(row=i, column=4, value=complaint.complainant_phone or '')
+
+                    # Column E: Respondent Name
+                    respondent_name = f"{complaint.respondent_last_name}, {complaint.respondent_first_name}"
+                    ws.cell(row=i, column=5, value=respondent_name)
+
+                    # Column F: Respondent Type
+                    ws.cell(row=i, column=6, value=complaint.get_respondent_type_display())
+
+                    # Column G: Respondent Year
+                    ws.cell(row=i, column=7, value=complaint.respondent_year or '')
+
+                    # Column H: Respondent Section
+                    ws.cell(row=i, column=8, value=complaint.respondent_section or '')
+
+                    # Column I: Respondent Course
+                    ws.cell(row=i, column=9, value=respondent_course)
+
+                    # Column J: Respondent Department
+                    ws.cell(row=i, column=10, value=respondent_department)
+
+                    # Column K: Complaint Title
+                    ws.cell(row=i, column=11, value=complaint.title)
+
+                    # Column L: Incident Date
+                    if complaint.incident_date:
+                        ws.cell(row=i, column=12, value=complaint.incident_date.strftime('%Y-%m-%d'))
+                    else:
+                        ws.cell(row=i, column=12, value='')
+
+                    # Column M: Incident Time
+                    ws.cell(row=i, column=13, value=incident_time)
+
+                    # Column N: Incident Location
+                    ws.cell(row=i, column=14, value=complaint.incident_location or '')
+
+                    # Column O: Date Submitted
+                    if complaint.created_at:
+                        ws.cell(row=i, column=15, value=complaint.created_at.strftime('%Y-%m-%d %H:%M'))
+                    else:
+                        ws.cell(row=i, column=15, value='')
+
+                    # Column P: Status
+                    ws.cell(row=i, column=16, value=complaint.get_status_display())
+
+                # Save workbook to a BytesIO object
+                output = BytesIO()
+                wb.save(output)
+                output.seek(0)
+
+                # Create response with template
+                response = HttpResponse(
+                    output.read(),
+                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                )
+                response['Content-Disposition'] = 'attachment; filename="complaints_export.xlsx"'
+
+                return response
+
+            elif file_format == 'csv':
+                # Prepare comprehensive data for CSV export
+                data = []
+                for complaint in complaints:
+                    # Get hearing information
+                    next_hearing = complaint.next_hearing
+                    next_hearing_display = ''
+                    if next_hearing:
+                        next_hearing_display = f"{next_hearing.schedule_date.strftime('%Y-%m-%d')} {next_hearing.schedule_time.strftime('%H:%M')}"
+
+                    # Get hearing count
+                    hearing_count = complaint.hearings.count()
+
+                    # Get document and image counts
+                    document_count = complaint.documents.count()
+                    image_count = complaint.images.count()
+
+                    # Get complainant instructor name
+                    complainant_instructor = complaint.complainant_instructor_name or ''
+
+                    # Get statement (first 100 chars)
+                    statement_preview = complaint.statement[:100] + '...' if len(
+                        complaint.statement) > 100 else complaint.statement
+
+                    # Get witnesses
+                    witnesses = complaint.witnesses or ''
+
+                    # Get notes (first 100 chars)
+                    notes_preview = complaint.notes[:100] + '...' if complaint.notes and len(
+                        complaint.notes) > 100 else (complaint.notes or '')
+
+                    # Get archived information
+                    archived_by = ''
+                    archived_at = ''
+                    if complaint.is_archived and complaint.archived_by:
+                        archived_by = f"{complaint.archived_by.last_name}, {complaint.archived_by.first_name}"
+                        if complaint.archived_at:
+                            archived_at = complaint.archived_at.strftime('%Y-%m-%d %H:%M')
+
+                    data.append({
+                        'Reference Number': complaint.reference_number,
+                        'Title': complaint.title,
+
+                        # Complainant Information
+                        'Complainant': f"{complaint.complainant_last_name}, {complaint.complainant_first_name}",
+                        'Complainant Email': complaint.complainant_email,
+                        'Complainant Phone': complaint.complainant_phone,
+                        'Complainant Address': complaint.complainant_address,
+                        'Complainant Instructor': complainant_instructor,
+
+                        # Respondent Information
+                        'Respondent Type': complaint.get_respondent_type_display(),
+                        'Respondent': f"{complaint.respondent_last_name}, {complaint.respondent_first_name}",
+                        'Respondent Course': str(complaint.respondent_course) if complaint.respondent_course else '',
+                        'Respondent Year': complaint.respondent_year or '',
+                        'Respondent Section': complaint.respondent_section or '',
+                        'Respondent Department': complaint.respondent_department or '',
+
+                        # Complaint Details
+                        'Incident Date': complaint.incident_date.strftime('%Y-%m-%d'),
+                        'Incident Time': complaint.incident_time.strftime('%H:%M') if complaint.incident_time else '',
+                        'Incident Location': complaint.incident_location,
+                        'Statement Preview': statement_preview,
+                        'Witnesses': witnesses,
+                        'Notes Preview': notes_preview,
+
+                        # Status and Dates
+                        'Status': complaint.get_status_display(),
+                        'Date Submitted': complaint.created_at.strftime('%Y-%m-%d %H:%M'),
+                        'Last Updated': complaint.updated_at.strftime('%Y-%m-%d %H:%M'),
+                        'Date Resolved': complaint.updated_at.strftime(
+                            '%Y-%m-%d %H:%M') if complaint.status == 'resolved' else '',
+
+                        # Hearing Information
+                        'Next Hearing': next_hearing_display,
+                        'Hearing Count': hearing_count,
+
+                        # Evidence Information
+                        'Document Count': document_count,
+                        'Image Count': image_count,
+
+                        # Created By
+                        'Created By': f"{complaint.created_by.last_name}, {complaint.created_by.first_name}" if complaint.created_by else '',
+
+                        # Archived Information
+                        'Archived Status': 'Yes' if complaint.is_archived else 'No',
+                        'Archived By': archived_by,
+                        'Archived At': archived_at,
+                    })
+
+                # Create DataFrame
+                df = pd.DataFrame(data)
+
                 response = HttpResponse(content_type='text/csv')
                 response['Content-Disposition'] = 'attachment; filename="complaints_export.csv"'
                 df.to_csv(response, index=False, encoding='utf-8')
-            else:  # excel
-                response = HttpResponse(
-                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-                response['Content-Disposition'] = 'attachment; filename="complaints_export.xlsx"'
-                df.to_excel(response, index=False, engine='openpyxl')
 
-            return response
+                return response
 
         except Exception as e:
             import traceback
@@ -7309,129 +7495,17 @@ class ArchivedItemDetailView(LoginRequiredMixin, View):
                 'name': item.name,
                 'address': item.address,
                 'contact_number': item.contact_number,
-                'available_slots': item.available_slots,
-                'filled_slots': item.filled_slots,
-                'remaining_slots': item.remaining_slots,
-                'utilization_rate': item.utilization_rate,
-                'status': item.status,
-                'is_active': not item.is_archived,
+                'description': item.description or "",
+                'website': item.website or "",
+                'email': item.email or "",
+                'status': item.display_status,  # Use display_status property
                 'created_at': item.created_at.strftime('%B %d, %Y %H:%M'),
-                'updated_at': item.updated_at.strftime('%B %d, %Y %H:%M') if item.updated_at else None,
-                'archived_at': item.archived_at.strftime('%B %d, %Y %H:%M') if item.archived_at else None,
-                'archived_by': item.archived_by.get_full_name() if item.archived_by else None,
-                'current_students': [{
-                    'id': application.student.id,
-                    'full_name': application.student.get_full_name(),
-                    'student_number': application.student.student_number,
-                    'course': application.student.course.name if application.student.course else 'Not specified',
-                    'profile_picture': application.student.profile_picture.url if application.student.profile_picture else None,
-                    'status': application.get_status_display(),
-                } for application in item.ojt_applications.filter(
-                    is_archived=False,
-                    status='approved'
-                )]
-            }
-        elif item_type == 'ojt-application':
-            item = get_object_or_404(OJTApplication, pk=pk, is_archived=True)
-
-            # Check permissions
-            if not (request.user.is_superuser or
-                    request.user.user_type in [1, 13] or
-                    item.student == request.user or
-                    item.archived_by == request.user):
-                return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
-
-            data = {
-                'id': item.id,
-                'student': {
-                    'full_name': item.student.get_full_name(),
-                    'student_number': item.student.username,
-                    'course': item.student_course,
-                    'section': item.student_section,
-                    'year_level': item.student_year_level,
-                    'profile_picture': item.student.profile_picture.url if item.student.profile_picture else None,
-                    'email': item.student.email,
-                },
-                'company': {
-                    'name': item.company.name,
-                    'address': item.company.address,
-                    'contact_number': item.company.contact_number,
-                    'status': item.company.status,
-                    'available_slots': item.company.available_slots,
-                    'filled_slots': item.company.filled_slots,
-                    'remaining_slots': item.company.remaining_slots,
-                    'is_full': item.company.is_full,
-                },
-                'application_details': {
-                    'proposed_start_date': item.proposed_start_date.strftime(
-                        '%B %d, %Y') if item.proposed_start_date else None,
-                    'proposed_end_date': item.proposed_end_date.strftime(
-                        '%B %d, %Y') if item.proposed_end_date else None,
-                    'proposed_hours': item.proposed_hours,
-                    'duration_days': item.duration_days,
-                    'cover_letter': item.cover_letter,
-                    'skills': item.skills,
-                },
-                'status': item.status,
-                'status_display': item.get_status_display(),
-                'previous_status': item.previous_status,
-                'previous_status_display': dict(item.STATUS_CHOICES).get(item.previous_status,
-                                                                         'N/A') if item.previous_status else 'N/A',
-                'application_date': item.application_date.strftime('%B %d, %Y %H:%M'),
-                'requirements_submitted': item.requirements_submitted,
-                'total_requirements': item.total_requirements,
-                'requirements_complete': item.requirements_complete,
-                'archived_at': item.archived_at.strftime('%B %d, %Y %H:%M') if item.archived_at else None,
-                'archived_by': item.archived_by.get_full_name() if item.archived_by else None,
-                'requirements': [{
-                    'requirement_type': req.get_requirement_type_display(),
-                    'file_name': req.file_name,
-                    'file_url': req.file.url,
-                    'is_submitted': req.is_submitted,
-                    'is_verified': req.is_verified,
-                    'status': req.status,
-                } for req in item.requirements.all()],
-                'can_retrieve': True,
-                'company_is_full': item.company.is_full,
-            }
-        elif item_type == 'ojt-report':
-            item = get_object_or_404(OJTReport, pk=pk, is_archived=True)
-
-            # Check permissions
-            if not (request.user.is_superuser or
-                    request.user.user_type in [1, 13] or
-                    item.submitted_by == request.user or
-                    item.archived_by == request.user):
-                return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
-
-            data = {
-                'id': item.id,
-                'title': item.title,
-                'report_type': item.report_type,
-                'report_type_display': item.get_report_type_display(),
-                'status': item.status,
-                'status_display': item.get_status_display(),
-                'description': item.description,
-                'issues_challenges': item.issues_challenges,
-                'feedback': item.feedback,
-                'student_name': item.student_name,
-                'company_name': item.company_name,
-                'report_date': item.report_date.strftime('%B %d, %Y') if item.report_date else None,
-                'period_start': item.period_start.strftime('%B %d, %Y') if item.period_start else None,
-                'period_end': item.period_end.strftime('%B %d, %Y') if item.period_end else None,
-                'submitted_by': item.submitted_by.get_full_name() if item.submitted_by else None,
-                'submitted_at': item.submitted_at.strftime('%B %d, %Y %H:%M') if item.submitted_at else None,
-                'reviewed_by': item.reviewed_by.get_full_name() if item.reviewed_by else None,
-                'reviewed_at': item.reviewed_at.strftime('%B %d, %Y %H:%M') if item.reviewed_at else None,
-                'archived_at': item.archived_at.strftime('%B %d, %Y %H:%M') if item.archived_at else None,
-                'archived_by': item.archived_by.get_full_name() if item.archived_by else None,
-                'attachments': [{
-                    'id': attachment.id,
-                    'file_url': attachment.file.url,
-                    'file_name': attachment.file.name.split('/')[-1],
-                    'file_size': f"{attachment.file.size / 1024:.1f} KB",
-                    'file_type_icon': self.get_file_type_icon(attachment.file.name)
-                } for attachment in item.attachments.all()]
+                'updated_at': item.updated_at.strftime('%B %d, %Y %H:%M') if item.updated_at else "",
+                'status_updated_at': item.status_updated_at.strftime(
+                    '%B %d, %Y %H:%M') if item.status_updated_at else "",
+                'status_updated_by': item.status_updated_by.get_full_name() if item.status_updated_by else "",
+                'archived_at': item.archived_at.strftime('%B %d, %Y %H:%M') if item.archived_at else "",
+                'archived_by': item.archived_by.get_full_name() if item.archived_by else "System",
             }
         elif item_type == 'organization':
             item = get_object_or_404(Organization, pk=pk, is_archived=True)
@@ -7754,57 +7828,6 @@ class RetrieveArchivedItemView(LoginRequiredMixin, View):
                 UserActivityLog.objects.create(
                     user=request.user,
                     activity=f"{request.user.first_name} retrieved OJT company: {item.name}"
-                )
-            elif item_type == 'ojt-application':
-                item = get_object_or_404(OJTApplication, pk=pk, is_archived=True)
-
-                # Check permissions
-                if not (request.user.is_superuser or
-                        request.user.user_type in [1, 13] or
-                        item.student == request.user or
-                        item.archived_by == request.user):
-                    return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
-
-                # Set flag for save method to handle retrieval logic
-                item._retrieving = True
-
-                # Check if company is full to determine new status
-                if item.company.is_full:
-                    # Company is full, set to draft
-                    new_status = 'draft'
-                    status_message = "draft (company is full)"
-                else:
-                    # Company has slots, restore to previous status
-                    new_status = item.previous_status or 'draft'
-                    status_message = new_status
-
-                item.is_archived = False
-                item.save()
-
-                # Log the activity
-                UserActivityLog.objects.create(
-                    user=request.user,
-                    activity=f"{request.user.first_name} retrieved OJT application #{item.id} and set status to {status_message}"
-                )
-            elif item_type == 'ojt-report':
-                item = get_object_or_404(OJTReport, pk=pk, is_archived=True)
-
-                # Check permissions
-                if not (request.user.is_superuser or
-                        request.user.user_type in [1, 13] or
-                        item.submitted_by == request.user or
-                        item.archived_by == request.user):
-                    return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
-
-                item.is_archived = False
-                item.archived_at = None
-                item.archived_by = None
-                item.save()
-
-                # Log the activity
-                UserActivityLog.objects.create(
-                    user=request.user,
-                    activity=f"{request.user.first_name} retrieved OJT report: {item.title}"
                 )
             elif item_type == 'organization':
                 item = get_object_or_404(Organization, pk=pk, is_archived=True)
@@ -8461,11 +8484,9 @@ def export_scholarship_applications(request):
         try:
             print("Export function called")
 
-            # Get export parameters from the request
+            # Get export parameters
             export_option = request.POST.get('exportOption', 'all')
-            file_format = request.POST.get('format', 'excel')
-
-            print(f"Export option: {export_option}, Format: {file_format}")
+            include_incomplete = request.POST.get('include_incomplete') == '1'
 
             # Get current filters
             search_term = request.POST.get('search', '')
@@ -8475,23 +8496,21 @@ def export_scholarship_applications(request):
             sort_column = request.POST.get('sort', 'application_date')
             sort_direction = request.POST.get('direction', 'desc')
 
-            print(f"Filters - search: {search_term}, scholarship: {scholarship_filter}, status: {status_filter}")  # Debug print
-
-            # Start with all non-archived applications
-            applications = ScholarshipApplication.objects.filter(is_archived=False).select_related('student', 'scholarship')
-            print(f"Initial applications count: {applications.count()}")  # Debug print
+            # Start with all applications (non-archived)
+            applications = ScholarshipApplication.objects.filter(
+                is_archived=False
+            ).select_related(
+                'student', 'scholarship', 'student__course'
+            )
 
             # Apply filters based on export options
             if export_option == 'scholarship':
                 scholarship_id = request.POST.get('scholarship')
-                print(f"Scholarship ID: {scholarship_id}")  # Debug print
                 if scholarship_id and scholarship_id != '':
                     applications = applications.filter(scholarship_id=scholarship_id)
             elif export_option == 'scholarship-status':
                 scholarship_id = request.POST.get('scholarship_status')
                 status = request.POST.get('status_scholarship')
-                print(f"Scholarship-status - scholarship: {scholarship_id}, status: {status}")
-
                 if scholarship_id and scholarship_id != '':
                     applications = applications.filter(scholarship_id=scholarship_id)
                 if status and status != 'all':
@@ -8500,8 +8519,6 @@ def export_scholarship_applications(request):
             # Apply date range if provided
             start_date = request.POST.get('start_date')
             end_date = request.POST.get('end_date')
-            print(f"Date range - start: {start_date}, end: {end_date}")
-
             if start_date:
                 applications = applications.filter(application_date__date__gte=start_date)
             if end_date:
@@ -8531,8 +8548,10 @@ def export_scholarship_applications(request):
                     start_of_week = now - timezone.timedelta(days=now.weekday())
                     applications = applications.filter(application_date__gte=start_of_week)
                 elif date_filter == 'month':
-                    applications = applications.filter(application_date__month=now.month,
-                                                       application_date__year=now.year)
+                    applications = applications.filter(
+                        application_date__month=now.month,
+                        application_date__year=now.year
+                    )
 
             # Apply sorting
             sort_field = sort_column
@@ -8547,61 +8566,185 @@ def export_scholarship_applications(request):
                 sort_field = f'-{sort_field}'
 
             applications = applications.order_by(sort_field)
+
+            # Only filter incomplete if checkbox is unchecked
+            if not include_incomplete:
+                # Check for required fields
+                applications = applications.filter(
+                    student__last_name__isnull=False,
+                    student__first_name__isnull=False,
+                    student__student_number__isnull=False,
+                    student__course__isnull=False,
+                    student__year_level__isnull=False
+                ).exclude(
+                    Q(student__last_name='') |
+                    Q(student__first_name='') |
+                    Q(student__student_number='') |
+                    Q(student__year_level='')
+                )
+
             print(f"Final applications count: {applications.count()}")
 
-            # Prepare data for export - ALWAYS create DataFrame even if empty
-            data = []
-            for app in applications:
-                # Get student number with fallback options
-                student_number = 'N/A'
-                student_attrs = ['student_id', 'student_number', 'username', 'id_number']
-                for attr in student_attrs:
-                    if hasattr(app.student, attr):
-                        attr_value = getattr(app.student, attr)
-                        if attr_value:  # Only use if not empty
-                            student_number = attr_value
-                            break
+            # Load the template Excel file
+            template_path = os.path.join(settings.BASE_DIR, 'static', 'templates', 'ScholarshipTemplate.xlsx')
 
-                # Get course and year level with fallbacks
-                course = getattr(app.student, 'course', '') or ''
-                year_level = getattr(app.student, 'year_level', '') or ''
+            if not os.path.exists(template_path):
+                raise FileNotFoundError(f"Template file not found at: {template_path}")
 
-                data.append({
-                    'Student Name': f"{app.student.last_name}, {app.student.first_name}",
-                    'Student Number': student_number,
-                    'Scholarship': app.scholarship.name,
-                    'Application Date': app.application_date.strftime('%Y-%m-%d %H:%M:%S'),
-                    'Status': app.get_status_display(),
-                    'Course': course,
-                    'Year Level': year_level,
-                    'Remarks': app.notes if app.notes else ''
-                })
+            print(f"Loading template from: {template_path}")
 
-            # Create DataFrame - this works even with empty data
-            df = pd.DataFrame(data)
-            print(f"DataFrame shape: {df.shape}")
+            # Load the workbook using openpyxl
+            workbook = load_workbook(template_path)
 
-            # Export based on format
-            if file_format == 'csv':
-                response = HttpResponse(content_type='text/csv')
-                response['Content-Disposition'] = 'attachment; filename="scholarship_applications.csv"'
-                df.to_csv(response, index=False, encoding='utf-8')
-                print("CSV export completed")  # Debug print
-            else:  # excel
-                response = HttpResponse(
-                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-                response['Content-Disposition'] = 'attachment; filename="scholarship_applications.xlsx"'
-                df.to_excel(response, index=False, engine='openpyxl')
-                print("Excel export completed")  # Debug print
+            # Get the 'Annex 1' sheet
+            if 'Annex 1' not in workbook.sheetnames:
+                raise ValueError("Template must contain 'Annex 1' sheet")
 
+            sheet = workbook['Annex 1']
+
+            # Data starts at row 13
+            data_start_row = 13
+
+            # Clear data from row 13 downwards
+            max_rows_to_clear = data_start_row + applications.count() + 50
+
+            for row in range(data_start_row, max_rows_to_clear + 1):
+                # Clear columns A-M (1-13)
+                for col in range(1, 14):
+                    try:
+                        cell = sheet.cell(row=row, column=col)
+                        # Only clear regular cells, not merged cells
+                        if cell.__class__.__name__ != 'MergedCell':
+                            cell.value = None
+                    except:
+                        continue
+
+            # Populate data starting from row 13
+            successful_exports = 0
+
+            # Set alignment style
+            from openpyxl.styles import Alignment
+            alignment = Alignment(horizontal='left', vertical='center')
+
+            for index, app in enumerate(applications):
+                row_num = data_start_row + index
+                student = app.student
+
+                try:
+                    # A: SEQ (Sequence Number) - Column 1
+                    cell = sheet.cell(row=row_num, column=1, value=index + 1)
+                    cell.alignment = alignment
+
+                    # B: STUDENT ID - Column 2
+                    cell = sheet.cell(row=row_num, column=2, value=student.student_number or '')
+                    cell.alignment = alignment
+
+                    # C: LAST NAME - Column 3
+                    cell = sheet.cell(row=row_num, column=3, value=student.last_name or '')
+                    cell.alignment = alignment
+
+                    # D: GIVEN NAME - Column 4
+                    cell = sheet.cell(row=row_num, column=4, value=student.first_name or '')
+                    cell.alignment = alignment
+
+                    # E: SEX - Column 5
+                    gender_map = {
+                        'M': 'Male',
+                        'F': 'Female',
+                        'O': 'Other',
+                        'N': ''
+                    }
+                    sex = gender_map.get(student.gender, '')
+                    cell = sheet.cell(row=row_num, column=5, value=sex)
+                    cell.alignment = alignment
+
+                    # F: BIRTHDATE (dd/mm/yyyy) - Column 6
+                    if student.birth_date:
+                        try:
+                            if isinstance(student.birth_date, str):
+                                date_str = student.birth_date.split()[0] if ' ' in student.birth_date else student.birth_date
+                                for fmt in ['%Y-%m-%d', '%m/%d/%Y', '%d/%m/%Y', '%Y/%m/%d']:
+                                    try:
+                                        birthdate = datetime.strptime(date_str, fmt)
+                                        break
+                                    except:
+                                        continue
+                                else:
+                                    birthdate = None
+                            else:
+                                birthdate = student.birth_date
+
+                            if birthdate:
+                                cell = sheet.cell(row=row_num, column=6, value=birthdate)
+                                cell.number_format = 'DD/MM/YYYY'
+                            else:
+                                cell = sheet.cell(row=row_num, column=6, value='')
+                        except Exception as e:
+                            cell = sheet.cell(row=row_num, column=6, value='')
+                    else:
+                        cell = sheet.cell(row=row_num, column=6, value='')
+                    cell.alignment = alignment
+
+                    # G: COMPLETE PROGRAM NAME - Column 7
+                    program_name = student.course.name if student.course else ''
+                    cell = sheet.cell(row=row_num, column=7, value=program_name)
+                    cell.alignment = alignment
+
+                    # H: YEAR LEVEL - Column 8
+                    year_level = student.year_level or ''
+                    # Clean year level
+                    if year_level:
+                        import re
+                        numbers = re.findall(r'\d+', str(year_level))
+                        if numbers:
+                            year_level = numbers[0]
+                    cell = sheet.cell(row=row_num, column=8, value=year_level)
+                    cell.alignment = alignment
+
+                    # I: STREET & BARANGAY - Column 9
+                    address = student.address or ''
+                    cell = sheet.cell(row=row_num, column=9, value=address)
+                    cell.alignment = alignment
+
+                    # J: (Empty/Reserved) - Column 10
+                    # K: (Empty/Reserved) - Column 11
+
+                    # L: CONTACT NUMBER - Column 12
+                    contact_number = student.phone_number or ''
+                    cell = sheet.cell(row=row_num, column=12, value=contact_number)
+                    cell.alignment = alignment
+
+                    # M: EMAIL ADDRESS - Column 13
+                    email = student.email or ''
+                    cell = sheet.cell(row=row_num, column=13, value=email)
+                    cell.alignment = alignment
+
+                    successful_exports += 1
+
+                except Exception as e:
+                    print(f"Error processing application for {student.get_full_name()}: {e}")
+                    continue
+
+            # Create HTTP response with Excel file
+            response = HttpResponse(
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+
+            # Generate filename with timestamp
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"Scholarship_Applications_{timestamp}.xlsx"
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+            # Save workbook to response
+            workbook.save(response)
+
+            print(f"Export completed with {successful_exports} applications")
             return response
 
         except Exception as e:
-            # Log the error for debugging
             import traceback
             error_trace = traceback.format_exc()
             print(f"Export error: {str(e)}")
-            print(f"Traceback: {error_trace}")
             return HttpResponse(f"Error during export: {str(e)}", status=500)
 
     return HttpResponse('Invalid request method. Use POST.', status=400)
@@ -9067,7 +9210,7 @@ def export_admissions(request):
     if request.method == 'POST':
         try:
             export_option = request.POST.get('export_option', 'all')
-            file_format = request.POST.get('format', 'csv')
+            file_format = request.POST.get('format', 'excel')
             search_term = request.POST.get('search', '')
             student_type_filter = request.POST.get('student_type_filter', '')
 
@@ -9113,41 +9256,105 @@ def export_admissions(request):
                     # Handle invalid date format
                     pass
 
-            # Prepare data for export
-            data = []
-            for app in applications:
-                # Get phone number with fallback
-                phone = ''
-                if app.user and hasattr(app.user, 'phone'):
-                    phone = app.user.phone
+            # Check if Excel format is selected
+            if file_format == 'excel':
+                # Load the template
+                template_path = os.path.join(settings.STATICFILES_DIRS[0], 'templates', 'AdmissionTemplate.xlsx')
 
-                data.append({
-                    'Control No': app.control_no,
-                    'Student Name': f"{app.user.last_name}, {app.user.first_name}" if app.user else '',
-                    'Student Type': app.get_student_type_display(),
-                    'Course': str(app.course) if app.course else '',
-                    'Status': app.get_status_display(),
-                    'Remarks': app.remarks or '',
-                    'Date Submitted': app.created_at.strftime('%Y-%m-%d %H:%M'),
-                    'Email': app.user.email if app.user and app.user.email else '',
-                    'Phone': phone
-                })
+                # If staticfiles_dirs doesn't work, try alternative path
+                if not os.path.exists(template_path):
+                    template_path = os.path.join(settings.BASE_DIR, 'static', 'templates', 'AdmissionTemplate.xlsx')
 
-            # Create DataFrame
-            df = pd.DataFrame(data)
+                if not os.path.exists(template_path):
+                    return HttpResponse("Template file not found", status=500)
 
-            # Export based on format
-            if file_format == 'csv':
+                # Load workbook
+                wb = load_workbook(template_path)
+                ws = wb.active
+
+                max_row = ws.max_row
+                for row in range(8, max_row + 1):
+                    for col in range(1, 9):  # Columns A to H (1-8)
+                        ws.cell(row=row, column=col, value=None)
+
+                # Start writing data at row 8
+                start_row = 8
+
+                # Write admission data to the template
+                for i, app in enumerate(applications, start=start_row):
+                    # Get student name
+                    student_name = ''
+                    if app.user:
+                        if app.user.last_name and app.user.first_name:
+                            student_name = f"{app.user.last_name}, {app.user.first_name}"
+                        elif app.last_name and app.first_name:
+                            student_name = f"{app.last_name}, {app.first_name}"
+
+                    # Get email
+                    email = app.user.email if app.user and app.user.email else ''
+
+                    # Get course name
+                    course_name = str(app.course) if app.course else ''
+
+                    ws.cell(row=i, column=1, value=app.control_no)  # Control No.
+                    ws.cell(row=i, column=2, value=student_name)  # Student Name
+                    ws.cell(row=i, column=3, value=app.get_student_type_display())  # Student Type
+                    ws.cell(row=i, column=4, value=course_name)  # Course
+                    ws.cell(row=i, column=5, value=email)  # Email
+                    ws.cell(row=i, column=6, value=app.get_status_display())  # Status
+
+                    # Date Submitted
+                    if app.created_at:
+                        ws.cell(row=i, column=7, value=app.created_at.strftime('%Y-%m-%d %H:%M'))
+                    else:
+                        ws.cell(row=i, column=7, value='')
+
+                    # Remarks
+                    ws.cell(row=i, column=8, value=app.remarks or '')  # Remarks
+
+                # Save workbook to a BytesIO object
+                output = BytesIO()
+                wb.save(output)
+                output.seek(0)
+
+                # Create response with template
+                response = HttpResponse(
+                    output.read(),
+                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                )
+                response['Content-Disposition'] = 'attachment; filename="admissions_export.xlsx"'
+
+                return response
+
+            elif file_format == 'csv':
+                # Prepare data for CSV export (original logic)
+                data = []
+                for app in applications:
+                    # Get phone number with fallback
+                    phone = ''
+                    if app.user and hasattr(app.user, 'phone'):
+                        phone = app.user.phone
+
+                    data.append({
+                        'Control No': app.control_no,
+                        'Student Name': f"{app.user.last_name}, {app.user.first_name}" if app.user else '',
+                        'Student Type': app.get_student_type_display(),
+                        'Course': str(app.course) if app.course else '',
+                        'Status': app.get_status_display(),
+                        'Remarks': app.remarks or '',
+                        'Date Submitted': app.created_at.strftime('%Y-%m-%d %H:%M'),
+                        'Email': app.user.email if app.user and app.user.email else '',
+                        'Phone': phone
+                    })
+
+                # Create DataFrame
+                df = pd.DataFrame(data)
+
                 response = HttpResponse(content_type='text/csv')
                 response['Content-Disposition'] = 'attachment; filename="admissions_export.csv"'
                 df.to_csv(response, index=False, encoding='utf-8')
-            else:  # excel
-                response = HttpResponse(
-                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-                response['Content-Disposition'] = 'attachment; filename="admissions_export.xlsx"'
-                df.to_excel(response, index=False, engine='openpyxl')
 
-            return response
+                return response
 
         except Exception as e:
             # Log the error for debugging
@@ -9844,7 +10051,7 @@ class CompanyCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     success_url = reverse_lazy('ojt-company')
 
     def test_func(self):
-        return self.request.user.is_superuser or self.request.user.user_type in [1, 13]
+        return self.request.user.is_superuser or self.request.user.user_type in [1, 13, 16]
 
     def handle_no_permission(self):
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -9889,28 +10096,6 @@ class OJTCompanyDetailView(LoginRequiredMixin, DetailView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            # Get current OJT students (approved applications)
-            current_students = self.object.ojt_applications.filter(
-                status='approved',
-                is_archived=False
-            ).select_related('student', 'student__course')
-
-            students_data = []
-            for application in current_students:
-                students_data.append({
-                    'id': application.student.id,
-                    'name': application.student.get_full_name(),
-                    'student_id': application.student.username,
-                    'email': application.student.email,
-                    'course': application.student_course,
-                    'year': application.student_year_level,
-                    'section': application.student_section,
-                    'start_date': application.proposed_start_date.strftime('%Y-%m-%d') if application.proposed_start_date else '',
-                    'end_date': application.proposed_end_date.strftime('%Y-%m-%d') if application.proposed_end_date else '',
-                    'duration_days': application.duration_days,
-                    'status': 'Active'
-                })
-
             return JsonResponse({
                 'success': True,
                 'company': {
@@ -9921,16 +10106,10 @@ class OJTCompanyDetailView(LoginRequiredMixin, DetailView):
                     'email': self.object.email,
                     'website': self.object.website,
                     'description': self.object.description,
-                    'available_slots': self.object.available_slots,
-                    'filled_slots': self.object.filled_slots,
-                    'remaining_slots': self.object.remaining_slots,
-                    'utilization_rate': round(self.object.utilization_rate, 1),
                     'status': self.object.status,
                     'is_archived': self.object.is_archived,
                     'created_at': self.object.created_at.strftime('%Y-%m-%d %H:%M'),
                     'updated_at': self.object.updated_at.strftime('%Y-%m-%d %H:%M'),
-                    'current_students': students_data,
-                    'total_students': len(students_data)
                 }
             })
         return super().get(request, *args, **kwargs)
@@ -9938,7 +10117,7 @@ class OJTCompanyDetailView(LoginRequiredMixin, DetailView):
 
 class OJTCompanyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
-        return self.request.user.is_superuser or self.request.user.user_type in [1, 13]
+        return self.request.user.is_superuser or self.request.user.user_type in [1, 13, 16]
 
     def handle_no_permission(self):
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -9957,31 +10136,48 @@ class OJTCompanyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
                 'name': company.name,
                 'address': company.address,
                 'contact_number': company.contact_number,
-                'available_slots': company.available_slots,
-                'filled_slots': company.filled_slots,
-                'remaining_slots': company.remaining_slots,
-                'utilization_rate': round(company.utilization_rate, 1),
                 'status': company.status,
-                # ADD THE MISSING FIELDS:
+                'is_archived': company.is_archived,
                 'description': company.description or '',
                 'email': company.email or '',
                 'website': company.website or '',
                 'created_at': company.created_at.strftime('%Y-%m-%d %H:%M'),
                 'updated_at': company.updated_at.strftime('%Y-%m-%d %H:%M'),
+                'status_updated_at': company.status_updated_at.strftime(
+                    '%Y-%m-%d %H:%M') if company.status_updated_at else None,
+                'status_updated_by': company.status_updated_by.get_full_name() if company.status_updated_by else None,
             }
         })
 
     def post(self, request, *args, **kwargs):
         company = get_object_or_404(OJTCompany, pk=kwargs['pk'])
-        form = OJTCompanyForm(request.POST, instance=company)  # Use your form here
+
+        # Create form with request data and instance
+        form_data = request.POST.copy()
+        form = OJTCompanyForm(form_data, instance=company)
 
         if form.is_valid():
-            company = form.save()
+            # Get original status before saving
+            original_status = company.status
 
-            # Log the activity
+            # Save the company with the request context for status tracking
+            company = form.save(commit=False)
+
+            # Check if status has changed
+            if original_status != form.cleaned_data['status']:
+                company.status_updated_at = timezone.now()
+                company.status_updated_by = request.user
+
+            company.save()
+
+            # Log the activity including status change if applicable
+            log_message = f"{request.user.first_name} updated company: {company.name}"
+            if original_status != company.status:
+                log_message += f" (Status changed from {original_status} to {company.status})"
+
             UserActivityLog.objects.create(
                 user=request.user,
-                activity=f"{request.user.first_name} updated company: {company.name}"
+                activity=log_message
             )
 
             return JsonResponse({
@@ -9991,16 +10187,14 @@ class OJTCompanyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
                     'name': company.name,
                     'address': company.address,
                     'contact_number': company.contact_number,
-                    'available_slots': company.available_slots,
-                    'filled_slots': company.filled_slots,
-                    'remaining_slots': company.remaining_slots,
-                    'utilization_rate': round(company.utilization_rate, 1),
                     'status': company.status,
-                    # ADD THE MISSING FIELDS FOR CONSISTENCY:
+                    'is_archived': company.is_archived,
                     'description': company.description or '',
                     'email': company.email or '',
                     'website': company.website or '',
-                }
+                },
+                'status_changed': original_status != company.status,
+                'message': 'Company updated successfully'
             })
 
         errors = {field: [str(error) for error in errors] for field, errors in form.errors.items()}
@@ -10009,7 +10203,7 @@ class OJTCompanyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 class OJTCompanyArchiveView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
-        return self.request.user.is_superuser or self.request.user.user_type in [1, 13]
+        return self.request.user.is_superuser or self.request.user.user_type in [1, 13, 16]
 
     def handle_no_permission(self):
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -10032,12 +10226,6 @@ class OJTCompanyArchiveView(LoginRequiredMixin, UserPassesTestMixin, View):
                 'error': f'Company "{company.name}" is already archived.'
             }, status=400)
 
-        # Check if company has active OJT students (approved applications)
-        active_students = company.ojt_applications.filter(
-            status='approved',
-            is_archived=False
-        ).count()
-
         try:
             # Archive the company
             company.is_archived = True
@@ -10051,14 +10239,9 @@ class OJTCompanyArchiveView(LoginRequiredMixin, UserPassesTestMixin, View):
                 activity=f"{request.user.first_name} archived company: {company.name}"
             )
 
-            message = f'Company "{company.name}" has been archived successfully.'
-            if active_students > 0:
-                message += f' {active_students} active student record(s) have been preserved.'
-
             return JsonResponse({
                 'success': True,
-                'message': message,
-                'archived_students_count': active_students
+                'message': f'Company "{company.name}" has been archived successfully.',
             })
 
         except Exception as e:
@@ -10069,1900 +10252,152 @@ class OJTCompanyArchiveView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 
 class OJTCompanyExportView(View):
-    def get(self, request, *args, **kwargs):
-        if request.GET.get('get_companies') == 'true':
-            try:
-                companies = OJTCompany.objects.filter(is_archived=False).order_by('name').values('id', 'name')
-
-                # Return as proper JSON object
-                return JsonResponse({
-                    'companies': list(companies),
-                    'success': True,
-                    'count': len(companies)
-                })
-            except Exception as e:
-                logger.error(f"Error loading companies for export: {str(e)}")
-                return JsonResponse({
-                    'error': 'Failed to load companies list',
-                    'success': False
-                }, status=500)
-
-        return JsonResponse({'message': 'Use POST for export'})
-
     def post(self, request, *args, **kwargs):
         try:
-            # Get export parameters
-            export_type = request.POST.get('export_type', 'all')
-            specific_company_id = request.POST.get('specific_company', '')
+            # Get export parameters - try multiple parameter names
+            export_option = request.POST.get('export_option', 'all')
 
-            # Proper checkbox handling
-            include_students_raw = request.POST.get('include_students', 'true')
-            include_students = include_students_raw == 'true' or include_students_raw == 'on'
+            # Debug: Print all POST data
+            print("=== OJT Export Debug ===")
+            print("All POST data:", dict(request.POST))
+            print("Export option from form:", export_option)
 
-            export_title = request.POST.get('export_title', 'OJT Companies Report').strip()[:100]
+            # Check for the new form structure
+            if 'export_type' in request.POST:
+                export_type = request.POST.get('export_type', 'all')
+                print("Export type:", export_type)
 
-            # Validate export title
-            if not export_title:
-                export_title = 'OJT Companies Report'
-
-            # Base queryset
-            companies = OJTCompany.objects.filter(is_archived=False)
-
-            # Apply filters based on export type
-            if export_type == 'available':
-                companies = companies.filter(available_slots__gt=0)
-            elif export_type == 'not_available':
-                companies = companies.filter(available_slots=0)
-            elif export_type == 'specific':
-                if not specific_company_id:
-                    return JsonResponse({'error': 'Please select a company'}, status=400)
-                try:
-                    companies = companies.filter(id=int(specific_company_id))
-                    if not companies.exists():
-                        return JsonResponse({'error': 'Selected company not found'}, status=404)
-                except (ValueError, TypeError):
-                    return JsonResponse({'error': 'Invalid company ID'}, status=400)
-
-            # Force evaluation
-            companies_list = list(companies)
-
-            if not companies_list:
-                return JsonResponse({'error': 'No companies found matching your criteria'}, status=404)
-
-            # Create workbook
-            wb = Workbook()
-            ws = wb.active
-            ws.title = "OJT Companies"
-
-            # Define styles
-            header_font = Font(bold=True, color="FFFFFF", size=12)
-            header_fill = PatternFill(start_color="2C5F9E", end_color="2C5F9E", fill_type="solid")
-            subheader_font = Font(bold=True, color="2C5F9E", size=11)
-            company_header_fill = PatternFill(start_color="E8F4FD", end_color="E8F4FD", fill_type="solid")
-            border = Border(
-                left=Side(style='thin'),
-                right=Side(style='thin'),
-                top=Side(style='thin'),
-                bottom=Side(style='thin')
-            )
-
-            # Set title and headers
-            ws['A1'] = export_title
-            ws['A1'].font = Font(bold=True, size=16, color="2C5F9E")
-
-            # Set export info
-            ws['A2'] = f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M')}"
-            ws['A2'].font = Font(italic=True, size=10)
-
-            # Set export summary
-            summary_text = f"Export Type: {self.get_export_type_display(export_type)} | Total Companies: {len(companies_list)}"
-            if export_type == 'specific' and companies_list:
-                summary_text += f" | Company: {companies_list[0].name}"
-            summary_text += f" | Students Data: {'Included' if include_students else 'Excluded'}"
-
-            ws['A3'] = summary_text
-            ws['A3'].font = Font(italic=True, size=10)
-
-            # Company data starts at row 5
-            current_row = 5
-
-            # Iterate through companies
-            for company in companies_list:
-                # Access properties directly
-                filled_slots = company.filled_slots
-                remaining_slots = company.remaining_slots
-                utilization_rate = company.utilization_rate
-                status = company.status
-
-                # Company Header
-                company_header_row = current_row
-                ws.merge_cells(f'A{company_header_row}:H{company_header_row}')
-                ws[f'A{company_header_row}'] = f"Company: {company.name}"
-                ws[f'A{company_header_row}'].font = subheader_font
-                ws[f'A{company_header_row}'].fill = company_header_fill
-
-                current_row += 1
-
-                # Company Details - ONLY include address, contact, slots, status, and utilization
-                ws[f'A{current_row}'] = "Address:"
-                ws[f'B{current_row}'] = company.address or ""
-                current_row += 1
-
-                ws[f'A{current_row}'] = "Contact:"
-                ws[f'B{current_row}'] = company.contact_number or ""
-                current_row += 1
-
-                ws[f'A{current_row}'] = "Available Slots:"
-                ws[f'B{current_row}'] = f"{remaining_slots}/{company.available_slots}"
-                current_row += 1
-
-                ws[f'A{current_row}'] = "Status:"
-                status_cell = ws[f'B{current_row}']
-                status_cell.value = status
-                # Color code status
-                if status == "Available":
-                    status_cell.font = Font(color="52C41A", bold=True)
-                elif status == "Limited":
-                    status_cell.font = Font(color="FAAD14", bold=True)
-                elif status == "Full":
-                    status_cell.font = Font(color="F5222D", bold=True)
-                elif status == "Archived":
-                    status_cell.font = Font(color="666666", bold=True)
-                current_row += 1
-
-                ws[f'A{current_row}'] = "Utilization Rate:"
-                utilization_cell = ws[f'B{current_row}']
-                utilization_cell.value = f"{utilization_rate:.1f}%"
-                # Color code utilization
-                if utilization_rate >= 80:
-                    utilization_cell.font = Font(color="F5222D", bold=True)
-                elif utilization_rate >= 50:
-                    utilization_cell.font = Font(color="FAAD14", bold=True)
+                if export_type == 'by_status':
+                    if 'status_filter' in request.POST:
+                        status_filter = request.POST.get('status_filter', 'active')
+                        print("Status filter:", status_filter)
+                        export_option = status_filter  # 'active' or 'inactive'
                 else:
-                    utilization_cell.font = Font(color="52C41A", bold=True)
-                current_row += 2
+                    export_option = 'all'
 
-                # Students Data (if included)
-                if include_students:
-                    # Prefetch students data efficiently
-                    students = company.ojt_applications.filter(
-                        is_archived=False,
-                        status='approved'
-                    ).select_related(
-                        'student', 'student__course'
-                    ).order_by('student__last_name', 'student__first_name')
+            print("Final export option:", export_option)
 
-                    student_count = students.count()
+            export_title = request.POST.get('export_title', 'OJT Companies Report')
 
-                    if student_count > 0:
-                        ws[f'A{current_row}'] = f"Current OJT Students ({student_count}):"
-                        ws[f'A{current_row}'].font = Font(bold=True)
-                        current_row += 1
+            # Load template file
+            template_path = os.path.join(settings.BASE_DIR, 'static', 'templates', 'OJTTemplate.xlsx')
 
-                        # Student table headers
-                        headers = ['No.', 'Student Name', 'Student ID', 'Course', 'Year', 'Section', 'Start Date',
-                                   'End Date', 'Duration (days)', 'Status']
-                        for col, header in enumerate(headers, 1):
-                            cell = ws.cell(row=current_row, column=col)
-                            cell.value = header
-                            cell.font = header_font
-                            cell.fill = header_fill
-                            cell.alignment = Alignment(horizontal='center')
-                            cell.border = border
+            if not os.path.exists(template_path):
+                return JsonResponse(
+                    {'error': 'Export template not found. Please ensure OJTTemplate.xlsx exists in static/templates/'},
+                    status=500)
 
-                        current_row += 1
+            wb = load_workbook(template_path)
+            ws = wb['Sheet1']
 
-                        # Student data
-                        for idx, record in enumerate(students, 1):
-                            ws[f'A{current_row}'] = idx
-                            ws[f'B{current_row}'] = record.student.get_full_name()
-                            ws[f'C{current_row}'] = record.student.username
-                            ws[f'D{current_row}'] = record.student.course.name if record.student.course else ''
-                            ws[f'E{current_row}'] = record.student.year_level or ''
-                            ws[f'F{current_row}'] = record.student.section or ''
-                            ws[f'G{current_row}'] = record.proposed_start_date.strftime(
-                                '%Y-%m-%d') if record.proposed_start_date else ''
-                            ws[f'H{current_row}'] = record.proposed_end_date.strftime(
-                                '%Y-%m-%d') if record.proposed_end_date else ''
+            # Update report title in cell A2
+            ws['A2'] = export_title
 
-                            # Calculate duration
-                            duration = 0
-                            if record.proposed_start_date and record.proposed_end_date:
-                                duration = (record.proposed_end_date - record.proposed_start_date).days
-                            ws[f'I{current_row}'] = duration
+            # Get companies based on export option
+            # IMPORTANT: We need to handle three different cases:
+            # 1. All active/inactive companies (non-archived)
+            # 2. Only active companies (non-archived and status=active)
+            # 3. Only inactive companies (non-archived and status=inactive)
 
-                            # Status
-                            ws[f'J{current_row}'] = record.get_status_display()
+            print(f"Export option: {export_option}")
 
-                            # Apply borders to student row
-                            for col in range(1, 11):
-                                ws.cell(row=current_row, column=col).border = border
+            if export_option == 'all':
+                # Get ALL non-archived companies (both active and inactive status)
+                companies = OJTCompany.objects.filter(is_archived=False)
+                print(f"Getting all non-archived companies (both active and inactive)")
 
-                            current_row += 1
-                    else:
-                        ws[f'A{current_row}'] = "No current OJT students"
-                        ws[f'A{current_row}'].font = Font(italic=True, color="666666")
-                        current_row += 1
-
-                current_row += 2  # Space between companies
-
-            # Auto-adjust column widths
-            for column in ws.columns:
-                max_length = 0
-                column_letter = get_column_letter(column[0].column)
-                for cell in column:
-                    try:
-                        if len(str(cell.value)) > max_length:
-                            max_length = len(str(cell.value))
-                    except:
-                        pass
-                adjusted_width = min(max_length + 2, 50)
-                ws.column_dimensions[column_letter].width = adjusted_width
-
-            # Create response
-            response = HttpResponse(
-                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            )
-
-            # Generate safe filename
-            filename_parts = ['OJT_Companies', export_type]
-            if export_type == 'specific' and companies_list:
-                company_name = companies_list[0].name
-                safe_company_name = re.sub(r'[^\w\s-]', '', company_name).strip().replace(' ', '_')
-                filename_parts.append(safe_company_name)
-
-            timestamp = timezone.now().strftime('%Y%m%d_%H%M')
-            filename_parts.append(timestamp)
-            filename = f"{'_'.join(filename_parts)}.xlsx"
-
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-
-            wb.save(response)
-            return response
-
-        except Exception as e:
-            logger.error(f"Error exporting OJT companies: {str(e)}")
-            return JsonResponse({'error': 'An unexpected error occurred during export'}, status=500)
-
-    def get_export_type_display(self, export_type):
-        display_map = {
-            'all': 'All Companies',
-            'available': 'Available Companies Only',
-            'not_available': 'Not Available Companies Only',
-            'specific': 'Specific Company Only'
-        }
-        return display_map.get(export_type, export_type)
-
-
-# ----------------------------------------------- OJT Application Section ----------------------------------------------
-class OJTApplicationView(LoginRequiredMixin, TemplateView):
-    template_name = 'core/ojt-application.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # Initialize form with student
-        form = OJTApplicationForm(student=self.request.user)
-
-        # Initialize formset for requirements
-        RequirementFormSet = forms.inlineformset_factory(
-            OJTApplication,
-            OJTRequirement,
-            form=OJTRequirementForm,
-            extra=1,
-            can_delete=True,
-            max_num=13,
-            validate_max=True,
-            min_num=1,
-            validate_min=True
-        )
-        requirement_formset = RequirementFormSet(prefix='requirements')
-
-        # Get available companies for display
-        available_companies = OJTCompany.get_available_companies()
-
-        context.update({
-            'form': form,
-            'requirement_formset': requirement_formset,
-            'available_companies': available_companies,
-            'current_student': self.request.user,
-            'requirement_types': OJTRequirement.REQUIREMENT_TYPES,
-        })
-
-        # Get footer content
-        footer_content = FooterContent.objects.first()
-        if not footer_content:
-            footer_content = FooterContent.objects.create()
-
-        context.update({
-            'footer_content': footer_content,
-        })
-
-        return context
-
-    def post(self, request, *args, **kwargs):
-        form = OJTApplicationForm(request.POST, student=request.user)
-
-        # Handle requirements formset
-        RequirementFormSet = forms.inlineformset_factory(
-            OJTApplication,
-            OJTRequirement,
-            form=OJTRequirementForm,
-            extra=0,
-            can_delete=True,
-            max_num=13,
-            validate_max=True,
-            min_num=1,
-            validate_min=True
-        )
-        requirement_formset = RequirementFormSet(
-            request.POST,
-            request.FILES,
-            prefix='requirements'
-        )
-
-        if form.is_valid() and requirement_formset.is_valid():
-            try:
-                with transaction.atomic():
-                    # Save application first
-                    application = form.save(commit=False)
-                    application.student = request.user
-                    application.status = 'submitted'
-                    application.save()
-
-                    # Save requirements
-                    requirements = requirement_formset.save(commit=False)
-                    for requirement in requirements:
-                        requirement.application = application
-                        requirement.is_submitted = True
-                        requirement.submitted_at = timezone.now()
-                        requirement.save()
-
-                    # Save deleted requirements
-                    for requirement in requirement_formset.deleted_objects:
-                        requirement.delete()
-
-                    messages.success(
-                        request,
-                        f'OJT application submitted successfully for {application.company.name}!'
-                    )
-
-                    # Redirect to dashboard with OJT records tab
-                    redirect_url = reverse('dashboard') + '?tab=basic#ojt-records'
-                    return redirect(redirect_url)
-
-            except Exception as e:
-                messages.error(request, f'Error submitting application: {str(e)}')
-        else:
-            # Combine form and formset errors
-            if not form.is_valid():
-                messages.error(request, 'Please correct the form errors below.')
-            if not requirement_formset.is_valid():
-                messages.error(request, 'Please correct the requirement errors below.')
-
-        context = self.get_context_data()
-        context['form'] = form
-        context['requirement_formset'] = requirement_formset
-        return self.render_to_response(context)
-
-
-class OJTApplicationApproveModalView(View):
-    def get(self, request, *args, **kwargs):
-        application = get_object_or_404(OJTApplication, pk=kwargs['pk'])
-
-        # Check permissions
-        if not request.user.user_type in [1, 13]:
-            return JsonResponse({
-                'success': False,
-                'message': 'You do not have permission to approve OJT applications.'
-            }, status=403)
-
-        # Prepare application data for modal
-        application_data = {
-            'id': application.id,
-            'student_name': application.student.get_full_name(),
-            'student_number': application.student.username,
-            'student_course': application.student.course.name if application.student.course else 'Not specified',
-            'student_section': application.student.section or 'Not specified',
-            'company_name': application.company.name,
-            'application_date': application.application_date.strftime("%B %d, %Y"),
-            'status': application.status,
-            'status_display': application.get_status_display(),
-            'proposed_start_date': application.proposed_start_date.strftime("%B %d, %Y"),
-            'proposed_end_date': application.proposed_end_date.strftime("%B %d, %Y"),
-            'duration_days': application.duration_days,
-            'proposed_hours': application.proposed_hours,
-            'cover_letter': application.cover_letter,
-            'skills': application.skills,
-            'company_available_slots': application.company.available_slots,
-            'company_filled_slots': application.company.filled_slots,
-            'company_remaining_slots': application.company.remaining_slots,
-            'company_status': application.company.status,
-            'requirements': []
-        }
-
-        # Add requirements data
-        requirements = application.requirements.all()
-        for req in requirements:
-            application_data['requirements'].append({
-                'requirement_type_display': req.get_requirement_type_display(),
-                'status': req.status,
-                'file_url': req.file.url if req.file else None
-            })
-
-        return JsonResponse({
-            'success': True,
-            'application': application_data
-        })
-
-
-class OJTApplicationApproveView(View):
-    def post(self, request, *args, **kwargs):
-        application = get_object_or_404(OJTApplication, pk=kwargs['pk'])
-
-        # Check permissions
-        if not request.user.user_type in [1, 13]:
-            return JsonResponse({
-                'success': False,
-                'message': 'You do not have permission to approve OJT applications.'
-            }, status=403)
-
-        decision = request.POST.get('decision')
-        notes = request.POST.get('notes', '')
-
-        if decision not in ['approved', 'rejected']:
-            return JsonResponse({
-                'success': False,
-                'message': 'Invalid decision.'
-            }, status=400)
-
-        try:
-            with transaction.atomic():
-                company = application.company
-
-                # Handle approval
-                if decision == 'approved':
-                    if not company.can_accept_more_students():
-                        return JsonResponse({
-                            'success': False,
-                            'message': 'Cannot approve application. Company has no available slots.'
-                        }, status=400)
-
-                    # Check if this application is already approved to avoid double-counting
-                    if application.status != 'approved':
-                        # Approve the application
-                        application.approve_application(request.user)
-                        application.review_notes = notes
-                        application.save()
-
-                        # Check if company is now full after this approval
-                        if company.is_full:
-                            self.handle_full_company(company)
-
-                # Handle rejection
-                elif decision == 'rejected':
-                    if application.status == 'approved' and company.available_slots is not None:
-                        company.available_slots += 1
-                        company.save()
-
-                    application.reject_application(notes, request.user)
-                    application.review_notes = notes
-                    application.save()
-
-                # Send email notification
-                self.send_decision_email(application, decision, notes)
-
-                # Log the activity
-                UserActivityLog.objects.create(
-                    user=request.user,
-                    activity=f"{request.user.get_full_name()} {decision} OJT application {application.id} for {company.name}"
+            elif export_option == 'active':
+                # Get only active AND non-archived companies
+                companies = OJTCompany.objects.filter(
+                    is_archived=False,
+                    status='active'
                 )
-
-                return JsonResponse({
-                    'success': True,
-                    'message': f'Application {decision} successfully.',
-                    'slots_remaining': company.remaining_slots,
-                    'company_status': company.status
-                })
-
-        except ValidationError as e:
-            return JsonResponse({
-                'success': False,
-                'message': str(e)
-            }, status=400)
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': f'An error occurred: {str(e)}'
-            }, status=500)
-
-    def handle_full_company(self, company):
-        pending_applications = OJTApplication.objects.filter(
-            company=company,
-            status__in=['submitted', 'under_review'],
-            is_archived=False
-        )
-
-        for application in pending_applications:
-            application.status = 'draft'
-            application.save()
-
-            self.send_company_full_notification(application)
-
-    def send_company_full_notification(self, application):
-        student = application.student
-        subject = f"OJT Application Status Update - {application.company.name}"
-
-        context = {
-            'student_name': student.get_full_name(),
-            'company_name': application.company.name,
-            'application_id': application.id,
-            'new_status': 'draft',
-            'reason': 'The company has reached full capacity for OJT slots.'
-        }
-
-        html_message = render_to_string('emails/ojt_company_full.html', context)
-        plain_message = strip_tags(html_message)
-
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=None,
-            recipient_list=[student.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-
-    def send_decision_email(self, application, decision, notes):
-        student = application.student
-        subject = f"Your OJT Application for {application.company.name} has been {decision}"
-
-        context = {
-            'student_name': student.get_full_name(),
-            'company_name': application.company.name,
-            'decision': decision,
-            'notes': notes,
-            'approved_at': application.approved_at.strftime("%B %d, %Y") if application.approved_at else None,
-            'approved_by': application.approved_by.get_full_name() if application.approved_by else 'OSAS Staff',
-            'proposed_start_date': application.proposed_start_date.strftime("%B %d, %Y"),
-            'proposed_end_date': application.proposed_end_date.strftime("%B %d, %Y"),
-            'slots_remaining': application.company.remaining_slots
-        }
-
-        html_message = render_to_string('emails/ojt_decision.html', context)
-        plain_message = strip_tags(html_message)
-
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=None,
-            recipient_list=[student.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-
-
-class OJTApplicationViewModalView(View):
-    def get(self, request, *args, **kwargs):
-        application = get_object_or_404(OJTApplication, pk=kwargs['pk'])
-
-        # Check if user has permission to view this application
-        if not (request.user.is_superuser or
-                request.user.user_type in [1, 13] or
-                (request.user.user_type == 14 and application.student.id == request.user.id)):
-            return JsonResponse({
-                'success': False,
-                'message': 'You do not have permission to view this OJT application.'
-            }, status=403)
-
-        # Prepare application data for modal
-        application_data = {
-            'id': application.id,
-            'student_name': application.student.get_full_name(),
-            'student_number': application.student.username,
-            'student_course': application.student.course.name if application.student.course else 'Not specified',
-            'student_section': application.student.section or 'Not specified',
-            'student_year_level': application.student_year_level,
-            'company_name': application.company.name,
-            'company_address': application.company.address,
-            'company_contact': application.company.contact_number,
-            'company_email': application.company.email,
-            'company_website': application.company.website,
-            'company_description': application.company.description,
-            'application_date': application.application_date.strftime("%B %d, %Y"),
-            'status': application.status,
-            'status_display': application.get_status_display(),
-            'proposed_start_date': application.proposed_start_date.strftime("%B %d, %Y"),
-            'proposed_end_date': application.proposed_end_date.strftime("%B %d, %Y"),
-            'duration_days': application.duration_days,
-            'proposed_hours': application.proposed_hours,
-            'cover_letter': application.cover_letter,
-            'skills': application.skills,
-            'company_available_slots': application.company.available_slots,
-            'company_filled_slots': application.company.filled_slots,
-            'company_remaining_slots': application.company.remaining_slots,
-            'company_status': application.company.status,
-            'review_notes': application.review_notes,
-            'rejection_reason': application.rejection_reason,
-            'approved_by': application.approved_by.get_full_name() if application.approved_by else None,
-            'approved_at': application.approved_at.strftime("%B %d, %Y") if application.approved_at else None,
-            'reviewed_by': application.reviewed_by.get_full_name() if application.reviewed_by else None,
-            'reviewed_at': application.reviewed_at.strftime("%B %d, %Y") if application.reviewed_at else None,
-            'requirements': []
-        }
-
-        # Add requirements data
-        requirements = application.requirements.all()
-        for req in requirements:
-            application_data['requirements'].append({
-                'id': req.id,
-                'requirement_type': req.requirement_type,
-                'requirement_type_display': req.get_requirement_type_display(),
-                'status': req.status,
-                'is_submitted': req.is_submitted,
-                'is_verified': req.is_verified,
-                'submitted_at': req.submitted_at.strftime("%B %d, %Y") if req.submitted_at else None,
-                'verified_by': req.verified_by.get_full_name() if req.verified_by else None,
-                'verified_at': req.verified_at.strftime("%B %d, %Y") if req.verified_at else None,
-                'verification_notes': req.verification_notes,
-                'file_url': req.file.url if req.file else None,
-                'file_name': req.file_name
-            })
-
-        return JsonResponse({
-            'success': True,
-            'application': application_data
-        })
-
-
-class OJTApplicationArchiveView(LoginRequiredMixin, UserPassesTestMixin, View):
-    def test_func(self):
-        return self.request.user.is_superuser or self.request.user.user_type in [1, 13, 14]
-
-    def get_object(self):
-        return get_object_or_404(OJTApplication, pk=self.kwargs['pk'])
-
-    def post(self, request, *args, **kwargs):
-        application = self.get_object()
-
-        # Check permissions
-        if request.user.user_type == 14 and application.student != request.user:
-            return JsonResponse({
-                'success': False,
-                'error': 'You can only archive your own applications.'
-            }, status=403)
-
-        # Check if application is already archived
-        if application.is_archived:
-            return JsonResponse({
-                'success': False,
-                'error': f'Application #{application.id} is already archived.'
-            }, status=400)
-
-        try:
-            # Archive the application
-            application.is_archived = True
-            application.archived_at = timezone.now()
-            application.archived_by = request.user
-            application.save()
-
-            # Log the activity
-            action = "archived"
-            UserActivityLog.objects.create(
-                user=request.user,
-                activity=f"{request.user.get_full_name()} {action} OJT application #{application.id} for {application.company.name}"
-            )
-
-            message = f'Application #{application.id} has been {action} successfully.'
-
-            # FIX: Add the missing return statement
-            return JsonResponse({
-                'success': True,
-                'message': message,
-                'action': action
-            })
-
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'error': f'Failed to archive application: {str(e)}'
-            }, status=500)
-
-
-class OJTApplicationArchiveModalView(LoginRequiredMixin, UserPassesTestMixin, View):
-    def test_func(self):
-        return self.request.user.is_superuser or self.request.user.user_type in [1, 13, 14]
-
-    def get(self, request, *args, **kwargs):
-        application = get_object_or_404(OJTApplication, pk=kwargs['pk'])
-
-        # Check permissions
-        if request.user.user_type == 14 and application.student != request.user:
-            return JsonResponse({
-                'success': False,
-                'error': 'You can only view your own applications.'
-            }, status=403)
-
-        # Prepare application data for modal
-        application_data = {
-            'id': application.id,
-            'student_name': application.student.get_full_name(),
-            'student_number': application.student.username,
-            'student_course': application.student.course.name if application.student.course else 'Not specified',
-            'student_section': application.student.section or 'Not specified',
-            'company_name': application.company.name,
-            'company_status': application.company.status,
-            'application_date': application.application_date.strftime("%B %d, %Y"),
-            'status': application.status,
-            'status_display': application.get_status_display(),
-            'proposed_start_date': application.proposed_start_date.strftime("%B %d, %Y"),
-            'proposed_end_date': application.proposed_end_date.strftime("%B %d, %Y"),
-            'duration_days': application.duration_days,
-            'proposed_hours': application.proposed_hours,
-            'cover_letter': application.cover_letter,
-            'requirements_submitted': application.requirements_submitted,
-            'total_requirements': application.total_requirements,
-            'requirements_complete': application.requirements_complete,
-            'is_archived': application.is_archived,
-            'can_cancel': (request.user.user_type == 14 and
-                           application.status in ['draft', 'submitted', 'under_review'])
-        }
-
-        return JsonResponse({
-            'success': True,
-            'application': application_data,
-            'user_type': request.user.user_type
-        })
-
-
-class OJTApplicationEditView(LoginRequiredMixin, View):
-    def get(self, request, *args, **kwargs):
-        try:
-            application = get_object_or_404(OJTApplication, pk=kwargs['pk'])
-
-            # Check if user has permission to edit this application
-            if not (request.user.is_superuser or
-                    request.user.user_type in [1, 13] or
-                    (request.user.user_type == 14 and application.student == request.user and application.status != 'approved')):
-                return JsonResponse({'success': False, 'error': 'You do not have permission to edit this application.'},
-                                    status=403)
-
-            # Get ALL non-archived companies (not just available ones)
-            available_companies = OJTCompany.objects.filter(is_archived=False).order_by('name')
-
-            # If it's a student, exclude companies where they already have applications (except current one)
-            if request.user.user_type == 14:
-                existing_company_ids = OJTApplication.objects.filter(
-                    student=request.user,
-                    is_archived=False
-                ).exclude(pk=application.pk).values_list('company_id', flat=True)
-                available_companies = available_companies.exclude(id__in=existing_company_ids)
-
-            # Get current application requirements
-            requirements = application.requirements.all()
-
-            # Format dates for HTML input
-            proposed_start_date = application.proposed_start_date.strftime('%Y-%m-%d') if application.proposed_start_date else ''
-            proposed_end_date = application.proposed_end_date.strftime('%Y-%m-%d') if application.proposed_end_date else ''
-
-            return JsonResponse({
-                'success': True,
-                'application': {
-                    'id': application.id,
-                    'student_name': application.student.get_full_name(),
-                    'student_number': application.student.username,
-                    'student_course': application.student_course,
-                    'student_section': application.student_section,
-                    'student_year_level': application.student_year_level,
-                    'company_id': application.company.id,
-                    'company_name': application.company.name,
-                    'proposed_start_date': proposed_start_date,
-                    'proposed_end_date': proposed_end_date,
-                    'proposed_hours': application.proposed_hours,
-                    'duration_days': application.duration_days,
-                    'cover_letter': application.cover_letter or '',
-                    'skills': application.skills or '',
-                    'status': application.status,
-                    'status_display': application.get_status_display(),
-                },
-                'available_companies': [
-                    {
-                        'id': company.id,
-                        'name': company.name,
-                        'address': company.address or '-',
-                        'contact_number': company.contact_number or '-',
-                        'available_slots': company.available_slots or 0,
-                        'filled_slots': company.filled_slots or 0,
-                        'remaining_slots': company.remaining_slots or 0,
-                        'status': company.status,
-                    }
-                    for company in available_companies
-                ],
-                'requirements': [
-                    {
-                        'id': req.id,
-                        'requirement_type': req.requirement_type,
-                        'requirement_type_display': req.get_requirement_type_display(),
-                        'file_name': req.file.name.split('/')[-1] if req.file else None,
-                        'file_url': req.file.url if req.file else None,
-                        'is_submitted': req.is_submitted,
-                        'submitted_at': req.submitted_at.isoformat() if req.submitted_at else None,
-                        'is_verified': req.is_verified,
-                    }
-                    for req in requirements
-                ]
-            })
-
-        except Exception as e:
-            print(f"Error loading application for edit: {str(e)}")
-            return JsonResponse({
-                'success': False,
-                'error': f'Failed to load application: {str(e)}'
-            }, status=500)
-
-    def post(self, request, *args, **kwargs):
-        try:
-            application = get_object_or_404(OJTApplication, pk=kwargs['pk'])
-
-            # Check permissions
-            if not (request.user.is_superuser or
-                    request.user.user_type in [1, 13] or
-                    (request.user.user_type == 14 and application.student == request.user and application.status != 'approved')):
-                return JsonResponse({'success': False, 'error': 'You do not have permission to edit this application.'},
-                                    status=403)
-
-            # Get and validate form data
-            company_id = request.POST.get('company')
-            proposed_start_date = request.POST.get('proposed_start_date')
-            proposed_end_date = request.POST.get('proposed_end_date')
-            proposed_hours = request.POST.get('proposed_hours')
-            cover_letter = request.POST.get('cover_letter', '')
-            skills = request.POST.get('skills', '')
-
-            # Validate required fields
-            if not all([company_id, proposed_start_date, proposed_end_date, proposed_hours]):
-                return JsonResponse({
-                    'success': False,
-                    'error': 'All required fields must be filled.'
-                }, status=400)
-
-            # Validate company
-            try:
-                company = OJTCompany.objects.get(id=company_id, is_archived=False)
-            except OJTCompany.DoesNotExist:
-                return JsonResponse({
-                    'success': False,
-                    'error': 'Selected company does not exist or is archived.'
-                }, status=400)
-
-            # Check for duplicate application (same student + company)
-            if request.user.user_type == 14:  # Only check for students
-                existing_application = OJTApplication.objects.filter(
-                    student=request.user,
-                    company=company,
-                    is_archived=False
-                ).exclude(pk=application.pk).first()
-
-                if existing_application:
-                    return JsonResponse({
-                        'success': False,
-                        'error': f'You already have an application for {company.name}. Please select a different company.'
-                    }, status=400)
-
-            # Validate dates
-            try:
-                start_date = datetime.strptime(proposed_start_date, '%Y-%m-%d').date()
-                end_date = datetime.strptime(proposed_end_date, '%Y-%m-%d').date()
-
-                if end_date <= start_date:
-                    return JsonResponse({
-                        'success': False,
-                        'error': 'End date must be after start date.'
-                    }, status=400)
-            except ValueError:
-                return JsonResponse({
-                    'success': False,
-                    'error': 'Invalid date format.'
-                }, status=400)
-
-            # Validate hours
-            try:
-                hours = int(proposed_hours)
-                if hours < 240 or hours > 1000:
-                    return JsonResponse({
-                        'success': False,
-                        'error': 'OJT hours must be between 240 and 1000 hours.'
-                    }, status=400)
-            except ValueError:
-                return JsonResponse({
-                    'success': False,
-                    'error': 'Invalid hours format.'
-                }, status=400)
-
-            # Update application
-            application.company = company
-            application.proposed_start_date = start_date
-            application.proposed_end_date = end_date
-            application.proposed_hours = hours
-            application.cover_letter = cover_letter
-            application.skills = skills
-            application.save()
-
-            # Handle new requirements upload
-            new_requirement_types = request.POST.getlist('new_requirement_types[]')
-            new_requirement_files = request.FILES.getlist('new_requirement_files[]')
-
-            for i, (req_type, req_file) in enumerate(zip(new_requirement_types, new_requirement_files)):
-                if req_type and req_file:
-                    # Check if requirement type already exists
-                    existing_requirement = OJTRequirement.objects.filter(
-                        application=application,
-                        requirement_type=req_type
-                    ).first()
-
-                    if existing_requirement:
-                        # Update existing requirement
-                        existing_requirement.file = req_file
-                        existing_requirement.is_submitted = True
-                        existing_requirement.submitted_at = timezone.now()
-                        existing_requirement.save()
-                    else:
-                        # Create new requirement
-                        OJTRequirement.objects.create(
-                            application=application,
-                            requirement_type=req_type,
-                            file=req_file,
-                            is_submitted=True,
-                            submitted_at=timezone.now()
-                        )
-
-            remove_requirements = request.POST.getlist('remove_requirements[]')
-            for requirement_id in remove_requirements:
-                try:
-                    requirement = OJTRequirement.objects.get(
-                        id=requirement_id,
-                        application=application
-                    )
-                    requirement.delete()
-                except OJTRequirement.DoesNotExist:
-                    continue
-
-            return JsonResponse({
-                'success': True,
-                'message': 'Application updated successfully'
-            })
-
-        except Exception as e:
-            print(f"Error updating application: {str(e)}")
-
-            if 'duplicate key value violates unique constraint' in str(e):
-                return JsonResponse({
-                    'success': False,
-                    'error': 'You already have an application for this company. Please select a different company.'
-                }, status=400)
-
-            return JsonResponse({
-                'success': False,
-                'error': f'Failed to update application: {str(e)}'
-            }, status=400)
-
-
-class OJTApplicationExportView(View):
-    def get(self, request, *args, **kwargs):
-        # Handle any GET requests if needed
-        return JsonResponse({'message': 'Use POST for export'})
-
-    def post(self, request, *args, **kwargs):
-        try:
-            # Get export parameters
-            export_scope = request.POST.get('export_scope', 'all')
-            export_company = request.POST.get('export_company', '')
-            export_status = request.POST.get('export_status', '')
-            date_range = request.POST.get('date_range', 'all')
-            start_date = request.POST.get('start_date', '')
-            end_date = request.POST.get('end_date', '')
-
-            # Checkbox handling
-            include_requirements = request.POST.get('include_requirements', 'false') == 'true'
-            include_review_notes = request.POST.get('include_review_notes', 'false') == 'true'
-
-            export_title = request.POST.get('export_title', 'OJT Applications Report').strip()[:100]
-
-            # Base queryset with optimizations
-            applications = OJTApplication.objects.select_related(
-                'student', 'company', 'approved_by', 'reviewed_by'
-            ).prefetch_related('requirements').filter(is_archived=False)
-
-            # Apply filters based on export scope
-            if export_scope == 'by_company' and export_company:
-                applications = applications.filter(company_id=export_company)
-            elif export_scope == 'by_status' and export_status:
-                applications = applications.filter(status=export_status)
-            elif export_scope == 'by_company_status' and export_company and export_status:
-                applications = applications.filter(company_id=export_company, status=export_status)
-            elif export_scope == 'current_filters':
-                # Apply current table filters (you would need to pass these from the frontend)
-                pass
-
-            # Apply date range filters
-            if date_range != 'all':
-                if date_range == 'custom' and start_date and end_date:
-                    try:
-                        start = timezone.datetime.strptime(start_date, '%Y-%m-%d').date()
-                        end = timezone.datetime.strptime(end_date, '%Y-%m-%d').date()
-                        applications = applications.filter(application_date__date__range=[start, end])
-                    except ValueError:
-                        return JsonResponse({'error': 'Invalid date format'}, status=400)
-                elif date_range == 'last_7_days':
-                    start = timezone.now().date() - timezone.timedelta(days=7)
-                    applications = applications.filter(application_date__date__gte=start)
-                elif date_range == 'last_30_days':
-                    start = timezone.now().date() - timezone.timedelta(days=30)
-                    applications = applications.filter(application_date__date__gte=start)
-                elif date_range == 'this_month':
-                    today = timezone.now().date()
-                    start = today.replace(day=1)
-                    applications = applications.filter(application_date__date__gte=start)
-                elif date_range == 'last_month':
-                    today = timezone.now().date()
-                    first_day_this_month = today.replace(day=1)
-                    last_day_last_month = first_day_this_month - timezone.timedelta(days=1)
-                    first_day_last_month = last_day_last_month.replace(day=1)
-                    applications = applications.filter(
-                        application_date__date__range=[first_day_last_month, last_day_last_month]
-                    )
-
-            # Force evaluation
-            applications_list = list(applications)
-
-            if not applications_list:
-                return JsonResponse({'error': 'No applications found matching your criteria'}, status=404)
-
-            # Create workbook
-            wb = Workbook()
-            ws = wb.active
-            ws.title = "OJT Applications"
-
-            # Define styles
-            header_font = Font(bold=True, color="FFFFFF", size=12)
-            header_fill = PatternFill(start_color="2C5F9E", end_color="2C5F9E", fill_type="solid")
-            subheader_font = Font(bold=True, color="2C5F9E", size=11)
-            border = Border(
-                left=Side(style='thin'),
-                right=Side(style='thin'),
-                top=Side(style='thin'),
-                bottom=Side(style='thin')
-            )
-
-            # Set title and headers
-            current_row = 1
-            ws[f'A{current_row}'] = export_title
-            ws[f'A{current_row}'].font = Font(bold=True, size=16, color="2C5F9E")
-            current_row += 1
-
-            # Set export info
-            ws[f'A{current_row}'] = f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M')}"
-            ws[f'A{current_row}'].font = Font(italic=True, size=10)
-            current_row += 1
-
-            # Set export summary
-            summary_text = f"Export Type: {self.get_export_scope_display(export_scope)} | Total Applications: {len(applications_list)}"
-            if export_company:
-                company_name = applications_list[0].company.name if applications_list else "Selected Company"
-                summary_text += f" | Company: {company_name}"
-            if export_status:
-                summary_text += f" | Status: {self.get_status_display(export_status)}"
-
-            ws[f'A{current_row}'] = summary_text
-            ws[f'A{current_row}'].font = Font(italic=True, size=10)
-            current_row += 2
-
-            # Define headers
-            headers = [
-                'ID', 'Student Name', 'Student ID', 'Course', 'Year Level', 'Section',
-                'Company', 'Proposed Start Date', 'Proposed End Date', 'Duration (days)',
-                'Status', 'Application Date', 'Requirements Status'
-            ]
-
-            # Add optional columns
-            if include_review_notes:
-                headers.extend(['Review Notes', 'Rejection Reason'])
-            if include_requirements:
-                headers.extend(['Requirements Details'])
-
-            # Write headers
-            for col, header in enumerate(headers, 1):
-                cell = ws.cell(row=current_row, column=col)
-                cell.value = header
-                cell.font = header_font
-                cell.fill = header_fill
-                cell.alignment = Alignment(horizontal='center')
-                cell.border = border
-
-            current_row += 1
-
-            # Write application data
-            for app in applications_list:
-                # Basic information
-                ws[f'A{current_row}'] = app.id
-                ws[f'B{current_row}'] = app.student.get_full_name()
-                ws[f'C{current_row}'] = app.student.username
-                ws[f'D{current_row}'] = app.student_course
-                ws[f'E{current_row}'] = app.student_year_level or ''
-                ws[f'F{current_row}'] = app.student_section or ''
-                ws[f'G{current_row}'] = app.company.name
-                ws[f'H{current_row}'] = app.proposed_start_date.strftime('%Y-%m-%d') if app.proposed_start_date else ''
-                ws[f'I{current_row}'] = app.proposed_end_date.strftime('%Y-%m-%d') if app.proposed_end_date else ''
-                ws[f'J{current_row}'] = app.duration_days
-                ws[f'K{current_row}'] = app.get_status_display()
-                ws[f'L{current_row}'] = app.application_date.strftime('%Y-%m-%d %H:%M')
-                ws[f'M{current_row}'] = f"{app.requirements_submitted}/{app.total_requirements}"
-
-                # Optional columns
-                col_offset = 13  # After basic columns
-
-                if include_review_notes:
-                    ws.cell(row=current_row, column=col_offset + 1).value = app.review_notes or ''
-                    ws.cell(row=current_row, column=col_offset + 2).value = app.rejection_reason or ''
-                    col_offset += 2
-
-                if include_requirements:
-                    requirements_details = []
-                    for req in app.requirements.all():
-                        status = "Verified" if req.is_verified else "Submitted" if req.is_submitted else "Pending"
-                        requirements_details.append(f"{req.get_requirement_type_display()}: {status}")
-
-                    ws.cell(row=current_row, column=col_offset + 1).value = "; ".join(requirements_details)
-
-                # Apply borders to all cells in the row
-                for col in range(1, len(headers) + 1):
-                    ws.cell(row=current_row, column=col).border = border
-
-                current_row += 1
-
-            # Auto-adjust column widths
-            for column in ws.columns:
-                max_length = 0
-                column_letter = get_column_letter(column[0].column)
-                for cell in column:
-                    try:
-                        if len(str(cell.value)) > max_length:
-                            max_length = len(str(cell.value))
-                    except:
-                        pass
-                adjusted_width = min(max_length + 2, 50)
-                ws.column_dimensions[column_letter].width = adjusted_width
-
-            # Create response
-            response = HttpResponse(
-                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            )
-
-            # Generate safe filename
-            filename_parts = ['OJT_Applications', export_scope]
-            if export_company:
-                company_name = applications_list[0].company.name if applications_list else "company"
-                safe_company_name = re.sub(r'[^\w\s-]', '', company_name).strip().replace(' ', '_')
-                filename_parts.append(safe_company_name)
-            if export_status:
-                filename_parts.append(export_status)
-
-            timestamp = timezone.now().strftime('%Y%m%d_%H%M')
-            filename_parts.append(timestamp)
-            filename = f"{'_'.join(filename_parts)}.xlsx"
-
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-
-            wb.save(response)
-            return response
-
-        except Exception as e:
-            logger.error(f"Error exporting OJT applications: {str(e)}")
-            return JsonResponse({'error': 'An unexpected error occurred during export'}, status=500)
-
-    def get_export_scope_display(self, export_scope):
-        display_map = {
-            'all': 'All Applications',
-            'by_company': 'By Company',
-            'by_status': 'By Status',
-            'by_company_status': 'By Company & Status',
-            'current_filters': 'Current Table Filters'
-        }
-        return display_map.get(export_scope, export_scope)
-
-    def get_status_display(self, status):
-        status_map = {
-            'draft': 'Draft',
-            'submitted': 'Submitted',
-            'under_review': 'Under Review',
-            'approved': 'Approved',
-            'rejected': 'Rejected',
-            'cancelled': 'Cancelled'
-        }
-        return status_map.get(status, status)
-
-
-# ------------------------------------------------ OJT Report Section --------------------------------------------------
-class OJTReportCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    model = OJTReport
-    form_class = OJTReportForm
-    success_url = reverse_lazy('ojt-reports')
-
-    def test_func(self):
-        return self.request.user.is_superuser or self.request.user.user_type in [1, 13, 14]
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
-        return kwargs
-
-    def handle_no_permission(self):
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'error': 'You do not have permission to submit reports.'
-            }, status=403)
-        return super().handle_no_permission()
-
-    def form_valid(self, form):
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            try:
-                report = form.save()
-
-                # Handle file attachments - ONLY DO THIS ONCE
-                attachments = self.request.FILES.getlist('attachments')
-                print(f"DEBUG: Processing {len(attachments)} attachments")  # Debug line
-
-                for attachment_file in attachments:
-                    print(f"DEBUG: Creating attachment for file: {attachment_file.name}")  # Debug line
-                    OJTReportAttachment.objects.create(
-                        report=report,
-                        file=attachment_file
-                    )
-
-                # Log the activity
-                UserActivityLog.objects.create(
-                    user=self.request.user,
-                    activity=f"{self.request.user.get_full_name()} submitted OJT report: {report.title}"
+                print(f"Getting active non-archived companies")
+
+            elif export_option == 'inactive':
+                # Get only inactive AND non-archived companies
+                companies = OJTCompany.objects.filter(
+                    is_archived=False,
+                    status='inactive'
                 )
-
-                return JsonResponse({
-                    'success': True,
-                    'report': {
-                        'id': report.id,
-                        'title': report.title,
-                        'report_type': report.report_type,
-                        'status': report.status,
-                    },
-                    'attachments_count': len(attachments)  # Add this for debugging
-                })
-
-            except ValidationError as e:
-                return JsonResponse({
-                    'success': False,
-                    'errors': {'__all__': [str(e)]}
-                }, status=400)
-
-        return super().form_valid(form)
-
-    def form_invalid(self, form):
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            errors = {field: [str(error) for error in errors] for field, errors in form.errors.items()}
-            return JsonResponse({'success': False, 'errors': errors}, status=400)
-        return super().form_invalid(form)
-
-
-class OJTReportDetailView(LoginRequiredMixin, DetailView):
-    model = OJTReport
-
-    def get_queryset(self):
-        return OJTReport.objects.select_related(
-            'application__student',
-            'application__student__course',
-            'submitted_by',
-            'reviewed_by'
-        )
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-
-            # Get report attachments
-            attachments = self.object.attachments.all()
-            attachments_data = []
-            for attachment in attachments:
-                attachments_data.append({
-                    'id': attachment.id,
-                    'file_name': attachment.file_name,
-                    'file_url': attachment.file.url,
-                    'file_size': attachment.file_size,
-                    'file_type': attachment.file_type,
-                    'file_type_icon': attachment.file_type_icon,
-                    'uploaded_at': attachment.uploaded_at.strftime('%Y-%m-%d %H:%M')
-                })
-
-            # Calculate period duration if available
-            period_duration = None
-            if self.object.period_start and self.object.period_end:
-                period_duration = (self.object.period_end - self.object.period_start).days
-
-            # FIXED: Better student information retrieval
-            student_course = "Not specified"
-            student_year_level = "N/A"
-            student_section = "N/A"
-
-            if self.object.application and self.object.application.student:
-                student = self.object.application.student
-                if student.course:
-                    student_course = student.course.name
-                student_year_level = student.year_level or "N/A"
-                student_section = student.section or "N/A"
+                print(f"Getting inactive non-archived companies")
             else:
-                # Fallback: try to get student info from submitted_by if it's a student
-                if self.object.submitted_by and self.object.submitted_by.is_student:
-                    student = self.object.submitted_by
-                    if student.course:
-                        student_course = student.course.name
-                    student_year_level = student.year_level or "N/A"
-                    student_section = student.section or "N/A"
+                # Fallback: get all non-archived
+                companies = OJTCompany.objects.filter(is_archived=False)
+                print(f"Unknown export option, falling back to all non-archived")
 
-            report_data = {
-                'id': self.object.id,
-                'title': self.object.title,
-                'report_type': self.object.report_type,
-                'report_type_display': self.object.get_report_type_display(),
-                'status': self.object.status,
-                'status_display': self.object.get_status_display(),
-                'report_date': self.object.report_date.strftime('%Y-%m-%d'),
-                'period_start': self.object.period_start.strftime('%Y-%m-%d') if self.object.period_start else None,
-                'period_end': self.object.period_end.strftime('%Y-%m-%d') if self.object.period_end else None,
-                'period_duration': period_duration,
-                'description': self.object.description,
-                'issues_challenges': self.object.issues_challenges,
-                'submitted_by': self.object.submitted_by.get_full_name(),
-                'submitted_at': self.object.submitted_at.strftime('%Y-%m-%d %H:%M'),
-                'reviewed_by': self.object.reviewed_by.get_full_name() if self.object.reviewed_by else None,
-                'reviewed_at': self.object.reviewed_at.strftime('%Y-%m-%d %H:%M') if self.object.reviewed_at else None,
-                'feedback': self.object.feedback,
-                'student_name': self.object.student_name,
-                'student_course': student_course,
-                'student_year_level': student_year_level,
-                'student_section': student_section,
-                'attachments': attachments_data,
-                'total_attachments': len(attachments_data),
-                'is_complaint_report': self.object.is_complaint_report
-            }
+            companies = companies.order_by('name')
+            companies_count = companies.count()
 
-            return JsonResponse({
-                'success': True,
-                'report': report_data
-            })
-        return super().get(request, *args, **kwargs)
+            print(f"Found {companies_count} companies for export")
 
+            # Debug: Print sample companies
+            for i, company in enumerate(companies[:3]):
+                print(f"Company {i + 1}: {company.name}, Status: {company.status}, Archived: {company.is_archived}")
 
-class OJTReportUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
-    def test_func(self):
-        # Allow report owners or admins to edit
-        report = get_object_or_404(OJTReport, pk=self.kwargs['pk'])
-        return (self.request.user == report.submitted_by or
-                self.request.user.is_superuser or
-                self.request.user.user_type in [1, 13])
+            # Data starts at row 7
+            data_start_row = 7
 
-    def handle_no_permission(self):
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'error': 'You do not permission to edit this report.'
-            }, status=403)
-        return super().handle_no_permission()
+            # Clear only the data area (rows 7 and below for columns A-G)
+            max_rows_to_clear = data_start_row + companies_count + 50
 
-    def get(self, request, *args, **kwargs):
-        try:
-            report = get_object_or_404(OJTReport, pk=kwargs['pk'])
-
-            # Get report attachments
-            attachments = report.attachments.all()
-            attachments_data = []
-            for attachment in attachments:
-                attachments_data.append({
-                    'id': attachment.id,
-                    'file_name': attachment.file_name,
-                    'file_url': attachment.file.url,
-                    'file_size': attachment.file_size,
-                    'file_type': attachment.file_type,
-                    'file_type_icon': attachment.file_type_icon,
-                    'uploaded_at': attachment.uploaded_at.strftime('%Y-%m-%d %H:%M')
-                })
-
-            report_data = {
-                'id': report.id,
-                'title': report.title,
-                'report_type': report.report_type,
-                'report_type_display': report.get_report_type_display(),
-                'status': report.status,
-                'status_display': report.get_status_display(),
-                'report_date': report.report_date.strftime('%Y-%m-%d'),
-                'period_start': report.period_start.strftime('%Y-%m-%d') if report.period_start else None,
-                'period_end': report.period_end.strftime('%Y-%m-%d') if report.period_end else None,
-                'description': report.description,
-                'issues_challenges': report.issues_challenges,
-                'submitted_by': report.submitted_by.get_full_name(),
-                'submitted_at': report.submitted_at.strftime('%Y-%m-%d %H:%M'),
-                'application_id': report.application.id,
-                'attachments': attachments_data,
-            }
-
-            return JsonResponse({
-                'success': True,
-                'report': report_data
-            })
-        except Exception as e:
-            logger.error(f"Error loading OJT report for editing: {str(e)}")
-            return JsonResponse({
-                'success': False,
-                'error': 'Failed to load report details'
-            }, status=500)
-
-    def post(self, request, *args, **kwargs):
-        try:
-            report = get_object_or_404(OJTReport, pk=kwargs['pk'])
-            form = OJTReportForm(request.POST, request.FILES, instance=report, request=request)
-
-            if form.is_valid():
-                report = form.save()
-
-                # Handle new file attachments
-                new_attachments = request.FILES.getlist('attachments')
-                for attachment_file in new_attachments:
-                    OJTReportAttachment.objects.create(
-                        report=report,
-                        file=attachment_file
-                    )
-
-                # Log the activity
-                UserActivityLog.objects.create(
-                    user=request.user,
-                    activity=f"{request.user.first_name} updated OJT report: {report.title}"
-                )
-
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Report updated successfully!'
-                })
-
-            errors = {field: [str(error) for error in errors] for field, errors in form.errors.items()}
-            return JsonResponse({'success': False, 'errors': errors}, status=400)
-
-        except Exception as e:
-            logger.error(f"Error updating OJT report: {str(e)}")
-            return JsonResponse({
-                'success': False,
-                'error': 'An unexpected error occurred while updating the report'
-            }, status=500)
-
-
-class OJTReportAttachmentDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
-    def test_func(self):
-        attachment = get_object_or_404(OJTReportAttachment, pk=self.kwargs['pk'])
-        return (self.request.user == attachment.report.submitted_by or
-                self.request.user.is_superuser or
-                self.request.user.user_type in [1, 13])
-
-    def post(self, request, *args, **kwargs):
-        attachment = get_object_or_404(OJTReportAttachment, pk=kwargs['pk'])
-        report_title = attachment.report.title
-        attachment.delete()
-
-        # Log the activity
-        UserActivityLog.objects.create(
-            user=request.user,
-            activity=f"{request.user.first_name} removed attachment from report: {report_title}"
-        )
-
-        return JsonResponse({
-            'success': True,
-            'message': 'Attachment removed successfully!'
-        })
-
-
-class OJTReportArchiveView(LoginRequiredMixin, UserPassesTestMixin, View):
-    def test_func(self):
-        return self.request.user.is_superuser or self.request.user.user_type in [1, 13, 14]
-
-    def handle_no_permission(self):
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'error': 'You do not have permission to archive reports.'
-            }, status=403)
-        return super().handle_no_permission()
-
-    def get_object(self):
-        return get_object_or_404(OJTReport, pk=self.kwargs['pk'])
-
-    def post(self, request, *args, **kwargs):
-        report = self.get_object()
-
-        # Check if report is already archived
-        if report.is_archived:
-            return JsonResponse({
-                'success': False,
-                'error': f'Report "{report.title}" is already archived.'
-            }, status=400)
-
-        # Check if user has permission to archive this report
-        if not (request.user.is_superuser or
-                request.user.user_type in [1, 13] or
-                report.submitted_by == request.user):
-            return JsonResponse({
-                'success': False,
-                'error': 'You do not have permission to archive this report.'
-            }, status=403)
-
-        try:
-            # Archive the report
-            report.is_archived = True
-            report.archived_at = timezone.now()
-            report.archived_by = request.user
-            report.save()
-
-            # Log the activity
-            UserActivityLog.objects.create(
-                user=request.user,
-                activity=f"{request.user.first_name} archived OJT report: {report.title}"
-            )
-
-            message = f'Report "{report.title}" has been archived successfully.'
-
-            return JsonResponse({
-                'success': True,
-                'message': message,
-                'report_id': report.id
-            })
-
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'error': f'Failed to archive report: {str(e)}'
-            }, status=500)
-
-
-class OJTReportReviewView(LoginRequiredMixin, UserPassesTestMixin, View):
-    def test_func(self):
-        return self.request.user.is_superuser or self.request.user.user_type in [1, 13]
-
-    def handle_no_permission(self):
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'error': 'You do not have permission to review reports.'
-            }, status=403)
-        return super().handle_no_permission()
-
-    def get_object(self):
-        return get_object_or_404(OJTReport, pk=self.kwargs['pk'])
-
-    def post(self, request, *args, **kwargs):
-        report = self.get_object()
-
-        # Check if report is already reviewed
-        if report.status == 'reviewed':
-            return JsonResponse({
-                'success': False,
-                'error': f'Report "{report.title}" is already reviewed.'
-            }, status=400)
-
-        # Get form data
-        feedback = request.POST.get('feedback', '')
-
-        try:
-            # Mark report as reviewed
-            report.mark_as_reviewed(
-                reviewed_by=request.user,
-                feedback=feedback
-            )
-
-            # Log the activity
-            UserActivityLog.objects.create(
-                user=request.user,
-                activity=f"{request.user.first_name} reviewed OJT report: {report.title}"
-            )
-
-            message = f'Report "{report.title}" has been marked as reviewed successfully.'
-
-            return JsonResponse({
-                'success': True,
-                'message': message,
-                'report_id': report.id
-            })
-
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'error': f'Failed to review report: {str(e)}'
-            }, status=500)
-
-
-logger = logging.getLogger(__name__)
-
-
-class OJTReportExportView(View):
-    def post(self, request, *args, **kwargs):
-        try:
-            # Get export parameters
-            export_title = request.POST.get('export_title', 'OJT Reports Export').strip()[:100]
-
-            # Checkbox handling
-            include_attachments = 'include_attachments' in request.POST
-            include_review_details = 'include_review_details' in request.POST
-            enable_date_range = 'enable_date_range' in request.POST
-
-            start_date = request.POST.get('start_date')
-            end_date = request.POST.get('end_date')
-
-            # Get status filters
-            status_filters = []
-            if 'status_submitted' in request.POST:
-                status_filters.append('submitted')
-            if 'status_reviewed' in request.POST:
-                status_filters.append('reviewed')
-
-            # Get type filters
-            type_filters = []
-            type_map = {
-                'type_weekly': 'weekly',
-                'type_monthly': 'monthly',
-                'type_final': 'final',
-                'type_incident': 'incident',
-                'type_complaint': 'complaint'
-            }
-
-            for post_key, report_type_val in type_map.items():
-                if post_key in request.POST:
-                    type_filters.append(report_type_val)
-
-            # Debug logging
-            logger.info(f"Export filters - status: {status_filters}, types: {type_filters}")
-            logger.info(f"Options - attachments: {include_attachments}, review_details: {include_review_details}")
-
-            # Validate export title
-            if not export_title:
-                export_title = 'OJT Reports Export'
-
-            # Base queryset - exclude archived reports
-            reports = OJTReport.objects.filter(is_archived=False).select_related(
-                'application__student',
-                'application__company',
-                'submitted_by',
-                'reviewed_by'
-            ).prefetch_related('attachments')
-
-            # Apply status filters if any selected
-            if status_filters:
-                reports = reports.filter(status__in=status_filters)
-                logger.info(f"Applied status filters: {status_filters}. Count: {reports.count()}")
-
-            # Apply type filters if any selected
-            if type_filters:
-                reports = reports.filter(report_type__in=type_filters)
-                logger.info(f"Applied type filters: {type_filters}. Count: {reports.count()}")
-
-            # Apply date range filter if enabled
-            if enable_date_range and start_date and end_date:
-                try:
-                    from django.utils.dateparse import parse_date
-                    start = parse_date(start_date)
-                    end = parse_date(end_date)
-                    if start and end:
-                        reports = reports.filter(report_date__range=[start, end])
-                        logger.info(f"Filtered by date range {start_date} to {end_date}. Count: {reports.count()}")
-                except (ValueError, TypeError) as e:
-                    logger.warning(f"Invalid date range: {e}")
-
-            # If no filters selected, return all (same as selecting all checkboxes)
-            if not status_filters and not type_filters:
-                logger.info("No filters selected - returning all reports")
-                # No additional filtering needed
-
-            # Order reports
-            reports = reports.order_by('-report_date', '-submitted_at')
-
-            # Force evaluation
-            reports_list = list(reports)
-            logger.info(f"Final reports count: {len(reports_list)}")
-
-            if not reports_list:
-                return JsonResponse({'error': 'No reports found matching your criteria'}, status=404)
-
-            # Create workbook
-            wb = Workbook()
-            ws = wb.active
-            ws.title = "OJT Reports"
-
-            # Define styles
-            header_font = Font(bold=True, color="FFFFFF", size=12)
-            header_fill = PatternFill(start_color="2C5F9E", end_color="2C5F9E", fill_type="solid")
-            border = Border(
-                left=Side(style='thin'),
-                right=Side(style='thin'),
-                top=Side(style='thin'),
-                bottom=Side(style='thin')
-            )
-
-            # Set title and headers
-            ws['A1'] = export_title
-            ws['A1'].font = Font(bold=True, size=16, color="2C5F9E")
-            ws['A2'] = f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M')}"
-            ws['A2'].font = Font(italic=True, size=10)
-
-            # Set export summary
-            status_summary = "All Status" if len(status_filters) == 2 else ", ".join(
-                [self.get_status_display(s) for s in status_filters])
-            type_summary = "All Types" if len(type_filters) == 5 else ", ".join(
-                [self.get_report_type_display(t) for t in type_filters])
-
-            summary_text = f"Status: {status_summary} | Types: {type_summary} | Total Reports: {len(reports_list)}"
-            summary_text += f" | Attachments: {'Included' if include_attachments else 'Excluded'}"
-            summary_text += f" | Review Details: {'Included' if include_review_details else 'Excluded'}"
-
-            ws['A3'] = summary_text
-            ws['A3'].font = Font(italic=True, size=10)
-
-            # Define column headers
-            headers = [
-                'Report ID', 'Title', 'Report Type', 'Status',
-                'Student Name', 'Company', 'Report Date',
-                'Period Start', 'Period End', 'Description',
-                'Issues & Challenges'
-            ]
-
-            # Add optional columns
-            if include_attachments:
-                headers.extend(['Attachments Count', 'Attachment Names'])
-
-            if include_review_details:
-                headers.extend(['Reviewed By', 'Reviewed At', 'Feedback'])
-
-            headers.extend(['Submitted By', 'Submitted At'])
-
-            # Write headers
-            for col, header in enumerate(headers, 1):
-                cell = ws.cell(row=5, column=col)
-                cell.value = header
-                cell.font = header_font
-                cell.fill = header_fill
-                cell.alignment = Alignment(horizontal='center')
-                cell.border = border
-
-            # Write report data with proper datetime handling
-            current_row = 6
-            for report in reports_list:
-                row_data = [
-                    report.id,
-                    report.title,
-                    report.get_report_type_display(),
-                    report.get_status_display(),
-                    report.student_name,
-                    report.company_name,
-                    report.report_date,
-                    report.period_start,
-                    report.period_end,
-                    report.description[:200] + "..." if len(report.description) > 200 else report.description,
-                    report.issues_challenges[:200] + "..." if report.issues_challenges and len(
-                        report.issues_challenges) > 200 else report.issues_challenges,
-                ]
-
-                # Optional attachment information
-                if include_attachments:
-                    attachments_count = report.attachments_count
-                    row_data.append(attachments_count)
-
-                    if attachments_count > 0:
-                        attachment_names = ", ".join([att.file_name for att in report.attachments.all()[:5]])
-                        if attachments_count > 5:
-                            attachment_names += f"... (+{attachments_count - 5} more)"
-                        row_data.append(attachment_names)
-                    else:
-                        row_data.append("No attachments")
-
-                # Optional review details with proper datetime handling
-                if include_review_details:
-                    if report.reviewed_by:
-                        row_data.append(str(report.reviewed_by))
-                        if report.reviewed_at:
-                            row_data.append(report.reviewed_at.replace(tzinfo=None))
-                        else:
-                            row_data.append("")
-                        row_data.append(report.feedback[:200] + "..." if report.feedback and len(
-                            report.feedback) > 200 else report.feedback)
-                    else:
-                        row_data.extend(["Not reviewed", "", ""])
-
-                # Submission information with proper datetime handling
-                row_data.append(str(report.submitted_by))
-                if report.submitted_at:
-                    row_data.append(report.submitted_at.replace(tzinfo=None))
-                else:
-                    row_data.append("")
-
-                # Write row data
-                for col, value in enumerate(row_data, 1):
-                    cell = ws.cell(row=current_row, column=col, value=value)
-
-                    # Apply status color coding
-                    if col == 4:  # Status column
-                        if report.status == 'reviewed':
-                            cell.font = Font(color="52C41A", bold=True)
-                        else:
-                            cell.font = Font(color="FAAD14", bold=True)
-
-                    # Apply border to all cells
-                    cell.border = border
-
-                current_row += 1
-
-            # Auto-adjust column widths
-            for column in ws.columns:
-                max_length = 0
-                column_letter = get_column_letter(column[0].column)
-                for cell in column:
+            for row in range(data_start_row, max_rows_to_clear + 1):
+                for col in range(1, 8):  # Columns A-G
                     try:
-                        if len(str(cell.value)) > max_length:
-                            max_length = len(str(cell.value))
+                        cell = ws.cell(row=row, column=col)
+                        # Only clear if it's not a merged cell
+                        if cell.value is not None or cell.has_style:
+                            cell.value = None
                     except:
-                        pass
-                adjusted_width = min(max_length + 2, 50)
-                ws.column_dimensions[column_letter].width = adjusted_width
+                        continue
+
+            # Populate data
+            for idx, company in enumerate(companies):
+                row_num = data_start_row + idx
+
+                # Map data to template columns
+                ws.cell(row=row_num, column=1, value=company.name or "")
+                ws.cell(row=row_num, column=2, value=company.address or "")
+                ws.cell(row=row_num, column=3, value=company.contact_number or "")
+                ws.cell(row=row_num, column=4, value=company.email or "")
+                ws.cell(row=row_num, column=5, value=company.description or "")
+
+                # Status - use actual status field, not display_status
+                # The display_status property shows "Archived" if is_archived=True
+                # But we're filtering out archived companies, so we can use the status field
+                status_display = company.get_status_display() if company.status else ""
+                ws.cell(row=row_num, column=6, value=status_display)
+
+                ws.cell(row=row_num, column=7, value=company.website or "")
 
             # Create response
             response = HttpResponse(
                 content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             )
 
-            # Generate filename based on filters
-            filename_parts = ['OJT_Reports']
+            # Generate filename
+            timestamp = timezone.now().strftime('%Y%m%d_%H%M%S')
+            if export_option == 'all':
+                status_text = "All"
+            elif export_option == 'active':
+                status_text = "Active"
+            elif export_option == 'inactive':
+                status_text = "Inactive"
+            else:
+                status_text = "All"
 
-            if len(status_filters) == 1:
-                filename_parts.append(status_filters[0])
-            elif len(status_filters) == 0:
-                filename_parts.append('NoStatus')
-
-            if len(type_filters) == 1:
-                filename_parts.append(type_filters[0])
-            elif len(type_filters) == 0:
-                filename_parts.append('NoTypes')
-            elif len(type_filters) < 5:
-                filename_parts.append(f'{len(type_filters)}Types')
-
-            timestamp = timezone.now().strftime('%Y%m%d_%H%M')
-            filename_parts.append(timestamp)
-            filename = f"{'_'.join(filename_parts)}.xlsx"
-
+            filename = f"OJT_Companies_{status_text}_{timestamp}.xlsx"
             response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
             wb.save(response)
+            print(f"Export completed: {filename}, {companies_count} companies")
             return response
 
         except Exception as e:
-            logger.error(f"Error exporting OJT reports: {str(e)}", exc_info=True)
-            return JsonResponse({'error': f'An unexpected error occurred during export: {str(e)}'}, status=500)
-
-    def get_status_display(self, status):
-        display_map = {
-            'submitted': 'Submitted',
-            'reviewed': 'Reviewed'
-        }
-        return display_map.get(status, status)
-
-    def get_report_type_display(self, report_type):
-        display_map = {
-            'weekly': 'Weekly',
-            'monthly': 'Monthly',
-            'final': 'Final',
-            'incident': 'Incident',
-            'complaint': 'Complaint'
-        }
-        return display_map.get(report_type, report_type)
+            print(f"Error exporting OJT companies: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
 
 # ---------------------------------------------- Organization Section --------------------------------------------------

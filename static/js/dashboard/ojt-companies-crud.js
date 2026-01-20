@@ -1,59 +1,76 @@
 // ------------------------------------------- OJT Companies Table Functions -------------------------------------------
 let currentCompanyPage = 1;
 let currentCompanySearch = '';
-let currentAvailabilityFilter = '';
-let currentStudentCountFilter = '';
+let currentStatusFilter = '';
 let currentSortOrder = 'name_asc';
 
 // Load companies on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadCompaniesData();
 
-    // Add event listeners for filters
-    document.getElementById('company-search').addEventListener('input', debounce(handleCompanySearch, 300));
-    document.getElementById('availability-filter').addEventListener('change', handleFilterChange);
-    document.getElementById('student-count-filter').addEventListener('change', handleFilterChange);
-    document.getElementById('sort-order').addEventListener('change', handleSortChange);
+    // Add event listeners for filters if they exist
+    const companySearch = document.getElementById('company-search');
+    const statusFilter = document.getElementById('status-filter');
+    const sortOrder = document.getElementById('sort-order');
+
+    if (companySearch) {
+        companySearch.addEventListener('input', debounce(handleCompanySearch, 300));
+    }
+
+    if (statusFilter) {
+        statusFilter.addEventListener('change', handleFilterChange);
+    }
+
+    if (sortOrder) {
+        sortOrder.addEventListener('change', handleSortChange);
+    }
 });
 
 function loadCompaniesData() {
-    const searchTerm = document.getElementById('company-search').value;
-    const availabilityFilter = document.getElementById('availability-filter').value;
-    const studentCountFilter = document.getElementById('student-count-filter').value;
-    const sortOrder = document.getElementById('sort-order').value;
+    const searchTerm = document.getElementById('company-search') ?
+        document.getElementById('company-search').value : '';
+
+    // Check if elements exist before getting values
+    const statusFilter = document.getElementById('status-filter') ?
+        document.getElementById('status-filter').value : '';
+
+    const sortOrder = document.getElementById('sort-order') ?
+        (document.getElementById('sort-order').value || 'created_desc') : 'created_desc';
 
     // Update current state
     currentCompanySearch = searchTerm;
-    currentAvailabilityFilter = availabilityFilter;
-    currentStudentCountFilter = studentCountFilter;
+    currentStatusFilter = statusFilter;
     currentSortOrder = sortOrder;
 
-    loadCompaniesPage(1, searchTerm, availabilityFilter, studentCountFilter, sortOrder);
+    loadCompaniesPage(1, searchTerm, statusFilter, sortOrder);
 }
 
-function loadCompaniesPage(page, search = '', availabilityFilter = '', studentCountFilter = '', sortOrder = 'name_asc') {
+function loadCompaniesPage(page, search = '', statusFilter = '', sortOrder = 'name_asc') {
     const tbody = document.getElementById('companies-tbody');
     const paginationContainer = document.getElementById('company-pagination-container');
 
     // Show loading state
     tbody.innerHTML = `
         <tr id="loading-row">
-            <td colspan="8" style="text-align: center; padding: 20px;">
+            <td colspan="7" style="text-align: center; padding: 20px;">
                 <div class="loading-spinner"></div>
                 Loading companies...
             </td>
         </tr>
     `;
 
-    // Build query parameters
+    // Build query parameters - include status_filter only if it has a value
     const params = new URLSearchParams({
         'get_filtered_ojt_companies': '1',
         'page': page,
         'search': search,
-        'availability_filter': availabilityFilter,
-        'student_count_filter': studentCountFilter,
         'sort_order': sortOrder
     });
+
+    // Only add status_filter if it exists and has a value
+    if (statusFilter && statusFilter.trim() !== '') {
+        params.append('status_filter', statusFilter);
+    }
 
     fetch(`?${params.toString()}`, {
         method: 'GET',
@@ -79,7 +96,7 @@ function loadCompaniesPage(page, search = '', availabilityFilter = '', studentCo
         console.error('Error loading companies:', error);
         tbody.innerHTML = `
             <tr id="error-row">
-                <td colspan="8" style="text-align: center; padding: 20px; color: #dc3545; font-weight: 500;">
+                <td colspan="7" style="text-align: center; padding: 20px; color: #dc3545; font-weight: 500;">
                     <i class='bx bx-error'></i> Error loading data. Please try again.
                 </td>
             </tr>
@@ -93,7 +110,7 @@ function updateCompaniesTable(data) {
     if (!data.companies || data.companies.length === 0) {
         tbody.innerHTML = `
             <tr id="no-data-row">
-                <td colspan="8" style="text-align: center; padding: 40px; font-style: italic; color: #6c757d;">
+                <td colspan="7" style="text-align: center; padding: 40px; font-style: italic; color: #6c757d;">
                     <i class='bx bx-building-house' style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
                     No companies found matching your criteria
                 </td>
@@ -104,49 +121,51 @@ function updateCompaniesTable(data) {
 
     let html = '';
     data.companies.forEach(company => {
-        // Use the utilization_rate from backend or calculate it
-        const utilizationRate = company.utilization_rate || (company.filled_slots > 0 ? (company.filled_slots / company.available_slots) * 100 : 0);
-        const statusClass = getStatusClass(company.status);
-
         // Truncate long addresses for better display
         const truncatedAddress = company.address.length > 50 ?
             company.address.substring(0, 50) + '...' : company.address;
 
+        // Truncate name if too long
+        const truncatedName = company.name.length > 30 ?
+            company.name.substring(0, 30) + '...' : company.name;
+
         // Check permissions for this company
-        const canEdit = company.can_edit || (data.current_user_type && [1, 13].includes(data.current_user_type));
-        const canArchive = company.can_archive || (data.current_user_type && [1, 13].includes(data.current_user_type));
+        const canEdit = company.can_edit || (data.current_user_type && [1, 13, 16].includes(data.current_user_type));
+        const canArchive = company.can_archive || (data.current_user_type && [1, 13, 16].includes(data.current_user_type));
+
+        // Determine status class based on actual status
+        let statusClass = '';
+        let statusText = '';
+
+        // For students, we should only see active companies (archived are hidden in backend)
+        if (company.is_archived) {
+            statusClass = 'status-archived';
+            statusText = 'Archived';
+        } else if (company.status === 'active') {
+            statusClass = 'status-active';
+            statusText = 'Active';
+        } else if (company.status === 'inactive') {
+            statusClass = 'status-inactive';
+            statusText = 'Inactive';
+        } else {
+            // Fallback for any other status
+            statusClass = 'status-inactive';
+            statusText = company.status_display || 'Inactive';
+        }
+
+        // For students, only show view button
+        const isStudent = data.current_user_type && ![1, 13, 16].includes(data.current_user_type);
 
         html += `
             <tr>
                 <td>${company.id}</td>
-                <td>
-                    <div class="company-name">
-                        <strong>${escapeHtml(company.name)}</strong>
-                        ${company.description ? `<br><small class="text-muted">${escapeHtml(company.description.substring(0, 60))}${company.description.length > 60 ? '...' : ''}</small>` : ''}
-                    </div>
-                </td>
+                <td title="${escapeHtml(company.name)}">${escapeHtml(truncatedName)}</td>
                 <td title="${escapeHtml(company.address)}">${escapeHtml(truncatedAddress)}</td>
                 <td>${escapeHtml(company.contact_number)}</td>
-                <td>
-                    <div class="slot-indicator">
-                        <span class="slot-count">${company.remaining_slots}/${company.available_slots}</span>
-                        <div class="slot-progress">
-                            <div class="slot-progress-bar ${getProgressBarClass(utilizationRate)}"
-                                 style="width: ${Math.min(utilizationRate, 100)}%"
-                                 title="${utilizationRate.toFixed(1)}% utilized">
-                            </div>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <span class="student-count ${company.student_count > 0 ? 'has-students' : ''}">
-                        ${company.student_count}
-                    </span>
-                </td>
+                <td>${escapeHtml(company.email || '-')}</td>
                 <td>
                     <span class="status-badge ${statusClass}">
-                        <i class='bx ${getStatusIcon(company.status)}'></i>
-                        ${company.status}
+                        ${statusText}
                     </span>
                 </td>
                 <td class="action-buttons">
@@ -155,20 +174,23 @@ function updateCompaniesTable(data) {
                         <i class='bx bx-show'></i>
                     </button>
 
-                    <!-- Edit button - only for user type 1 and 13 -->
-                    ${canEdit ? `
+                    <!-- Edit button - only for user type 1, 13, and 16 (admin, job placement, OJT Adviser) -->
+                    ${!isStudent && canEdit ? `
                     <button class="btn-action edit-btn" onclick="openCompanyEditModal(${company.id})" title="Edit Company">
                         <i class='bx bx-edit'></i>
                     </button>
                     ` : ''}
 
-                    <!-- Archive button - only for user type 1 and 13 -->
-                    ${canArchive ? `
-                    <button class="btn-action ${company.is_archived ? 'unarchive-btn' : 'archive-btn'}"
-                            onclick="${company.is_archived ? 'openCompanyUnarchiveModal' : 'openCompanyArchiveModal'}(${company.id})"
-                            title="${company.is_archived ? 'Unarchive Company' : 'Archive Company'}">
-                        <i class='bx ${company.is_archived ? 'bx-reset' : 'bx-archive'}'></i>
-                    </button>
+                    <!-- Archive/Unarchive button - only for user type 1, 13, and 16 (admin, job placement, OJT Adviser) -->
+                    ${!isStudent && canArchive ? `
+                    ${company.is_archived ?
+                        `<button class="btn-action unarchive-btn" onclick="openCompanyUnarchiveModal(${company.id})" title="Unarchive Company">
+                            <i class='bx bx-undo'></i>
+                        </button>` :
+                        `<button class="btn-action archive-btn" onclick="openCompanyArchiveModal(${company.id})" title="Archive Company">
+                            <i class='bx bx-archive'></i>
+                        </button>`
+                    }
                     ` : ''}
                 </td>
             </tr>
@@ -176,35 +198,6 @@ function updateCompaniesTable(data) {
     });
 
     tbody.innerHTML = html;
-}
-
-function getStatusClass(status) {
-    const statusLower = status.toLowerCase();
-    switch(statusLower) {
-        case 'available': return 'status-available';
-        case 'limited': return 'status-limited';
-        case 'full': return 'status-full';
-        case 'archived': return 'status-archived';
-        default: return 'status-unknown';
-    }
-}
-
-function getStatusIcon(status) {
-    const statusLower = status.toLowerCase();
-    switch(statusLower) {
-        case 'available': return 'bx-check-circle';
-        case 'limited': return 'bx-time';
-        case 'full': return 'bx-x-circle';
-        case 'archived': return 'bx-archive';
-        default: return 'bx-help-circle';
-    }
-}
-
-function getProgressBarClass(utilizationRate) {
-    if (utilizationRate >= 90) return 'progress-danger';
-    if (utilizationRate >= 75) return 'progress-warning';
-    if (utilizationRate >= 50) return 'progress-info';
-    return 'progress-success';
 }
 
 function updateCompaniesPagination(pagination, currentPage) {
@@ -306,8 +299,7 @@ function loadCompaniesPageWithCurrentFilters(page) {
     loadCompaniesPage(
         page,
         currentCompanySearch,
-        currentAvailabilityFilter,
-        currentStudentCountFilter,
+        currentStatusFilter,
         currentSortOrder
     );
 }
@@ -327,7 +319,7 @@ function handleSortChange() {
     loadCompaniesData();
 }
 
-// Export companies data
+// Export companies data - for admin, job placement, and OJT Adviser
 document.addEventListener('DOMContentLoaded', function() {
     const exportBtn = document.getElementById('export-company-btn');
     if (exportBtn) {
@@ -337,18 +329,6 @@ document.addEventListener('DOMContentLoaded', function() {
             openCompanyExportModal();
         });
     }
-
-    // Your other existing event listeners...
-    document.getElementById('company-search').addEventListener('input', debounce(handleCompanySearch, 300));
-    document.getElementById('availability-filter').addEventListener('change', handleFilterChange);
-    document.getElementById('student-count-filter').addEventListener('change', handleFilterChange);
-    document.getElementById('sort-order').addEventListener('change', handleSortChange);
-
-    // Export modal event listeners
-    document.getElementById('exportType').addEventListener('change', updateExportPreview);
-    document.getElementById('includeStudents').addEventListener('change', updateExportPreview);
-    document.getElementById('specificCompany').addEventListener('change', updateExportPreview);
-    document.getElementById('exportCompanyTitle').addEventListener('input', updateExportPreview);
 });
 
 // Utility functions
@@ -380,17 +360,18 @@ function getCSRFToken() {
     return csrfToken ? csrfToken.value : '';
 }
 
-// Refresh companies table after successful operations
 function refreshCompaniesTable() {
     loadCompaniesPageWithCurrentFilters(currentCompanyPage);
 }
 
-// Reset filters
 function resetCompanyFilters() {
-    document.getElementById('company-search').value = '';
-    document.getElementById('availability-filter').value = '';
-    document.getElementById('student-count-filter').value = '';
-    document.getElementById('sort-order').value = 'name_asc';
+    const companySearch = document.getElementById('company-search');
+    const statusFilter = document.getElementById('status-filter');
+    const sortOrder = document.getElementById('sort-order');
+
+    if (companySearch) companySearch.value = '';
+    if (statusFilter) statusFilter.value = '';
+    if (sortOrder) sortOrder.value = 'name_asc';
 
     loadCompaniesData();
 }
@@ -533,7 +514,7 @@ document.getElementById('companyCreateForm').addEventListener('submit', function
 
             setTimeout(() => {
                 closeCompanyCreateModal();
-                refreshCompaniesTable(); // Refresh the table instead of reloading the page
+                window.location.reload();
             }, 1500);
         } else {
             showFormErrors(form, data.errors);
@@ -630,6 +611,17 @@ document.getElementById('id_email').addEventListener('blur', function(e) {
     }
 });
 
+// Auto-format website URL
+document.getElementById('id_website').addEventListener('blur', function(e) {
+    const input = e.target;
+    let value = input.value.trim();
+
+    if (value && !value.startsWith('http://') && !value.startsWith('https://')) {
+        value = 'https://' + value;
+        input.value = value;
+    }
+});
+
 // Utility function to update field validation
 function updateFieldValidation(input, isValid, errorMessage) {
     if (!isValid) {
@@ -679,336 +671,99 @@ function showFormErrors(form, errors) {
     }
 }
 
-// Auto-format website URL
-document.getElementById('id_website').addEventListener('blur', function(e) {
-    const input = e.target;
-    let value = input.value.trim();
-
-    if (value && !value.startsWith('http://') && !value.startsWith('https://')) {
-        value = 'https://' + value;
-        input.value = value;
-    }
-});
-
-// ------------------------------------------------ View Functions -----------------------------------------------------
+// -------------------------------------------- View Company Functions -------------------------------------------
 function openCompanyViewModal(companyId) {
-    showCompanyLoadingState(true);
-
-    fetch(`/ojt-company/${companyId}/`, {
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        }
-    })
-    .then(handleCompanyResponse)
-    .then(data => {
-        if (data.success) {
-            populateCompanyModalData(data.company);
-            showCompanyModal();
-        } else {
-            throw new Error(data.error || 'Failed to load company details');
-        }
-    })
-    .catch(handleCompanyError)
-    .finally(() => {
-        showCompanyLoadingState(false);
-    });
-}
-
-function populateCompanyModalData(company) {
-    // Basic Information
-    document.getElementById('viewCompanyName').textContent = company.name;
-    document.getElementById('viewCompanyAddress').textContent = company.address;
-    document.getElementById('viewCompanyContact').textContent = company.contact_number;
-
-    // New Contact Links (Email and Website)
-    populateContactLinks(company.email, company.website);
-
-    // Company Description
-    populateCompanyDescription(company.description);
-
-    // OJT Capacity
-    document.getElementById('viewCompanyTotalSlots').textContent = company.available_slots;
-    document.getElementById('viewCompanyFilledSlots').textContent = company.filled_slots;
-    document.getElementById('viewCompanyAvailableSlots').textContent = company.remaining_slots;
-    document.getElementById('viewCompanyUtilization').textContent = `${company.utilization_rate}%`;
-
-    // Status & Timeline
-    document.getElementById('viewCompanyStatus').textContent = company.status;
-    document.getElementById('viewCompanyCreatedAt').textContent = formatDateTime(company.created_at);
-    document.getElementById('viewCompanyUpdatedAt').textContent = formatDateTime(company.updated_at);
-
-    // Style the status badge
-    const statusElement = document.getElementById('viewCompanyStatus');
-    statusElement.className = 'status-badge';
-    switch(company.status.toLowerCase()) {
-        case 'available':
-            statusElement.classList.add('status-available');
-            break;
-        case 'limited':
-            statusElement.classList.add('status-limited');
-            break;
-        case 'full':
-            statusElement.classList.add('status-full');
-            break;
-        case 'archived':
-            statusElement.classList.add('status-archived');
-            break;
-        default:
-            statusElement.classList.add('status-unknown');
-    }
-
-    // Current Students
-    populateStudentsList(company.current_students, company.total_students);
-}
-
-function populateContactLinks(email, website) {
-    const contactLinksContainer = document.getElementById('viewCompanyContactLinks');
-    let html = '';
-
-    if (email) {
-        html += `
-            <div class="contact-link">
-                <i class='bx bx-envelope'></i>
-                <a href="mailto:${escapeHtml(email)}" class="contact-link-item">
-                    ${escapeHtml(email)}
-                </a>
-            </div>
-        `;
-    }
-
-    if (website) {
-        // Ensure website has proper protocol
-        let websiteUrl = website;
-        if (!website.startsWith('http://') && !website.startsWith('https://')) {
-            websiteUrl = 'https://' + website;
-        }
-
-        html += `
-            <div class="contact-link">
-                <i class='bx bx-globe'></i>
-                <a href="${escapeHtml(websiteUrl)}" target="_blank" rel="noopener noreferrer" class="contact-link-item">
-                    ${escapeHtml(website)}
-                </a>
-            </div>
-        `;
-    }
-
-    if (html) {
-        contactLinksContainer.innerHTML = html;
-    } else {
-        contactLinksContainer.innerHTML = `
-            <div class="no-contact-info">
-                <i class='bx bx-info-circle'></i>
-                No additional contact information provided
-            </div>
-        `;
-    }
-}
-
-function populateCompanyDescription(description) {
-    const descriptionSection = document.getElementById('viewCompanyDescriptionSection');
-    const descriptionContent = document.getElementById('viewCompanyDescription');
-
-    if (description && description.trim()) {
-        descriptionContent.innerHTML = `
-            <div class="description-text">
-                ${escapeHtml(description).replace(/\n/g, '<br>')}
-            </div>
-        `;
-        descriptionSection.style.display = 'block';
-    } else {
-        descriptionSection.style.display = 'none';
-    }
-}
-
-function populateStudentsList(students, totalStudents) {
-    const studentsList = document.getElementById('viewCompanyStudentsList');
-    const studentsCount = document.getElementById('viewStudentsCount');
-
-    // Update students count
-    studentsCount.textContent = `${totalStudents} student${totalStudents !== 1 ? 's' : ''}`;
-
-    if (totalStudents === 0) {
-        studentsList.innerHTML = `
-            <div class="no-students-message">
-                <i class='bx bx-user-x'></i>
-                <p>No current OJT students</p>
-                <small class="no-students-subtext">This company has no active OJT placements</small>
-            </div>
-        `;
-        return;
-    }
-
-    let html = '';
-
-    students.forEach(student => {
-        const statusClass = getStudentStatusClass(student.status);
-        const yearSection = student.section ? `${student.year} - ${student.section}` : student.year;
-
-        html += `
-            <div class="student-row">
-                <div class="student-col name">
-                    <div class="student-avatar">
-                        <i class='bx bx-user'></i>
-                    </div>
-                    <div class="student-info">
-                        <span class="student-name">${escapeHtml(student.name)}</span>
-                        <small class="student-email">${escapeHtml(student.email || '')}</small>
-                    </div>
-                </div>
-                <div class="student-col id">
-                    <span class="student-id">${escapeHtml(student.student_id)}</span>
-                </div>
-                <div class="student-col course">
-                    <span class="student-course">${escapeHtml(student.course)}</span>
-                </div>
-                <div class="student-col year-section">
-                    <span class="student-year">${escapeHtml(yearSection)}</span>
-                </div>
-                <div class="student-col duration">
-                    <div class="duration-info">
-                        <span class="duration-days">${student.duration_days} days</span>
-                        <small class="date-range">${formatDate(student.start_date)} - ${formatDate(student.end_date)}</small>
-                    </div>
-                </div>
-                <div class="student-col status">
-                    <span class="student-status ${statusClass}">
-                        <i class='bx ${getStudentStatusIcon(student.status)}'></i>
-                        ${student.status || 'Active'}
-                    </span>
-                </div>
-            </div>
-        `;
-    });
-
-    studentsList.innerHTML = html;
-}
-
-function getStudentStatusClass(status) {
-    const statusLower = (status || 'active').toLowerCase();
-    switch(statusLower) {
-        case 'active': return 'status-active';
-        case 'completed': return 'status-completed';
-        case 'terminated': return 'status-terminated';
-        case 'on_leave': return 'status-on-leave';
-        default: return 'status-unknown';
-    }
-}
-
-function getStudentStatusIcon(status) {
-    const statusLower = (status || 'active').toLowerCase();
-    switch(statusLower) {
-        case 'active': return 'bx-check-circle';
-        case 'completed': return 'bx-award';
-        case 'terminated': return 'bx-x-circle';
-        case 'on_leave': return 'bx-time';
-        default: return 'bx-help-circle';
-    }
-}
-
-function formatDateTime(dateTimeString) {
-    if (!dateTimeString) return '-';
-
-    try {
-        const date = new Date(dateTimeString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    } catch (e) {
-        return dateTimeString;
-    }
-}
-
-function formatDate(dateString) {
-    if (!dateString) return '-';
-
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    } catch (e) {
-        return dateString;
-    }
-}
-
-function showCompanyModal() {
     const modal = document.getElementById('companyViewModal');
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
+
+    // Clear previous content
+    document.getElementById('viewCompanyName').textContent = '-';
+    document.getElementById('viewCompanyAddress').textContent = '-';
+    document.getElementById('viewCompanyContact').textContent = '-';
+    document.getElementById('viewCompanyContactLinks').innerHTML = '';
+    document.getElementById('viewCompanyStatus').textContent = '-';
+    document.getElementById('viewCompanyDescription').innerHTML = '';
+    document.getElementById('viewCompanyPhone').textContent = '-';
+    document.getElementById('viewCompanyEmail').textContent = '-';
+    document.getElementById('viewCompanyWebsite').textContent = '-';
+    document.getElementById('viewCompanyCreatedAt').textContent = '-';
+    document.getElementById('viewCompanyUpdatedAt').textContent = '-';
+
+    // Hide description section initially
+    const descriptionSection = document.getElementById('viewCompanyDescriptionSection');
+    descriptionSection.style.display = 'none';
+
+    // Fetch company data
+    fetch(`/ojt-company/${companyId}/`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const company = data.company;
+
+            // Basic Information
+            document.getElementById('viewCompanyName').textContent = company.name;
+            document.getElementById('viewCompanyAddress').textContent = company.address;
+            document.getElementById('viewCompanyContact').textContent = company.contact_number;
+
+            // Contact Links
+            const contactLinksDiv = document.getElementById('viewCompanyContactLinks');
+            if (company.email) {
+                contactLinksDiv.innerHTML += `
+                    <a href="mailto:${company.email}" class="contact-link email-link">
+                        <i class='bx bx-envelope'></i> ${company.email}
+                    </a>
+                `;
+            }
+            if (company.website) {
+                contactLinksDiv.innerHTML += `
+                    <a href="${company.website}" target="_blank" class="contact-link website-link">
+                        <i class='bx bx-globe'></i> Visit Website
+                    </a>
+                `;
+            }
+
+            // Status
+            const statusBadge = document.getElementById('viewCompanyStatus');
+            statusBadge.textContent = company.status;
+            statusBadge.className = 'status-badge ' + (company.is_archived ? 'status-archived' : 'status-available');
+
+            // Description
+            if (company.description) {
+                descriptionSection.style.display = 'block';
+                document.getElementById('viewCompanyDescription').innerHTML = company.description;
+            }
+
+            // Contact Details
+            document.getElementById('viewCompanyPhone').textContent = company.contact_number || '-';
+            document.getElementById('viewCompanyEmail').textContent = company.email || '-';
+            document.getElementById('viewCompanyWebsite').innerHTML = company.website ?
+                `<a href="${company.website}" target="_blank">${company.website}</a>` : '-';
+
+            // Timeline
+            document.getElementById('viewCompanyCreatedAt').textContent = company.created_at || '-';
+            document.getElementById('viewCompanyUpdatedAt').textContent = company.updated_at || '-';
+        } else {
+            showErrorToast('Failed to load company details');
+            closeCompanyViewModal();
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching company details:', error);
+        showErrorToast('Failed to load company details');
+        closeCompanyViewModal();
+    });
 }
 
 function closeCompanyViewModal() {
     const modal = document.getElementById('companyViewModal');
     modal.classList.remove('active');
     document.body.style.overflow = '';
-
-    // Clear previous data
-    clearCompanyModalData();
 }
-
-function clearCompanyModalData() {
-    const elementsToClear = [
-        'viewCompanyName', 'viewCompanyAddress', 'viewCompanyContact',
-        'viewCompanyTotalSlots', 'viewCompanyFilledSlots', 'viewCompanyAvailableSlots',
-        'viewCompanyUtilization', 'viewCompanyStatus', 'viewCompanyCreatedAt',
-        'viewCompanyUpdatedAt', 'viewCompanyContactLinks', 'viewCompanyDescription',
-        'viewStudentsCount', 'viewCompanyStudentsList'
-    ];
-
-    elementsToClear.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) element.textContent = '';
-    });
-
-    // Hide description section
-    const descriptionSection = document.getElementById('viewCompanyDescriptionSection');
-    if (descriptionSection) descriptionSection.style.display = 'none';
-}
-
-function showCompanyLoadingState(show) {
-    const modal = document.getElementById('companyViewModal');
-    const modalContent = modal.querySelector('.modal-container');
-
-    if (show) {
-        if (!modal.querySelector('#companyModalLoadingOverlay')) {
-            const overlay = document.createElement('div');
-            overlay.id = 'companyModalLoadingOverlay';
-            overlay.className = 'modal-loading-overlay';
-            overlay.innerHTML = `
-                <div class="loading-spinner"></div>
-                <span class="loading-text">Loading company details...</span>
-            `;
-            modalContent.appendChild(overlay);
-        }
-    } else {
-        const overlay = modal.querySelector('#companyModalLoadingOverlay');
-        if (overlay) overlay.remove();
-    }
-}
-
-function handleCompanyResponse(response) {
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-}
-
-function handleCompanyError(error) {
-    console.error('Error loading company details:', error);
-    showErrorToast(error.message || 'Failed to load company details');
-}
-
-// Make functions globally available
-window.openCompanyViewModal = openCompanyViewModal;
-window.closeCompanyViewModal = closeCompanyViewModal;
 
 // --------------------------------------------- OJT Company Edit Function ---------------------------------------------
 function openCompanyEditModal(companyId) {
@@ -1041,41 +796,88 @@ function populateCompanyEditForm(company) {
     document.getElementById('editCompanyName').value = company.name;
     document.getElementById('editCompanyAddress').value = company.address;
     document.getElementById('editCompanyContactNumber').value = company.contact_number;
-    document.getElementById('editCompanyAvailableSlots').value = company.available_slots;
     document.getElementById('editCompanyEmail').value = company.email || '';
     document.getElementById('editCompanyDescription').value = company.description || '';
     document.getElementById('editCompanyWebsite').value = company.website || '';
 
-    // Set current status display
-    const statusElement = document.getElementById('editCompanyCurrentStatus');
-    statusElement.textContent = company.status;
-    statusElement.className = 'status-badge';
-    switch(company.status.toLowerCase()) {
-        case 'available':
-            statusElement.classList.add('status-available');
-            break;
-        case 'limited':
-            statusElement.classList.add('status-limited');
-            break;
-        case 'full':
-            statusElement.classList.add('status-full');
-            break;
-        case 'archived':
-            statusElement.classList.add('status-archived');
-            break;
-        default:
-            statusElement.classList.add('status-unknown');
+    // Set status select value
+    const statusSelect = document.getElementById('editCompanyStatus');
+    if (statusSelect) {
+        statusSelect.value = company.status;
     }
 
-    // Set capacity statistics
-    document.getElementById('editCompanyTotalSlots').textContent = company.available_slots;
-    document.getElementById('editCompanyFilledSlots').textContent = company.filled_slots;
-    document.getElementById('editCompanyRemainingSlots').textContent = company.remaining_slots;
-    document.getElementById('editCompanyUtilizationRate').textContent = `${company.utilization_rate}%`;
+    // Set current status display
+    const statusElement = document.getElementById('editCompanyCurrentStatus');
+    if (statusElement) {
+        statusElement.textContent = company.status.charAt(0).toUpperCase() + company.status.slice(1);
+
+        // Set status badge class
+        let statusClass = '';
+        if (company.is_archived) {
+            statusClass = 'status-archived';
+        } else if (company.status === 'active') {
+            statusClass = 'status-active';
+        } else if (company.status === 'inactive') {
+            statusClass = 'status-inactive';
+        }
+        statusElement.className = 'status-badge ' + statusClass;
+    }
 
     // Set form action
     const form = document.getElementById('companyEditForm');
     form.action = `/ojt-company/${company.id}/edit/`;
+
+    // Initialize status change warning
+    initializeStatusChangeWarning();
+}
+
+function initializeStatusChangeWarning() {
+    const statusSelect = document.getElementById('editCompanyStatus');
+    const currentStatusElement = document.getElementById('editCompanyCurrentStatus');
+    const warningDiv = document.getElementById('statusChangeWarning');
+    const warningText = document.getElementById('statusWarningText');
+
+    if (!statusSelect || !currentStatusElement || !warningDiv || !warningText) {
+        return;
+    }
+
+    const currentStatus = currentStatusElement.textContent.toLowerCase();
+    const initialStatus = statusSelect.value;
+
+    // Set initial state
+    if (initialStatus && initialStatus !== currentStatus) {
+        showStatusWarning(currentStatus, initialStatus);
+    } else {
+        warningDiv.style.display = 'none';
+    }
+
+    // Listen for changes
+    statusSelect.addEventListener('change', function() {
+        if (this.value && this.value !== currentStatus) {
+            showStatusWarning(currentStatus, this.value);
+        } else {
+            warningDiv.style.display = 'none';
+        }
+    });
+}
+
+function showStatusWarning(currentStatus, newStatus) {
+    const warningDiv = document.getElementById('statusChangeWarning');
+    const warningText = document.getElementById('statusWarningText');
+
+    if (!warningDiv || !warningText) {
+        return;
+    }
+
+    if (currentStatus === 'active' && newStatus === 'inactive') {
+        warningText.textContent = 'Setting company to inactive will hide it from student selections and reduce its visibility.';
+        warningDiv.style.display = 'flex';
+    } else if (currentStatus === 'inactive' && newStatus === 'active') {
+        warningText.textContent = 'Setting company to active will make it available for student selections and increase its visibility.';
+        warningDiv.style.display = 'flex';
+    } else {
+        warningDiv.style.display = 'none';
+    }
 }
 
 function showCompanyEditModal() {
@@ -1096,8 +898,19 @@ function closeCompanyEditModal() {
 
     // Clear form and errors
     document.getElementById('companyEditFormResponse').innerHTML = '';
-    document.querySelectorAll('#companyEditModal .form-input').forEach(el => el.classList.remove('error'));
+    const warningDiv = document.getElementById('statusChangeWarning');
+    if (warningDiv) {
+        warningDiv.style.display = 'none';
+    }
+
+    document.querySelectorAll('#companyEditModal .form-input, #companyEditModal .form-select').forEach(el => el.classList.remove('error'));
     document.querySelectorAll('#companyEditModal .error-message').forEach(el => el.remove());
+
+    // Reset status warning
+    const warningText = document.getElementById('statusWarningText');
+    if (warningText) {
+        warningText.textContent = '';
+    }
 }
 
 function showCompanyEditLoadingState(show) {
@@ -1145,7 +958,7 @@ document.getElementById('companyEditForm').addEventListener('submit', function(e
     formResponse.innerHTML = '';
 
     // Clear previous errors
-    document.querySelectorAll('#companyEditModal .form-input').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('#companyEditModal .form-input, #companyEditModal .form-select').forEach(el => el.classList.remove('error'));
     document.querySelectorAll('#companyEditModal .error-message').forEach(el => el.remove());
 
     // Validate required fields
@@ -1220,6 +1033,18 @@ document.getElementById('companyEditForm').addEventListener('submit', function(e
         return;
     }
 
+    // Validate status field
+    const statusSelect = document.getElementById('editCompanyStatus');
+    if (statusSelect && !statusSelect.value) {
+        statusSelect.classList.add('error');
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = 'Please select a status for the company';
+        statusSelect.parentNode.appendChild(errorDiv);
+        submitBtn.classList.remove('is-loading');
+        return;
+    }
+
     fetch(form.action, {
         method: 'POST',
         body: formData,
@@ -1236,20 +1061,25 @@ document.getElementById('companyEditForm').addEventListener('submit', function(e
     })
     .then(data => {
         if (data.success) {
-            showSuccessToast('Company updated successfully!');
+            let successMessage = 'Company updated successfully!';
+            if (data.status_changed) {
+                successMessage = 'Company updated successfully! Status has been changed.';
+            }
+
+            showSuccessToast(successMessage);
             formResponse.innerHTML = `
                 <div class="response-message response-success">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#52c41a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                         <polyline points="22 4 12 14.01 9 11.01"></polyline>
                     </svg>
-                    Company updated successfully! Refreshing data...
+                    ${successMessage} Refreshing data...
                 </div>
             `;
 
             setTimeout(() => {
                 closeCompanyEditModal();
-                refreshCompaniesTable(); // Refresh the table instead of reloading the page
+                window.location.reload();
             }, 1500);
         } else {
             showFormErrors(form, data.errors);
@@ -1346,6 +1176,30 @@ document.getElementById('editCompanyEmail').addEventListener('blur', function(e)
     }
 });
 
+// Add status validation for edit form
+const statusSelect = document.getElementById('editCompanyStatus');
+if (statusSelect) {
+    statusSelect.addEventListener('change', function(e) {
+        const input = e.target;
+        const value = input.value.trim();
+
+        if (!value) {
+            input.classList.add('error');
+            const existingError = input.parentNode.querySelector('.error-message');
+            if (!existingError) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = 'Please select a status';
+                input.parentNode.appendChild(errorDiv);
+            }
+        } else {
+            input.classList.remove('error');
+            const existingError = input.parentNode.querySelector('.error-message');
+            if (existingError) existingError.remove();
+        }
+    });
+}
+
 // Auto-format website URL for edit form
 document.getElementById('editCompanyWebsite').addEventListener('blur', function(e) {
     const input = e.target;
@@ -1356,6 +1210,108 @@ document.getElementById('editCompanyWebsite').addEventListener('blur', function(
         input.value = value;
     }
 });
+
+// Inject CSS for status badges and styling
+function injectStatusStyles() {
+    if (document.getElementById('company-status-styles')) {
+        return;
+    }
+
+    const style = document.createElement('style');
+    style.id = 'company-status-styles';
+    style.textContent = `
+        .status-badge.status-active {
+            background-color: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+        .status-badge.status-inactive {
+            background-color: #fff7e6;
+            color: #fa8c16;
+            border: 1px solid #ffd591;
+        }
+        .status-badge.status-archived {
+            background-color: #fff2f0;
+            color: #ff4d4f;
+            border: 1px solid #ffccc7;
+        }
+        .form-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+        .form-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .alert-warning {
+            background-color: #fff7e6;
+            border: 1px solid #ffd591;
+            color: #fa8c16;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .alert-warning svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .current-status {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .current-status .help-text {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        .form-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: white;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: border-color 0.2s;
+        }
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .form-select.error {
+            border-color: #f5222d;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Inject styles when document is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectStatusStyles);
+} else {
+    injectStatusStyles();
+}
 
 // Make functions globally available
 window.openCompanyEditModal = openCompanyEditModal;
@@ -1400,8 +1356,6 @@ function populateCompanyArchiveModal(company) {
     document.getElementById('archiveCompanyContact').textContent = company.contact_number || 'Not provided';
     document.getElementById('archiveCompanyEmail').textContent = company.email || 'Not provided';
     document.getElementById('archiveCompanyWebsite').textContent = company.website || 'Not provided';
-    document.getElementById('archiveCompanyStudents').textContent = company.total_students || 0;
-    document.getElementById('archiveCompanySlots').textContent = `${company.remaining_slots || 0}/${company.available_slots || 0}`;
 
     // Truncate description if too long
     const descriptionText = company.description || 'No description provided';
@@ -1411,40 +1365,8 @@ function populateCompanyArchiveModal(company) {
 
     // Set status badge
     const statusElement = document.getElementById('archiveCompanyStatus');
-    statusElement.textContent = company.status;
-    statusElement.className = 'status-badge';
-    switch(company.status.toLowerCase()) {
-        case 'available':
-            statusElement.classList.add('status-available');
-            break;
-        case 'limited':
-            statusElement.classList.add('status-limited');
-            break;
-        case 'full':
-            statusElement.classList.add('status-full');
-            break;
-        case 'archived':
-            statusElement.classList.add('status-archived');
-            break;
-        default:
-            statusElement.classList.add('status-unknown');
-    }
-
-    // Show/hide active students warning
-    const activeStudentsWarning = document.getElementById('activeStudentsWarning');
-    const activeStudentsCount = document.getElementById('activeStudentsCount');
-    const totalStudents = company.total_students || 0;
-
-    if (totalStudents > 0) {
-        activeStudentsCount.textContent = totalStudents;
-        activeStudentsWarning.style.display = 'flex';
-
-        // Update button text to reflect impact
-        const submitBtn = document.getElementById('archiveSubmitBtn');
-        submitBtn.querySelector('.btn-text').textContent = `Archive (${totalStudents} Active Students)`;
-    } else {
-        activeStudentsWarning.style.display = 'none';
-    }
+    statusElement.textContent = company.is_archived ? 'Archived' : 'Active';
+    statusElement.className = 'status-badge ' + (company.is_archived ? 'status-archived' : 'status-available');
 
     // Set form action
     const form = document.getElementById('companyArchiveForm');
@@ -1513,16 +1435,6 @@ document.getElementById('companyArchiveForm').addEventListener('submit', functio
     submitBtn.classList.add('is-loading');
     formResponse.innerHTML = '';
 
-    // Show confirmation for companies with active students
-    const totalStudents = parseInt(document.getElementById('archiveCompanyStudents').textContent) || 0;
-    if (totalStudents > 0) {
-        const confirmed = confirm(`This company has ${totalStudents} active student(s). Are you sure you want to archive it? Existing student records will be preserved.`);
-        if (!confirmed) {
-            submitBtn.classList.remove('is-loading');
-            return;
-        }
-    }
-
     fetch(form.action, {
         method: 'POST',
         headers: {
@@ -1556,7 +1468,7 @@ document.getElementById('companyArchiveForm').addEventListener('submit', functio
 
             setTimeout(() => {
                 closeCompanyArchiveModal();
-                refreshCompaniesTable(); // Refresh the table instead of reloading the page
+                window.location.reload();
             }, 1500);
         } else {
             showErrorToast(data.error || `Failed to archive "${companyName}"`);
@@ -1595,9 +1507,7 @@ window.openCompanyArchiveModal = openCompanyArchiveModal;
 window.closeCompanyArchiveModal = closeCompanyArchiveModal;
 
 // ------------------------------------------- Company Export Function -------------------------------------------------
-let availableCompanies = [];
 let exportCompaniesUrl = '';
-let isCompaniesLoading = false;
 
 function openCompanyExportModal() {
     // Set current time
@@ -1614,9 +1524,8 @@ function openCompanyExportModal() {
         return;
     }
 
-    // Reset form and load companies
+    // Reset form and update preview
     resetExportForm();
-    loadAvailableCompanies();
     updateExportPreview();
 
     const modal = document.getElementById('companyExportModal');
@@ -1636,10 +1545,9 @@ function closeCompanyExportModal() {
 function resetExportForm() {
     // Reset form to default state
     document.getElementById('exportType').value = 'all';
-    document.getElementById('specificCompany').value = '';
+    document.getElementById('statusFilter').value = 'active';
     document.getElementById('exportCompanyTitle').value = 'OJT Companies Report';
-    document.getElementById('includeStudents').checked = true;
-    document.getElementById('specificCompanySection').style.display = 'none';
+    document.getElementById('statusFilterSection').style.display = 'none';
 
     // Clear any existing errors
     const formResponse = document.getElementById('companyExportFormResponse');
@@ -1651,184 +1559,61 @@ function resetExportForm() {
     submitBtn.title = '';
 }
 
-function loadAvailableCompanies() {
-    if (!exportCompaniesUrl) {
-        console.error('Export URL not set');
-        return;
-    }
-
-    // Prevent multiple simultaneous requests
-    if (isCompaniesLoading) {
-        return;
-    }
-
-    isCompaniesLoading = true;
-    const dropdown = document.getElementById('specificCompany');
-    const url = `${exportCompaniesUrl}?get_companies=true`;
-
-    // Show loading state in dropdown
-    dropdown.innerHTML = '<option value="">Loading companies...</option>';
-    dropdown.disabled = true;
-
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Companies data received:', data);
-
-        // Handle different response formats
-        if (data.success && data.companies) {
-            availableCompanies = data.companies;
-        } else if (Array.isArray(data)) {
-            availableCompanies = data;
-        } else if (data.companies && Array.isArray(data.companies)) {
-            availableCompanies = data.companies;
-        } else {
-            throw new Error('Invalid companies data format');
-        }
-
-        populateCompanyDropdown();
-    })
-    .catch(error => {
-        console.error('Error loading companies:', error);
-        showErrorToast('Failed to load companies list: ' + error.message);
-
-        // Show error in dropdown
-        dropdown.innerHTML = '<option value="">Error loading companies</option>';
-        dropdown.disabled = true;
-    })
-    .finally(() => {
-        isCompaniesLoading = false;
-    });
-}
-
-function populateCompanyDropdown() {
-    const dropdown = document.getElementById('specificCompany');
-    if (!dropdown) {
-        console.error('Specific company dropdown not found');
-        return;
-    }
-
-    dropdown.innerHTML = '<option value="">Select a company...</option>';
-    dropdown.disabled = false;
-
-    if (!availableCompanies || availableCompanies.length === 0) {
-        console.warn('No companies available for dropdown');
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'No companies available';
-        option.disabled = true;
-        dropdown.appendChild(option);
-        dropdown.disabled = true;
-        return;
-    }
-
-    console.log('Populating dropdown with', availableCompanies.length, 'companies');
-
-    // Sort companies alphabetically
-    availableCompanies.sort((a, b) => a.name.localeCompare(b.name));
-
-    availableCompanies.forEach(company => {
-        const option = document.createElement('option');
-        option.value = company.id;
-        option.textContent = company.name;
-        dropdown.appendChild(option);
-    });
-
-    // Update preview if specific company is selected
-    updateExportPreview();
-}
-
 function handleExportTypeChange() {
     const exportType = document.getElementById('exportType').value;
-    const specificCompanySection = document.getElementById('specificCompanySection');
+    const statusFilterSection = document.getElementById('statusFilterSection');
 
-    if (exportType === 'specific') {
-        specificCompanySection.style.display = 'block';
-        // Load companies if not already loaded or if empty
-        if (availableCompanies.length === 0) {
-            loadAvailableCompanies();
-        }
+    if (exportType === 'by_status') {
+        statusFilterSection.style.display = 'block';
     } else {
-        specificCompanySection.style.display = 'none';
+        statusFilterSection.style.display = 'none';
     }
     updateExportPreview();
 }
 
 function updateExportPreview() {
     const exportType = document.getElementById('exportType').value;
-    const includeStudents = document.getElementById('includeStudents').checked;
-    const specificCompany = document.getElementById('specificCompany');
-    const selectedCompanyName = specificCompany.options[specificCompany.selectedIndex]?.text || '-';
+    const statusFilter = document.getElementById('statusFilter').value;
     const exportTitle = document.getElementById('exportCompanyTitle').value || 'OJT Companies Report';
 
     // Update preview texts
-    document.getElementById('previewExportType').textContent = getExportTypeDisplay(exportType);
-    document.getElementById('previewSelectedCompany').textContent = selectedCompanyName;
-    document.getElementById('previewIncludesStudents').textContent = includeStudents ? 'Yes' : 'No';
+    const exportTypeDisplay = exportType === 'all' ? 'All Companies' : 'By Status';
+    document.getElementById('previewExportType').textContent = exportTypeDisplay;
+
+    const statusFilterDisplay = exportType === 'by_status'
+        ? (statusFilter === 'active' ? 'Active Companies' : 'Inactive Companies')
+        : '-';
+    document.getElementById('previewStatusFilter').textContent = statusFilterDisplay;
+
+    // Template has these 5 columns based on your model
+    document.getElementById('previewColumns').textContent =
+    'Name, Address, Contact No, Email, Description, Status, Website';
 
     // Update submit button state
     const submitBtn = document.getElementById('exportSubmitBtn');
-    if (exportType === 'specific' && !specificCompany.value) {
-        submitBtn.disabled = true;
-        submitBtn.title = 'Please select a company';
-    } else {
-        submitBtn.disabled = false;
-        submitBtn.title = '';
-    }
+    submitBtn.disabled = false;
+    submitBtn.title = '';
 
     // Update summary information
-    updateExportSummary(exportType, includeStudents, exportTitle);
+    updateExportSummary(exportType, exportTitle, statusFilter);
 }
 
-function updateExportSummary(exportType, includeStudents, exportTitle) {
-    const summaryItems = document.querySelectorAll('.summary-item');
-
-    // Update format info based on selections
-    let formatText = 'Professional Excel report';
-    if (exportType === 'specific') {
-        formatText += ' (Single Company)';
+function updateExportSummary(exportType, exportTitle, statusFilter) {
+    // Update format info in summary
+    const formatElement = document.querySelector('.summary-item:first-child div');
+    if (formatElement) {
+        let formatText = 'Professional Template';
+        if (exportType === 'by_status') {
+            const statusText = statusFilter === 'active' ? 'Active' : 'Inactive';
+            formatText += ` (${statusText} Only)`;
+        }
+        formatElement.innerHTML = `<strong>Format:</strong> ${formatText}`;
     }
-
-    // Update includes info
-    let includesText = 'Company info, slots, status';
-    if (includeStudents) {
-        includesText += ', students';
-    }
-
-    // You can update specific summary items here if needed
-    console.log('Export Summary:', { exportType, includeStudents, exportTitle });
-}
-
-function getExportTypeDisplay(exportType) {
-    const displayMap = {
-        'all': 'All Companies',
-        'available': 'Available Companies Only',
-        'not_available': 'Not Available Companies Only',
-        'specific': 'Specific Company Only'
-    };
-    return displayMap[exportType] || exportType;
 }
 
 function validateExportForm() {
     const exportType = document.getElementById('exportType').value;
-    const specificCompany = document.getElementById('specificCompany').value;
     const exportTitle = document.getElementById('exportCompanyTitle').value.trim();
-
-    if (exportType === 'specific' && !specificCompany) {
-        return 'Please select a company to export';
-    }
 
     if (!exportTitle) {
         return 'Please enter a report title';
@@ -1853,16 +1638,21 @@ document.getElementById('companyExportForm').addEventListener('submit', function
     const form = this;
     const formData = new FormData(form);
 
-    // FIX: Debug the form data
+    // Add export_option for backward compatibility with Django view
+    const exportType = document.getElementById('exportType').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+
+    if (exportType === 'all') {
+        formData.append('export_option', 'all');
+    } else {
+        formData.append('export_option', statusFilter); // 'active' or 'inactive'
+    }
+
+    // Debug the form data
     console.log('Form data entries:');
     for (let [key, value] of formData.entries()) {
         console.log(`${key}: ${value}`);
     }
-
-    // FIX: Manually set include_students value to ensure it's correct
-    const includeStudentsCheckbox = document.getElementById('includeStudents');
-    formData.set('include_students', includeStudentsCheckbox.checked ? 'true' : 'false');
-    console.log('include_students after manual set:', formData.get('include_students'));
 
     const submitBtn = document.getElementById('exportSubmitBtn');
     const formResponse = document.getElementById('companyExportFormResponse');
@@ -1930,13 +1720,15 @@ document.getElementById('companyExportForm').addEventListener('submit', function
         a.style.display = 'none';
         a.href = url;
 
-        // Generate filename
+        // Generate filename based on export type
         const exportType = document.getElementById('exportType').value;
-        let filename = `OJT_Companies_${exportType}`;
+        const statusFilter = document.getElementById('statusFilter').value;
 
-        if (exportType === 'specific') {
-            const companyName = document.getElementById('specificCompany').options[document.getElementById('specificCompany').selectedIndex].text;
-            filename += `_${companyName.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        let filename = 'OJT_Companies';
+        if (exportType === 'all') {
+            filename += '_All';
+        } else {
+            filename += `_${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}`;
         }
 
         const timestamp = new Date().toISOString().slice(0, 16).replace(/[-:]/g, '').replace('T', '_');
@@ -1982,8 +1774,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update preview when options change
     document.getElementById('exportType').addEventListener('change', updateExportPreview);
-    document.getElementById('includeStudents').addEventListener('change', updateExportPreview);
-    document.getElementById('specificCompany').addEventListener('change', updateExportPreview);
+    document.getElementById('statusFilter').addEventListener('change', updateExportPreview);
     document.getElementById('exportCompanyTitle').addEventListener('input', updateExportPreview);
 
     // Close modal with Escape key

@@ -13,6 +13,9 @@
 
     <form id="editComplaintForm" enctype="multipart/form-data">
       {% csrf_token %}
+      <!-- Hidden field to store current status -->
+      <input type="hidden" id="currentStatus" name="current_status">
+
       <div class="form-body">
         <div class="form-main-layout">
           <div class="complaint-details-column">
@@ -28,6 +31,10 @@
                 <div class="status-option">
                   <input type="radio" id="statusResolved" name="status" value="resolved">
                   <label for="statusResolved">Resolved</label>
+                </div>
+                <div class="status-option">
+                  <input type="radio" id="statusCanceled" name="status" value="canceled">
+                  <label for="statusCanceled">Canceled</label>
                 </div>
               </div>
             </div>
@@ -153,8 +160,8 @@
             </div>
 
             <div class="form-group">
-              <label for="editNotes">Resolution Notes</label>
-              <textarea id="editNotes" name="notes" class="form-control" rows="3" placeholder="Enter resolution details if complaint is resolved"></textarea>
+              <label for="editNotes">Notes</label>
+              <textarea id="editNotes" name="notes" class="form-control" rows="3" placeholder="Enter notes..."></textarea>
             </div>
           </div>
 

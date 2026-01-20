@@ -74,8 +74,6 @@
                 <th data-sort="reference_number">Ref No. <i class='bx bx-sort'></i></th>
                 <th data-sort="title">Title <i class='bx bx-sort'></i></th>
                 <th data-sort="complainant">Complainant <i class='bx bx-sort'></i></th>
-                <th data-sort="incident_date">Incident Date <i class='bx bx-sort'></i></th>
-                <th data-sort="created_at">Date Submitted <i class='bx bx-sort'></i></th>
                 <th data-sort="updated_at">Date Resolved <i class='bx bx-sort'></i></th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -87,8 +85,6 @@
                 <td>{{ complaint.reference_number }}</td>
                 <td>{{ complaint.title }}</td>
                 <td>{{ complaint.complainant_first_name }} {{ complaint.complainant_last_name }}</td>
-                <td>{{ complaint.incident_date|date:"M d, Y" }}</td>
-                <td>{{ complaint.created_at|date:"M d, Y" }}</td>
                 <td>{{ complaint.updated_at|date:"M d, Y" }}</td>
                 <td>
                     <span class="status-badge resolved">

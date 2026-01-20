@@ -4,7 +4,7 @@
     <div class="modal-header">
       <div class="header-content">
         <h2>Export OJT Companies Data</h2>
-        <p class="header-description">Choose what companies to export</p>
+        <p class="header-description">Export companies using professional template</p>
       </div>
       <button class="modal-close" onclick="closeCompanyExportModal()">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -23,7 +23,7 @@
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
-          <p>Export company information with optional student lists in Excel format.</p>
+          <p>Export company information using the professional OJT Company Template format.</p>
         </div>
 
         <div id="companyExportFormResponse" class="form-response"></div>
@@ -37,41 +37,45 @@
                 <label for="exportType">Companies to Export</label>
                 <select id="exportType" name="export_type" class="form-input" onchange="handleExportTypeChange()">
                   <option value="all">All Companies</option>
-                  <option value="available">Available Companies Only</option>
-                  <option value="not_available">Not Available Companies Only</option>
-                  <option value="specific">Specific Company Only</option>
+                  <option value="by_status">By Status</option>
                 </select>
               </div>
 
-              <div id="specificCompanySection" class="form-group" style="display: none;">
-                <label for="specificCompany">Select Company</label>
-                <select id="specificCompany" name="specific_company" class="form-input">
-                  <option value="">Select a company...</option>
+              <div id="statusFilterSection" class="form-group" style="display: none;">
+                <label for="statusFilter">Select Status</label>
+                <select id="statusFilter" name="status_filter" class="form-input">
+                  <option value="active">Active Companies</option>
+                  <option value="inactive">Inactive Companies</option>
                 </select>
-                <small class="form-hint">Choose one company to export</small>
+                <small class="form-hint">Choose whether to export active or inactive companies</small>
               </div>
 
               <div class="form-group">
                 <label for="exportCompanyTitle">Report Title</label>
                 <input type="text" id="exportCompanyTitle" name="export_title" class="form-input"
                        placeholder="OJT Companies Report" value="OJT Companies Report">
+                <small class="form-hint">This will appear as the main title in the exported file</small>
               </div>
 
               <div class="form-group">
-                <label class="checkbox-label">
-                  <input type="checkbox" id="includeStudents" name="include_students" checked>
-                  <span>Include student lists</span>
-                </label>
-                <small class="form-hint">Include current OJT students for each company</small>
+                <div class="template-info">
+                  <i class='bx bx-file'></i>
+                  <div>
+                    <strong>Using Template:</strong> OJTTemplate.xlsx
+                    <br>
+                    <small>Data will be populated into the pre-designed template format</small>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <div class="form-section">
+            <div class="form-section">
               <h3 class="section-title">Export Summary</h3>
               <div class="export-summary">
                 <div class="summary-item">
                   <i class='bx bx-info-circle'></i>
                   <div>
-                    <strong>Format:</strong> Professional Excel report
+                    <strong>Format:</strong> Professional Template
                   </div>
                 </div>
                 <div class="summary-item">
@@ -83,11 +87,10 @@
                 <div class="summary-item">
                   <i class='bx bx-data'></i>
                   <div>
-                    <strong>Includes:</strong> Company info, slots, status, students
+                    <strong>Template:</strong> OJTTemplate.xlsx
                   </div>
                 </div>
               </div>
-            </div>
             </div>
           </div>
 
@@ -100,21 +103,54 @@
                   <span id="previewExportType">All Companies</span>
                 </div>
                 <div class="preview-item">
-                  <strong>Selected Company:</strong>
-                  <span id="previewSelectedCompany">-</span>
-                </div>
-                <div class="preview-item">
-                  <strong>Includes Students:</strong>
-                  <span id="previewIncludesStudents">Yes</span>
+                  <strong>Status Filter:</strong>
+                  <span id="previewStatusFilter">-</span>
                 </div>
                 <div class="preview-item">
                   <strong>File Format:</strong>
-                  <span>Excel (.xlsx)</span>
+                  <span>Excel (.xlsx) with Template</span>
                 </div>
                 <div class="preview-item">
-                  <strong>Content:</strong>
-                  <span>Company details + OJT student lists</span>
+                  <strong>Columns Included:</strong>
+                  <span id="previewColumns">Company Name, Address, Contact Number, Email, Status</span>
                 </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3 class="section-title">Template Columns</h3>
+              <div class="template-columns">
+                <div class="columns-grid">
+                  <div class="column-item">
+                    <span class="column-number">A</span>
+                    <span class="column-name">Name</span>
+                  </div>
+                  <div class="column-item">
+                    <span class="column-number">B</span>
+                    <span class="column-name">Address</span>
+                  </div>
+                  <div class="column-item">
+                    <span class="column-number">C</span>
+                    <span class="column-name">Contact No</span>
+                  </div>
+                  <div class="column-item">
+                    <span class="column-number">D</span>
+                    <span class="column-name">Email</span>
+                  </div>
+                  <div class="column-item">
+                    <span class="column-number">E</span>
+                    <span class="column-name">Description</span>
+                  </div>
+                  <div class="column-item">
+                    <span class="column-number">F</span>
+                    <span class="column-name">Status</span>
+                  </div>
+                  <div class="column-item">
+                    <span class="column-number">G</span>
+                    <span class="column-name">Website</span>
+                  </div>
+                </div>
+                <small class="form-hint">Data will be populated exactly matching the template layout</small>
               </div>
             </div>
           </div>
@@ -130,7 +166,7 @@
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            Export to Excel
+            Export
           </span>
           <span class="btn-loader">
             <svg viewBox="0 0 50 50">

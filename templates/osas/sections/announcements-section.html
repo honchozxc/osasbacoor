@@ -134,7 +134,7 @@
                 {% for announcement in announcements %}
                 <tr data-id="{{ announcement.id }}" data-created="{{ announcement.created_at|date:'Y-m-d H:i' }}">
                     <td>{{ announcement.id }}</td>
-                    <td>{{ announcement.title }}</td>
+                    <td><span title="{{ announcement.title }}">{{ announcement.title }}</span></td>
                     <td>{{ announcement.get_category_display }}</td>
                     <td>{{ announcement.author.get_full_name }}</td>
                     <td>{{ announcement.created_at|date:"Y-m-d H:i" }}</td>

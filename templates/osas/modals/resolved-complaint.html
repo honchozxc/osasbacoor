@@ -1,45 +1,91 @@
-<!-- Resolve Confirmation Modal -->
-<div id="resolveModal" class="modal">
+<div id="statusUpdateModal" class="modal">
     <div class="modal-overlay"></div>
     <div class="modal-container">
         <div class="modal-header">
             <div class="header-content">
-                <h2>Confirm Resolution</h2>
-                <p class="header-description">Mark this complaint as resolved</p>
+                <h2>Update Complaint Status</h2>
+                <p class="header-description">Update the status of this complaint</p>
             </div>
-            <button class="modal-close close-modal">
+            <button class="modal-close close-status-modal">
                 <i class='bx bx-x'></i>
             </button>
         </div>
 
         <div class="form-body">
-            <div class="form-intro">
-                <i class='bx bx-info-circle'></i>
-                <p>Are you sure you want to mark this complaint as resolved? This action cannot be undone.</p>
-            </div>
-
-            <!-- Added complaint details section -->
+            <!-- Complaint Details -->
             <div class="complaint-details">
                 <div class="detail-row">
                     <span class="detail-label">Reference #:</span>
-                    <span class="detail-value" id="resolveRefNumber"></span>
+                    <span class="detail-value" id="statusRefNumber"></span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Title:</span>
-                    <span class="detail-value" id="resolveTitle"></span>
+                    <span class="detail-value" id="statusTitle"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Complainant:</span>
+                    <span class="detail-value" id="statusComplainant"></span>
                 </div>
             </div>
 
+            <!-- Status Selection -->
             <div class="form-group">
-                <label for="resolutionNotes">Resolution Notes (Optional)</label>
-                <textarea id="resolutionNotes" class="form-input" rows="4" placeholder="Add any notes about how this complaint was resolved..."></textarea>
+                <label for="statusSelect">Select Status *</label>
+                <select id="statusSelect" class="form-input" required>
+                    <option value="">Choose status...</option>
+                    <option value="1st_hearing">1st Hearing</option>
+                    <option value="2nd_hearing">2nd Hearing</option>
+                    <option value="other_hearing">Other Hearing</option>
+                    <option value="ongoing_hearing">Mark as Ongoing Hearing</option>
+                    <option value="under_review">Return to Under Review</option>
+                    <option value="resolved">Mark as Resolved</option>
+                    <option value="canceled">Cancel Complaint</option>
+                </select>
+            </div>
+
+            <!-- Hearing Details Section (Conditional) -->
+            <div id="hearingDetailsSection" style="display: none;">
+                <div class="form-section-header">
+                    <h3>Hearing Details</h3>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="hearingDate">Date *</label>
+                        <input type="date" id="hearingDate" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hearingTime">Time *</label>
+                        <input type="time" id="hearingTime" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="hearingLocation">Location *</label>
+                    <input type="text" id="hearingLocation" class="form-input"
+                           placeholder="Enter hearing location (e.g., Room 101, Main Building)"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="hearingDescription">Additional Information (Optional)</label>
+                    <textarea id="hearingDescription" class="form-input" rows="3"
+                              placeholder="Any additional details about the hearing..."></textarea>
+                </div>
+            </div>
+
+            <!-- Admin Notes -->
+            <div class="form-group">
+                <label for="statusNotes">Admin Notes (Optional)</label>
+                <textarea id="statusNotes" class="form-input" rows="4"
+                          placeholder="Add any notes about this status change..."></textarea>
             </div>
         </div>
 
         <div class="modal-footer">
-            <button class="btn btn-secondary close-modal">Cancel</button>
-            <button class="btn btn-primary" id="confirmResolve">
-                <span class="btn-text">Confirm Resolution</span>
+            <button class="btn btn-secondary close-status-modal">Cancel</button>
+            <button class="btn btn-primary" id="confirmStatusUpdate">
+                <span class="btn-text">Update Status</span>
             </button>
         </div>
     </div>

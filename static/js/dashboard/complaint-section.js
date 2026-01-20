@@ -3,26 +3,51 @@ document.addEventListener('DOMContentLoaded', function() {
     const exportBtn = document.getElementById('export-complaint-btn');
     const exportResolvedBtn = document.getElementById('export-resolved-btn');
     const exportModal = document.getElementById('exportComplaintModal');
+
+    // Check if modal exists before proceeding
+    if (!exportModal) {
+        console.error('Export modal not found!');
+        return;
+    }
+
     const cancelExportBtn = document.getElementById('cancelComplaintExport');
     const confirmExportBtn = document.getElementById('confirmComplaintExport');
     const closeBtn = exportModal.querySelector('.export-modal-close');
     const exportForm = document.getElementById('exportComplaintForm');
-    const exportOptions = document.querySelectorAll('input[name="export_option"]');
+    const exportOptions = exportModal.querySelectorAll('input[name="export_option"]');
+
+    // Get all options sections
     const respondentOptions = document.getElementById('respondentOptions');
     const statusOptions = document.getElementById('statusOptions');
+    const customOptions = document.getElementById('customOptions');
     const sourceSectionInput = document.getElementById('exportSourceSection');
+
+    // Function to hide all option sections
+    function hideAllOptions() {
+        if (respondentOptions) respondentOptions.style.display = 'none';
+        if (statusOptions) statusOptions.style.display = 'none';
+        if (customOptions) customOptions.style.display = 'none';
+    }
 
     if (exportBtn) {
         exportBtn.addEventListener('click', function() {
-            sourceSectionInput.value = 'under_review';
+            if (sourceSectionInput) {
+                sourceSectionInput.value = 'under_review';
+            }
             exportModal.classList.add('active');
+            // Initialize with correct options visible
+            hideAllOptions();
         });
     }
 
     if (exportResolvedBtn) {
         exportResolvedBtn.addEventListener('click', function() {
-            sourceSectionInput.value = 'resolved';
+            if (sourceSectionInput) {
+                sourceSectionInput.value = 'resolved';
+            }
             exportModal.classList.add('active');
+            // Initialize with correct options visible
+            hideAllOptions();
         });
     }
 
@@ -39,20 +64,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    exportOptions.forEach(option => {
-        option.addEventListener('change', function() {
-            if (this.value === 'by_respondent') {
-                respondentOptions.style.display = 'block';
-                statusOptions.style.display = 'none';
-            } else if (this.value === 'by_status') {
-                respondentOptions.style.display = 'none';
-                statusOptions.style.display = 'block';
-            } else {
-                respondentOptions.style.display = 'none';
-                statusOptions.style.display = 'none';
-            }
+    // Handle export option changes
+    if (exportOptions.length > 0) {
+        exportOptions.forEach(option => {
+            option.addEventListener('change', function() {
+                hideAllOptions();
+
+                switch(this.value) {
+                    case 'by_respondent':
+                        if (respondentOptions) respondentOptions.style.display = 'block';
+                        break;
+                    case 'by_status':
+                        if (statusOptions) statusOptions.style.display = 'block';
+                        break;
+                    case 'custom':
+                        if (customOptions) customOptions.style.display = 'block';
+                        break;
+                    default:
+                        hideAllOptions();
+                }
+            });
         });
-    });
+    }
 
     // Handle export confirmation
     if (confirmExportBtn) {
@@ -241,6 +274,7 @@ function setupFilterEventListeners(type) {
 function createFetchFunction(type) {
     return function() {
         const searchInput = document.getElementById(`${type}-search`);
+        const statusFilter = document.getElementById('statusFilter');
         let dateFilter;
 
         if (type === 'under-review') {
@@ -256,6 +290,7 @@ function createFetchFunction(type) {
 
         const searchTerm = searchInput.value;
         const dateFilterValue = dateFilter.value;
+        const statusFilterValue = type === 'under-review' ? (statusFilter ? statusFilter.value : 'all') : 'resolved';
         const currentPage = new URLSearchParams(window.location.search).get(`${type === 'under-review' ? 'under_review_page' : 'resolved_page'}`) || 1;
 
         // Get current sort values
@@ -296,7 +331,7 @@ function createFetchFunction(type) {
         })
         .then(data => {
             console.log(`Received ${type} complaints data:`, data);
-            updateComplaintsTableWithData(type, data.complaints);
+            updateComplaintsTableWithData(type, data.complaints, statusFilterValue);
             updateComplaintsPaginationControls(type, data);
             hideTableLoading(type);
         })
@@ -313,6 +348,16 @@ function createFetchFunction(type) {
             }
         });
     };
+}
+
+// Add status filter event listener
+const statusFilter = document.getElementById('statusFilter');
+if (statusFilter) {
+    statusFilter.addEventListener('change', function() {
+        if (typeof window.fetchAndDisplayUnderReviewComplaints === 'function') {
+            window.fetchAndDisplayUnderReviewComplaints();
+        }
+    });
 }
 
 function initComplaintsTable(type) {
@@ -536,7 +581,7 @@ function updateComplaintsPaginationControls(type, data) {
     }
 }
 
-function updateComplaintsTableWithData(type, complaints) {
+function updateComplaintsTableWithData(type, complaints, statusFilterValue = 'all') {
     const table = document.getElementById(`${type}-table`);
     if (!table) return;
 
@@ -570,176 +615,131 @@ function updateComplaintsTableWithData(type, complaints) {
     }
 
     complaints.forEach(complaint => {
+        // Apply status filter if specified
+        if (statusFilterValue !== 'all' && complaint.status !== statusFilterValue) {
+            return;
+        }
+
         const row = document.createElement('tr');
         row.dataset.id = complaint.id;
 
+        // Reference Number
+        const refCell = document.createElement('td');
+        refCell.textContent = complaint.reference_number;
+        row.appendChild(refCell);
+
+        // Title
+        const titleCell = document.createElement('td');
+        titleCell.textContent = complaint.title;
+        row.appendChild(titleCell);
+
+        // Complainant
+        const complainantCell = document.createElement('td');
+        complainantCell.textContent = `${complaint.complainant_first_name} ${complaint.complainant_last_name}`;
+        row.appendChild(complainantCell);
+
+        // Date column (incident date for active, updated_at for resolved)
+        const dateCell = document.createElement('td');
         if (type === 'under-review') {
-            row.dataset.created = complaint.created_at;
-
-            // Reference Number
-            const refCell = document.createElement('td');
-            refCell.textContent = complaint.reference_number;
-            row.appendChild(refCell);
-
-            // Title
-            const titleCell = document.createElement('td');
-            titleCell.textContent = complaint.title;
-            row.appendChild(titleCell);
-
-            // Complainant
-            const complainantCell = document.createElement('td');
-            complainantCell.textContent = `${complaint.complainant_first_name} ${complaint.complainant_last_name}`;
-            row.appendChild(complainantCell);
-
-            // Incident Date
-            const incidentDateCell = document.createElement('td');
-            incidentDateCell.textContent = formatDate(complaint.incident_date);
-            row.appendChild(incidentDateCell);
-
-            // Created Date
-            const createdDateCell = document.createElement('td');
-            createdDateCell.textContent = formatDate(complaint.created_at);
-            row.appendChild(createdDateCell);
-
-            // Status
-            const statusCell = document.createElement('td');
-            const statusBadge = document.createElement('span');
-            statusBadge.className = 'status-badge under-review';
-            statusBadge.textContent = 'Under Review';
-            statusCell.appendChild(statusBadge);
-            row.appendChild(statusCell);
-
-            // Actions
-            const actionsCell = document.createElement('td');
-            actionsCell.className = 'actions';
-
-            // Resolve button (for admins)
-            if (complaint.can_resolve) {
-                const resolveBtn = document.createElement('button');
-                resolveBtn.className = 'btn-action resolve btn-icon';
-                resolveBtn.title = 'Mark as Resolved';
-                resolveBtn.setAttribute('data-id', complaint.id);
-                resolveBtn.setAttribute('data-ref', complaint.reference_number);
-                resolveBtn.setAttribute('data-title', complaint.title);
-                resolveBtn.innerHTML = '<i class="bx bx-check"></i>';
-                actionsCell.appendChild(resolveBtn);
-            }
-
-            // View button
-            if (complaint.can_view) {
-                const viewBtn = document.createElement('button');
-                viewBtn.className = 'view-complaint btn-action view btn-icon';
-                viewBtn.setAttribute('data-id', complaint.id);
-                viewBtn.innerHTML = '<i class="bx bx-show"></i>';
-                actionsCell.appendChild(viewBtn);
-            }
-
-            // Edit button
-            if (complaint.can_edit) {
-                const editBtn = document.createElement('button');
-                editBtn.className = 'btn-action edit btn-icon edit-under-review';
-                editBtn.title = 'Edit';
-                editBtn.setAttribute('data-id', complaint.id);
-                editBtn.innerHTML = '<i class="bx bx-edit"></i>';
-                actionsCell.appendChild(editBtn);
-            }
-
-            // Archive button
-            if (complaint.can_delete) {
-                const archiveBtn = document.createElement('button');
-                archiveBtn.className = 'btn-icon archive archive-complaint btn-icon';
-                archiveBtn.title = 'Archive Complaint';
-                archiveBtn.setAttribute('data-id', complaint.id);
-                archiveBtn.setAttribute('data-ref', complaint.reference_number);
-                archiveBtn.setAttribute('data-title', complaint.title);
-                archiveBtn.innerHTML = '<i class="bx bx-archive"></i>';
-                actionsCell.appendChild(archiveBtn);
-            }
-
-            row.appendChild(actionsCell);
+            dateCell.textContent = formatDate(complaint.incident_date);
+            dateCell.dataset.sort = complaint.incident_date;
         } else {
-            row.dataset.updated = complaint.updated_at;
+            dateCell.textContent = formatDate(complaint.updated_at);
+            dateCell.dataset.sort = complaint.updated_at;
+        }
+        row.appendChild(dateCell);
 
-            // Reference Number
-            const refCell = document.createElement('td');
-            refCell.textContent = complaint.reference_number;
-            row.appendChild(refCell);
+        // Status
+        const statusCell = document.createElement('td');
+        let statusClass, statusText;
 
-            // Title
-            const titleCell = document.createElement('td');
-            titleCell.textContent = complaint.title;
-            row.appendChild(titleCell);
+        // Determine status class based on complaint status
+        if (type === 'under-review') {
+            statusText = complaint.status_display || complaint.status;
 
-            // Complainant
-            const complainantCell = document.createElement('td');
-            complainantCell.textContent = `${complaint.complainant_first_name} ${complaint.complainant_last_name}`;
-            row.appendChild(complainantCell);
+            // Map status to CSS classes
+            const statusClassMap = {
+                'under_review': 'under-review',
+                '1st_hearing': 'first-hearing',
+                '2nd_hearing': 'second-hearing',
+                'other_hearing': 'other-hearing',
+                'ongoing_hearing': 'ongoing-hearing',
+                'canceled': 'canceled',
+                'resolved': 'resolved'
+            };
 
-            // Incident Date
-            const incidentDateCell = document.createElement('td');
-            incidentDateCell.textContent = formatDate(complaint.incident_date);
-            row.appendChild(incidentDateCell);
-
-            // Created Date
-            const createdDateCell = document.createElement('td');
-            createdDateCell.textContent = formatDate(complaint.created_at);
-            row.appendChild(createdDateCell);
-
-            // Updated Date (Resolved Date)
-            const updatedDateCell = document.createElement('td');
-            updatedDateCell.textContent = formatDate(complaint.updated_at);
-            row.appendChild(updatedDateCell);
-
-            // Status
-            const statusCell = document.createElement('td');
-            const statusBadge = document.createElement('span');
-            statusBadge.className = 'status-badge resolved';
-            statusBadge.textContent = 'Resolved';
-            statusCell.appendChild(statusBadge);
-            row.appendChild(statusCell);
-
-            // Actions
-            const actionsCell = document.createElement('td');
-            actionsCell.className = 'actions';
-
-            // View button
-            if (complaint.can_view) {
-                const viewBtn = document.createElement('button');
-                viewBtn.className = 'view-complaint btn-action view btn-icon';
-                viewBtn.setAttribute('data-id', complaint.id);
-                viewBtn.innerHTML = '<i class="bx bx-show"></i>';
-                actionsCell.appendChild(viewBtn);
-            }
-
-            // Edit button (for admins)
-            if (complaint.can_edit) {
-                const editBtn = document.createElement('button');
-                editBtn.className = 'btn-action edit btn-icon edit-under-review';
-                editBtn.title = 'Edit';
-                editBtn.setAttribute('data-id', complaint.id);
-                editBtn.innerHTML = '<i class="bx bx-edit"></i>';
-                actionsCell.appendChild(editBtn);
-            }
-
-            // Archive button (for admins)
-            if (complaint.can_delete) {
-                const archiveBtn = document.createElement('button');
-                archiveBtn.className = 'btn-icon archive archive-complaint btn-icon';
-                archiveBtn.title = 'Archive Complaint';
-                archiveBtn.setAttribute('data-id', complaint.id);
-                archiveBtn.setAttribute('data-ref', complaint.reference_number);
-                archiveBtn.setAttribute('data-title', complaint.title);
-                archiveBtn.innerHTML = '<i class="bx bx-archive"></i>';
-                actionsCell.appendChild(archiveBtn);
-            }
-
-            row.appendChild(actionsCell);
+            statusClass = `status-badge ${statusClassMap[complaint.status] || complaint.status.replace('_', '-')}`;
+        } else {
+            // For resolved section
+            statusText = 'Resolved';
+            statusClass = 'status-badge resolved';
         }
 
+        const statusBadge = document.createElement('span');
+        statusBadge.className = statusClass;
+        statusBadge.textContent = statusText;
+        statusCell.appendChild(statusBadge);
+        row.appendChild(statusCell);
+
+        // Next Hearing (only for active complaints)
+        if (type === 'under-review') {
+            const nextHearingCell = document.createElement('td');
+            nextHearingCell.textContent = complaint.next_hearing_display || 'No hearing scheduled';
+            row.appendChild(nextHearingCell);
+        }
+
+        // Actions
+        const actionsCell = document.createElement('td');
+        actionsCell.className = 'actions';
+
+        // Resolve button (only for active complaints and admin users)
+        if (complaint.can_resolve && type === 'under-review') {
+            const resolveBtn = document.createElement('button');
+            resolveBtn.className = 'btn-action resolve btn-icon';
+            resolveBtn.title = 'Update Status';
+            resolveBtn.setAttribute('data-id', complaint.id);
+            resolveBtn.setAttribute('data-ref', complaint.reference_number);
+            resolveBtn.setAttribute('data-title', complaint.title);
+            resolveBtn.innerHTML = '<i class="bx bx-check"></i>';
+            actionsCell.appendChild(resolveBtn);
+        }
+
+        // View button
+        if (complaint.can_view) {
+            const viewBtn = document.createElement('button');
+            viewBtn.className = 'view-complaint btn-action view btn-icon';
+            viewBtn.title = 'View Details';
+            viewBtn.setAttribute('data-id', complaint.id);
+            viewBtn.innerHTML = '<i class="bx bx-show"></i>';
+            actionsCell.appendChild(viewBtn);
+        }
+
+        // Edit button (for admins)
+        if (complaint.can_edit) {
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn-action edit btn-icon edit-under-review';
+            editBtn.title = 'Edit';
+            editBtn.setAttribute('data-id', complaint.id);
+            editBtn.innerHTML = '<i class="bx bx-edit"></i>';
+            actionsCell.appendChild(editBtn);
+        }
+
+        // Archive button (for admins)
+        if (complaint.can_delete) {
+            const archiveBtn = document.createElement('button');
+            archiveBtn.className = 'btn-icon archive archive-complaint btn-icon';
+            archiveBtn.title = 'Archive Complaint';
+            archiveBtn.setAttribute('data-id', complaint.id);
+            archiveBtn.setAttribute('data-ref', complaint.reference_number);
+            archiveBtn.setAttribute('data-title', complaint.title);
+            archiveBtn.innerHTML = '<i class="bx bx-archive"></i>';
+            actionsCell.appendChild(archiveBtn);
+        }
+
+        row.appendChild(actionsCell);
         tbody.appendChild(row);
     });
 
-    // Reattach event listeners to the new buttons
     attachComplaintEventListeners();
 }
 
@@ -836,107 +836,274 @@ function debugComplaintsInit() {
 // Run debug on load
 setTimeout(debugComplaintsInit, 500);
 
-// --------------------------------------------- Mark as Resolved Function ---------------------------------------------
-// Resolve Complaint Modal
+// --------------------------------------------- Update Complaint Status Function --------------------------------------
 document.addEventListener('DOMContentLoaded', function() {
-    // Modal elements
-    const modal = document.getElementById('resolveModal');
-    const closeButtons = document.querySelectorAll('.close-modal');
-    const confirmResolveBtn = document.getElementById('confirmResolve');
-    const resolutionNotes = document.getElementById('resolutionNotes');
-    const resolveRefNumber = document.getElementById('resolveRefNumber');
-    const resolveComplainant = document.getElementById('resolveComplainant');
-    const resolveTitle = document.getElementById('resolveTitle');
+    // Status Update Modal
+    const statusModal = document.getElementById('statusUpdateModal');
+    const closeStatusButtons = document.querySelectorAll('.close-status-modal');
+    const confirmStatusBtn = document.getElementById('confirmStatusUpdate');
+    const statusSelect = document.getElementById('statusSelect');
+    const hearingDetailsSection = document.getElementById('hearingDetailsSection');
+    const hearingDateInput = document.getElementById('hearingDate');
+    const hearingTimeInput = document.getElementById('hearingTime');
+    const hearingLocationInput = document.getElementById('hearingLocation');
+    const hearingDescriptionInput = document.getElementById('hearingDescription');
 
     let currentComplaintId = null;
+    let currentComplaintRow = null;
+    let currentComplaintStatus = null; // Store current status of complaint
 
-     // Open modal when resolve button is clicked
+    // Open modal when resolve button is clicked
     document.addEventListener('click', function(e) {
         if (e.target.closest('.resolve')) {
             const resolveBtn = e.target.closest('.resolve');
             currentComplaintId = resolveBtn.getAttribute('data-id');
+            currentComplaintRow = resolveBtn.closest('tr');
 
-            // Get the complaint details from data attributes
+            // Get complaint details
             const refNumber = resolveBtn.getAttribute('data-ref');
             const title = resolveBtn.getAttribute('data-title');
 
-            // Populate the modal with complaint details
-            resolveRefNumber.textContent = refNumber || 'N/A';
-            resolveTitle.textContent = title || 'N/A';
+            // Get current status from table (assuming status is in 7th column)
+            const statusCell = currentComplaintRow.querySelector('td:nth-child(7)');
+            currentComplaintStatus = statusCell ? statusCell.getAttribute('data-status') || statusCell.textContent.trim().toLowerCase().replace(/\s+/g, '_') : null;
 
-            modal.classList.add('active');
+            // Get complainant name from table row
+            const complainantCell = currentComplaintRow.querySelector('td:nth-child(3)');
+            const complainantName = complainantCell ? complainantCell.textContent.trim() : 'N/A';
+
+            // Populate modal
+            document.getElementById('statusRefNumber').textContent = refNumber || 'N/A';
+            document.getElementById('statusTitle').textContent = title || 'N/A';
+            document.getElementById('statusComplainant').textContent = complainantName;
+
+            // Reset form
+            resetStatusForm();
+
+            // Show modal
+            statusModal.classList.add('active');
             document.body.style.overflow = 'hidden';
+
+            // Set focus to status select
+            setTimeout(() => {
+                statusSelect.focus();
+            }, 100);
         }
     });
 
-    // Close modal when X or Cancel is clicked
-    closeButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            modal.classList.remove('active');
-            resolutionNotes.value = '';
-            document.body.style.overflow = '';
-        });
+    function resetStatusForm() {
+        statusSelect.value = '';
+        hearingDetailsSection.style.display = 'none';
+
+        // ALWAYS CLEAR ALL HEARING FIELDS
+        hearingDateInput.value = '';
+        hearingTimeInput.value = '';
+        hearingLocationInput.value = '';
+        hearingDescriptionInput.value = '';
+        document.getElementById('statusNotes').value = '';
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        hearingDateInput.min = today;
+
+        // Set default time to next hour
+        const nextHour = new Date();
+        nextHour.setHours(nextHour.getHours() + 1);
+        const formattedTime = nextHour.getHours().toString().padStart(2, '0') + ':00';
+        hearingTimeInput.value = formattedTime;
+    }
+
+    // Show/hide hearing details based on status selection
+    statusSelect.addEventListener('change', function() {
+        const selectedValue = this.value;
+
+        // Show hearing details for hearing statuses
+        const isHearingStatus = selectedValue === '1st_hearing' ||
+                               selectedValue === '2nd_hearing' ||
+                               selectedValue === 'other_hearing' ||
+                               selectedValue === 'ongoing_hearing';
+
+        if (isHearingStatus) {
+            hearingDetailsSection.style.display = 'block';
+
+            // IMPORTANT: Always clear date field when selecting a hearing status
+            // This ensures user MUST enter a new date every time
+            hearingDateInput.value = '';
+
+            // Set default date only for 1st and 2nd hearings
+            if (selectedValue === '1st_hearing' || selectedValue === '2nd_hearing') {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const formattedDate = tomorrow.toISOString().split('T')[0];
+                hearingDateInput.value = formattedDate;
+            }
+            // For "other_hearing" and "ongoing_hearing", keep it empty
+            else if (selectedValue === 'other_hearing' || selectedValue === 'ongoing_hearing') {
+                hearingDateInput.value = '';
+            }
+
+            // Clear location and description as well (optional, you can keep if you want)
+            // hearingLocationInput.value = '';
+            // hearingDescriptionInput.value = '';
+        } else {
+            // For non-hearing statuses like "under_review", hide hearing details
+            hearingDetailsSection.style.display = 'none';
+        }
     });
 
-    // Close modal when clicking outside
-    modal.addEventListener('click', function(event) {
+    // Close modal
+    closeStatusButtons.forEach(btn => {
+        btn.addEventListener('click', closeStatusModal);
+    });
+
+    statusModal.addEventListener('click', function(event) {
         if (event.target.classList.contains('modal-overlay')) {
-            modal.classList.remove('active');
-            resolutionNotes.value = '';
-            document.body.style.overflow = '';
+            closeStatusModal();
         }
     });
 
-    // Handle confirm resolution
-    confirmResolveBtn.addEventListener('click', function() {
-        if (!currentComplaintId) return;
+    // Add escape key to close modal
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && statusModal.classList.contains('active')) {
+            closeStatusModal();
+        }
+    });
 
-        const notes = resolutionNotes.value;
+    function closeStatusModal() {
+        statusModal.classList.remove('active');
+        document.body.style.overflow = '';
+        resetStatusForm();
+        currentComplaintId = null;
+        currentComplaintRow = null;
+        currentComplaintStatus = null;
+    }
+
+    // Handle status update
+    confirmStatusBtn.addEventListener('click', function() {
+        if (!currentComplaintId) {
+            showToast('No complaint selected', 'error');
+            return;
+        }
+
+        const status = statusSelect.value;
+        const notes = document.getElementById('statusNotes').value;
+
+        if (!status) {
+            showToast('Please select a status', 'error');
+            return;
+        }
+
+        // Validate hearing details if applicable
+        let hearingData = null;
+        const isHearingStatus = status === '1st_hearing' ||
+                               status === '2nd_hearing' ||
+                               status === 'other_hearing' ||
+                               status === 'ongoing_hearing';
+
+        if (isHearingStatus) {
+            const hearingDate = hearingDateInput.value;
+            const hearingTime = hearingTimeInput.value;
+            const hearingLocation = hearingLocationInput.value;
+            const hearingDescription = hearingDescriptionInput.value;
+
+            // Debug logging
+            console.log('DEBUG - Hearing form values:');
+            console.log('  Date:', hearingDate);
+            console.log('  Time:', hearingTime);
+            console.log('  Location:', hearingLocation);
+            console.log('  Description:', hearingDescription);
+
+            // Basic validation
+            if (!hearingDate || !hearingTime || !hearingLocation) {
+                showToast('Please fill all required hearing details', 'error');
+                return;
+            }
+
+            // Check if date is not in the past
+            const selectedDateTime = new Date(hearingDate + 'T' + hearingTime);
+            const now = new Date();
+
+            if (selectedDateTime < now) {
+                showToast('Hearing date and time cannot be in the past', 'error');
+                return;
+            }
+
+            hearingData = {
+                schedule_date: hearingDate,
+                schedule_time: hearingTime,
+                location: hearingLocation,
+                description: hearingDescription
+            };
+        }
+
+        // Show loading state
         const btn = this;
         const btnText = btn.querySelector('.btn-text');
         const originalText = btnText.textContent;
-
-        // Show loading state
         btn.classList.add('is-loading');
-        btnText.textContent = 'Processing...';
+        btnText.textContent = 'Updating...';
         btn.disabled = true;
 
-        // Send AJAX request to update status
-        fetch(`/complaints/${currentComplaintId}/resolve/`, {
+        // Prepare data - ALWAYS send hearing_data for hearing statuses
+        const data = {
+            status: status,
+            notes: notes
+        };
+
+        if (isHearingStatus && hearingData) {
+            data.hearing_data = hearingData;
+
+            // Add a flag to indicate we should clear old hearings
+            data.clear_existing_hearings = true;
+        }
+
+        // Debug logging
+        console.log('DEBUG - Data being sent to server:');
+        console.log('  Status:', status);
+        console.log('  Current Complaint Status:', currentComplaintStatus);
+        console.log('  Hearing Data:', hearingData);
+        console.log('  Full Data:', JSON.stringify(data, null, 2));
+
+        // Send AJAX request
+        fetch(`/complaints/${currentComplaintId}/update-status/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCookie('csrftoken'),
             },
-            body: JSON.stringify({
-                notes: notes
-            })
+            body: JSON.stringify(data)
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('DEBUG - Response status:', response.status);
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    console.log('DEBUG - Error response:', errorData);
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                });
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('DEBUG - Success response:', data);
             if (data.success) {
-                // Close modal
-                modal.classList.remove('active');
-                resolutionNotes.value = '';
-                document.body.style.overflow = '';
+                showToast(data.message, 'success');
 
-                // Show success toast
-                showToast('Complaint marked as resolved successfully', 'success');
+                // Close modal immediately
+                closeStatusModal();
 
-                // Reload after a short delay
+                // Reload page after 2 seconds to show updated data
                 setTimeout(() => {
                     window.location.reload();
                 }, 1500);
             } else {
-                showToast(data.error || 'Failed to resolve complaint', 'error');
+                showToast(data.error || 'Failed to update status', 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showToast('An error occurred while resolving the complaint', 'error');
+            showToast('An error occurred while updating status: ' + error.message, 'error');
         })
         .finally(() => {
-            // Reset button state
             btn.classList.remove('is-loading');
             btnText.textContent = originalText;
             btn.disabled = false;
@@ -957,6 +1124,125 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         return cookieValue;
+    }
+
+    function showToast(message, type = 'info') {
+        // Create a simple toast if not already implemented
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+        `;
+
+        if (type === 'success') {
+            toast.style.backgroundColor = '#10b981';
+        } else if (type === 'error') {
+            toast.style.backgroundColor = '#ef4444';
+        } else {
+            toast.style.backgroundColor = '#3b82f6';
+        }
+
+        document.body.appendChild(toast);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 3000);
+    }
+
+    // Add animation styles if not already present
+    if (!document.querySelector('#toast-animations')) {
+        const style = document.createElement('style');
+        style.id = 'toast-animations';
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+
+            .toast {
+                animation: slideIn 0.3s ease;
+            }
+
+            .toast.slideOut {
+                animation: slideOut 0.3s ease;
+            }
+
+            .status-badge {
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .status-badge.under-review {
+                background-color: #e3f2fd;
+                color: #1976d2;
+            }
+
+            .status-badge.first-hearing {
+                background-color: #fff3e0;
+                color: #f57c00;
+            }
+
+            .status-badge.second-hearing {
+                background-color: #e1bee7;
+                color: #7b1fa2;
+            }
+
+            .status-badge.other-hearing {
+                background-color: #d1c4e9;
+                color: #4527a0;
+            }
+
+            .status-badge.ongoing-hearing {
+                background-color: #e8f5e8;
+                color: #388e3c;
+            }
+
+            .status-badge.resolved {
+                background-color: #e8f5e8;
+                color: #388e3c;
+            }
+
+            .status-badge.canceled {
+                background-color: #ffebee;
+                color: #d32f2f;
+            }
+        `;
+        document.head.appendChild(style);
     }
 });
 
@@ -1272,6 +1558,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeBtn = editModal.querySelector('.modal-close');
     const cancelBtn = editModal.querySelector('.btn-cancel');
 
+    // Store current status for warning messages
+    let currentComplaintStatus = null;
+
     // Initialize respondent type change handler
     function setupRespondentTypeHandler() {
         const respondentTypeSelect = document.getElementById('editRespondentType');
@@ -1334,6 +1623,12 @@ document.addEventListener('DOMContentLoaded', function() {
             editModal.classList.remove('loading');
 
             if (data.success) {
+                // Store current status for warning messages
+                currentComplaintStatus = data.complaint.status;
+
+                // Store current status in hidden field
+                document.getElementById('currentStatus').value = currentComplaintStatus;
+
                 // Populate course dropdown
                 const courseSelect = document.getElementById('editRespondentCourse');
                 courseSelect.innerHTML = '<option value="">Select Course</option>';
@@ -1347,6 +1642,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 populateForm(data.complaint);
                 editForm.setAttribute('data-id', complaintId);
+
+                // Setup status change warning
+                setupStatusChangeWarning();
             } else {
                 showToast(data.error || 'Failed to load complaint data', 'error');
                 closeEditModal();
@@ -1358,6 +1656,52 @@ document.addEventListener('DOMContentLoaded', function() {
             showToast(error.message || 'Error loading complaint data', 'error');
             closeEditModal();
         });
+    }
+
+    // Setup status change warning
+    function setupStatusChangeWarning() {
+        const statusRadios = document.querySelectorAll('input[name="status"]');
+
+        statusRadios.forEach(radio => {
+            // Remove existing event listeners
+            radio.removeEventListener('change', handleStatusChange);
+            // Add new event listener
+            radio.addEventListener('change', handleStatusChange);
+        });
+    }
+
+    function handleStatusChange() {
+        const newStatus = this.value;
+        const hearingStatuses = ['1st_hearing', '2nd_hearing', 'other_hearing', 'ongoing_hearing'];
+        const nonHearingStatuses = ['under_review', 'resolved', 'canceled'];
+
+        // Check if changing from hearing status to non-hearing status
+        if (hearingStatuses.includes(currentComplaintStatus) && nonHearingStatuses.includes(newStatus)) {
+            let message = '';
+
+            if (newStatus === 'under_review') {
+                message = 'Warning: Changing status to "Under Review" will remove any scheduled hearing dates for this complaint. Continue?';
+            } else if (newStatus === 'resolved') {
+                message = 'Warning: Changing status to "Resolved" will remove any scheduled hearing dates for this complaint. Continue?';
+            } else if (newStatus === 'canceled') {
+                message = 'Warning: Changing status to "Canceled" will remove any scheduled hearing dates for this complaint. Continue?';
+            }
+
+            if (message) {
+                const confirmed = confirm(message);
+                if (!confirmed) {
+                    // Revert to previous selection
+                    const previousRadio = document.querySelector(`input[name="status"][value="${currentComplaintStatus}"]`);
+                    if (previousRadio) {
+                        previousRadio.checked = true;
+                    } else {
+                        // If previous status is not available in the form (e.g., hearing status), check under_review
+                        document.querySelector('input[name="status"][value="under_review"]').checked = true;
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     // Enhanced populateForm function with proper respondent type handling
@@ -1406,7 +1750,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Evidence
         renderEvidence('editDocumentsList', complaint.documents, 'document');
         renderEvidence('editImagesList', complaint.images, 'image');
-        renderEvidence('editVideosList', complaint.videos, 'video');
 
         // Trigger UI update for respondent type
         document.getElementById('editRespondentType').dispatchEvent(new Event('change'));
@@ -1432,7 +1775,6 @@ document.addEventListener('DOMContentLoaded', function() {
             let iconClass;
             switch(type) {
                 case 'image': iconClass = 'bx bx-image-alt'; break;
-                case 'video': iconClass = 'bx bx-video'; break;
                 default: iconClass = 'bx bx-file';
             }
 
@@ -1448,49 +1790,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
             container.appendChild(itemElement);
-        });
-
-        // Add event listeners for remove buttons
-        container.querySelectorAll('.btn-remove-evidence').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const evidenceId = this.getAttribute('data-id');
-                const evidenceType = this.getAttribute('data-type');
-                removeEvidence(evidenceId, evidenceType, containerId);
-            });
-        });
-    }
-
-    // Function to handle evidence removal
-    function removeEvidence(evidenceId, evidenceType, containerId) {
-        if (!confirm('Are you sure you want to remove this evidence?')) return;
-
-        const complaintId = editForm.getAttribute('data-id');
-        if (!complaintId) return;
-
-        fetch(`/dashboard/complaints/${complaintId}/remove_evidence/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCSRFToken()
-            },
-            body: JSON.stringify({
-                evidence_id: evidenceId,
-                evidence_type: evidenceType
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast('Evidence removed successfully', 'success');
-                // Re-fetch complaint data to update the list
-                openEditModal(complaintId);
-            } else {
-                throw new Error(data.error || 'Failed to remove evidence');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast(error.message || 'Error removing evidence', 'error');
         });
     }
 
@@ -1575,6 +1874,7 @@ document.addEventListener('DOMContentLoaded', function() {
         editModal.classList.remove('active');
         document.body.style.overflow = '';
         editForm.reset();
+        currentComplaintStatus = null;
     }
 
     [closeBtn, cancelBtn].forEach(btn => {
@@ -1606,6 +1906,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getCSRFToken() {
         return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    }
+
+    function showToast(message, type = 'info') {
+        // Create a simple toast if not already implemented
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+        `;
+
+        if (type === 'success') {
+            toast.style.backgroundColor = '#10b981';
+        } else if (type === 'error') {
+            toast.style.backgroundColor = '#ef4444';
+        } else {
+            toast.style.backgroundColor = '#3b82f6';
+        }
+
+        document.body.appendChild(toast);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 3000);
     }
 });
 

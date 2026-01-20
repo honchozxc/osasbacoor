@@ -16,7 +16,7 @@ from .models import CustomUser, Downloadable, Announcement, AnnouncementImage, A
     ComplaintImage, ComplaintDocument, Complaint, FooterContent, \
     StudentDisciplineContent, Scholarship, ScholarshipApplication, ScholarshipPageContent, HomePageContent, \
     StudentAdmission, AdmissionPageContent, NSTPStudentInfo, NSTPFile, NSTPPageContent, \
-    Course, ClinicPageContent, OJTCompany, OJTApplication, OJTRequirement, OJTReport, OJTReportAttachment, \
+    Course, ClinicPageContent, OJTCompany, \
     OJTPageContent, Organization, SDSPageContent, AccomplishmentRecord
 
 
@@ -1900,9 +1900,18 @@ class NSTPFileForm(forms.ModelForm):
 
 # ----------------------------------------------- OJT Forms Section ----------------------------------------------------
 class OJTCompanyForm(forms.ModelForm):
+    status = forms.ChoiceField(
+        choices=OJTCompany.STATUS_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'id': 'editCompanyStatus'
+        }),
+        required=True
+    )
+
     class Meta:
         model = OJTCompany
-        fields = ['name', 'address', 'contact_number', 'available_slots', 'description', 'website', 'email']
+        fields = ['name', 'address', 'contact_number', 'description', 'website', 'email', 'status']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-input',
@@ -1916,11 +1925,6 @@ class OJTCompanyForm(forms.ModelForm):
             'contact_number': forms.TextInput(attrs={
                 'class': 'form-input',
                 'placeholder': 'Enter contact number (numbers and hyphens only)'
-            }),
-            'available_slots': forms.NumberInput(attrs={
-                'class': 'form-input',
-                'placeholder': 'Available slots',
-                'min': 1
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-input',
@@ -1954,308 +1958,18 @@ class OJTCompanyForm(forms.ModelForm):
 
         return contact_number
 
+    def save(self, commit=True, request=None):
+        company = super().save(commit=False)
 
-class OJTApplicationForm(forms.ModelForm):
-    company = forms.ModelChoiceField(
-        queryset=OJTCompany.objects.none(),  # Will be set in __init__
-        empty_label="Select a company...",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-
-    # Date fields with date picker
-    proposed_start_date = forms.DateField(
-        widget=forms.DateInput(attrs={
-            'type': 'date',
-            'class': 'form-control',
-            'min': timezone.now().date().isoformat()
-        })
-    )
-    proposed_end_date = forms.DateField(
-        widget=forms.DateInput(attrs={
-            'type': 'date',
-            'class': 'form-control',
-            'min': (timezone.now() + timezone.timedelta(days=30)).date().isoformat()
-        })
-    )
-
-    # Text areas with better styling
-    cover_letter = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'rows': 4,
-            'placeholder': 'Explain why you want to do OJT at this company...'
-        }),
-        required=False
-    )
-
-    skills = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'rows': 3,
-            'placeholder': 'List your relevant skills and qualifications...'
-        }),
-        required=False
-    )
-
-    class Meta:
-        model = OJTApplication
-        fields = [
-            'company',
-            'proposed_start_date',
-            'proposed_end_date',
-            'proposed_hours',
-            'cover_letter',
-            'skills'
-        ]
-        widgets = {
-            'proposed_hours': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '240',
-                'max': '1000',
-                'value': '240'
-            }),
-        }
-
-    def __init__(self, *args, **kwargs):
-        self.student = kwargs.pop('student', None)
-        super().__init__(*args, **kwargs)
-
-        # Filter companies to only show available companies
-        if self.student:
-            # Get companies that are not archived and have available slots
-            available_companies = OJTCompany.get_available_companies()
-
-            # Exclude companies where student already has an application
-            available_companies = available_companies.exclude(
-                ojt_applications__student=self.student,
-                ojt_applications__is_archived=False
-            )
-
-            self.fields['company'].queryset = available_companies
-
-    def clean(self):
-        cleaned_data = super().clean()
-        start_date = cleaned_data.get('proposed_start_date')
-        end_date = cleaned_data.get('proposed_end_date')
-        company = cleaned_data.get('company')
-        proposed_hours = cleaned_data.get('proposed_hours')
-
-        # Validate date range
-        if start_date and end_date:
-            if end_date <= start_date:
-                raise ValidationError("End date must be after start date.")
-
-            # Check if dates are in the future
-            today = timezone.now().date()
-            if start_date <= today:
-                raise ValidationError("Start date must be in the future.")
-
-            # Validate duration
-            duration = (end_date - start_date).days
-            if duration < 30:
-                raise ValidationError("OJT duration should be at least 1 month (30 days).")
-            if duration > 365:
-                raise ValidationError("OJT duration cannot exceed 1 year.")
-
-        # Validate hours
-        if proposed_hours and proposed_hours < 240:
-            raise ValidationError("OJT hours must be at least 240 hours.")
-        if proposed_hours and proposed_hours > 1000:
-            raise ValidationError("OJT hours cannot exceed 1000 hours.")
-
-        # Check if student already has an application with this company
-        if self.student and company:
-            existing_application = OJTApplication.objects.filter(
-                student=self.student,
-                company=company,
-                is_archived=False
-            ).exclude(pk=self.instance.pk if self.instance else None)
-
-            if existing_application.exists():
-                raise ValidationError(f"You already have an OJT application with {company.name}.")
-
-        # Check if company has available slots
-        if company and not company.can_accept_more_students():
-            raise ValidationError(f"{company.name} currently has no available OJT slots.")
-
-        return cleaned_data
-
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        if self.student:
-            instance.student = self.student
-        if commit:
-            instance.save()
-        return instance
-
-
-class OJTRequirementForm(forms.ModelForm):
-    requirement_type = forms.ChoiceField(
-        choices=OJTRequirement.REQUIREMENT_TYPES,
-        widget=forms.Select(attrs={'class': 'form-control requirement-type'})
-    )
-
-    file = forms.FileField(
-        widget=forms.FileInput(attrs={
-            'class': 'file-input',
-            'accept': '.pdf,.doc,.docx,.jpg,.jpeg,.png'
-        })
-    )
-
-    class Meta:
-        model = OJTRequirement
-        fields = ['requirement_type', 'file']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Make fields required for new forms
-        if not self.instance.pk:
-            self.fields['requirement_type'].required = True
-            self.fields['file'].required = True
-
-    def clean(self):
-        cleaned_data = super().clean()
-        requirement_type = cleaned_data.get('requirement_type')
-        file = cleaned_data.get('file')
-
-        # Both fields are required for new requirements
-        if not self.instance.pk:
-            if requirement_type and not file:
-                raise ValidationError("File is required for this requirement.")
-            if file and not requirement_type:
-                raise ValidationError("Requirement type is required.")
-
-        return cleaned_data
-
-    def clean_file(self):
-        file = self.cleaned_data.get('file')
-        if file:
-            # Validate file size (5MB limit)
-            max_size = 5 * 1024 * 1024  # 5MB
-            if file.size > max_size:
-                raise ValidationError("File size must be less than 5MB.")
-
-            # Validate file type
-            allowed_types = [
-                'application/pdf',
-                'application/msword',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'image/jpeg',
-                'image/jpg',
-                'image/png'
-            ]
-            if file.content_type not in allowed_types:
-                raise ValidationError(
-                    "File type not supported. Please upload PDF, DOC, DOCX, JPG, or PNG files."
-                )
-
-        return file
-
-
-class OJTApplicationStatusForm(forms.ModelForm):
-    class Meta:
-        model = OJTApplication
-        fields = ['status', 'review_notes', 'rejection_reason']
-        widgets = {
-            'status': forms.Select(attrs={'class': 'form-control'}),
-            'review_notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'rejection_reason': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-        }
-
-
-# Formset for multiple requirements
-OJTRequirementFormSet = forms.inlineformset_factory(
-    OJTApplication,
-    OJTRequirement,
-    form=OJTRequirementForm,
-    extra=1,
-    can_delete=True,
-    max_num=len(OJTRequirement.REQUIREMENT_TYPES)
-)
-
-
-class OJTReportForm(forms.ModelForm):
-    class Meta:
-        model = OJTReport
-        fields = [
-            'title', 'report_type', 'application', 'report_date',
-            'period_start', 'period_end', 'description', 'issues_challenges'
-        ]
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'form-input',
-                'placeholder': 'Enter report title'
-            }),
-            'report_type': forms.Select(attrs={
-                'class': 'form-input'
-            }),
-            'application': forms.Select(attrs={
-                'class': 'form-input'
-            }),
-            'report_date': forms.DateInput(attrs={
-                'class': 'form-input',
-                'type': 'date'
-            }),
-            'period_start': forms.DateInput(attrs={
-                'class': 'form-input',
-                'type': 'date'
-            }),
-            'period_end': forms.DateInput(attrs={
-                'class': 'form-input',
-                'type': 'date'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-input',
-                'rows': 6,
-                'placeholder': 'Describe your activities, accomplishments, and experiences...'
-            }),
-            'issues_challenges': forms.Textarea(attrs={
-                'class': 'form-input',
-                'rows': 4,
-                'placeholder': 'Describe any issues, challenges, or concerns...'
-            }),
-        }
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super().__init__(*args, **kwargs)
-
-        # Filter applications based on user type
-        if self.request and self.request.user.user_type == 14:  # Student
-            self.fields['application'].queryset = OJTApplication.objects.filter(
-                student=self.request.user,
-                status='approved'
-            )
-        else:
-            self.fields['application'].queryset = OJTApplication.objects.filter(
-                status='approved'
-            )
-
-    def clean(self):
-        cleaned_data = super().clean()
-        period_start = cleaned_data.get('period_start')
-        period_end = cleaned_data.get('period_end')
-        report_type = cleaned_data.get('report_type')
-
-        # Validate period dates for weekly and monthly reports
-        if report_type in ['weekly', 'monthly']:
-            if not period_start or not period_end:
-                raise forms.ValidationError(
-                    f"Period start and end dates are required for {report_type} reports."
-                )
-
-            if period_end <= period_start:
-                raise forms.ValidationError("Period end date must be after start date.")
-
-        return cleaned_data
-
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        instance.submitted_by = self.request.user
+        # If status is changing, update status tracking fields
+        if 'status' in self.changed_data:
+            company.status_updated_at = timezone.now()
+            if request and hasattr(request, 'user'):
+                company.status_updated_by = request.user
 
         if commit:
-            instance.save()
-        return instance
+            company.save()
+        return company
 
 
 # ------------------------------------------------ SDS Organizations ---------------------------------------------------

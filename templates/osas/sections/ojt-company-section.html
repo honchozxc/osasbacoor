@@ -8,6 +8,7 @@
 
         <!-- OJT Company Statistics Section -->
         <div class="user-statistics">
+            {% if request.user.user_type != 14 %}
             <div class="stat-card">
                 <div class="stat-icon total-users">
                     <i class='bx bx-building'></i>
@@ -27,26 +28,28 @@
                     <p>Archived Companies</p>
                 </div>
             </div>
-
+            {% endif %}
             <div class="stat-card">
                 <div class="stat-icon verified">
                     <i class='bx bx-check-circle'></i>
                 </div>
                 <div class="stat-info">
-                    <h3>{{ available_for_ojt }}</h3>
-                    <p>Available for OJT</p>
+                    <h3>{{ active_companies }}</h3>
+                    <p>Active Companies</p>
                 </div>
             </div>
 
+            {% if request.user.user_type != 14 %}
             <div class="stat-card">
-                <div class="stat-icon unverified">
+                <div class="stat-icon inactive">
                     <i class='bx bx-x-circle'></i>
                 </div>
                 <div class="stat-info">
-                    <h3>{{ not_available_for_ojt }}</h3>
-                    <p>Not Available</p>
+                    <h3>{{ inactive_companies }}</h3>
+                    <p>Inactive Companies</p>
                 </div>
             </div>
+            {% endif %}
         </div>
 
         <div class="controls">
@@ -55,41 +58,34 @@
                 <input type="text" id="company-search" placeholder="Search companies..." class="search-input" value="{{ request.GET.search|default:'' }}">
             </div>
 
-            <!-- Availability Filter -->
+            <!-- Status Filter - Hide for students -->
+            {% if request.user.user_type != 14 %}
             <div class="status-sort">
-                <select id="availability-filter" class="styled-select">
+                <select id="status-filter" class="styled-select">
                     <option value="">All Companies</option>
-                    <option value="available">All Available</option>
-                    <option value="not_available">All Non Available</option>
-                    <option value="archived">Archived</option>
+                    <option value="active">Active Companies</option>
+                    <option value="inactive">Inactive Companies</option>
                 </select>
             </div>
-
-            <!-- Student Count Filter -->
-            <div class="status-sort">
-                <select id="student-count-filter" class="styled-select">
-                    <option value="">All Student Counts</option>
-                    <option value="0">No Students</option>
-                    <option value="1-5">1-5 Students</option>
-                    <option value="6-10">6-10 Students</option>
-                    <option value="11+">11+ Students</option>
-                </select>
-            </div>
+            {% endif %}
 
             <!-- Sort Order -->
             <div class="verified-sort">
                 <select id="sort-order" class="styled-select">
+                    <option value="created_desc">Sort: Newest First</option>
+                    <option value="created_asc">Sort: Oldest First</option>
                     <option value="name_asc">Sort: Name A-Z</option>
                     <option value="name_desc">Sort: Name Z-A</option>
-                    <option value="available_asc">Sort: Available Slots (Low to High)</option>
-                    <option value="available_desc">Sort: Available Slots (High to Low)</option>
-                    <option value="students_asc">Sort: Students (Low to High)</option>
-                    <option value="students_desc">Sort: Students (High to Low)</option>
+                    {% if request.user.user_type != 14 %}  <!-- Hide status sorting for students -->
+                    <option value="status_asc">Sort: Status A-Z</option>
+                    <option value="status_desc">Sort: Status Z-A</option>
+                    {% endif %}
                 </select>
             </div>
-
-            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 16 %}
             <button class="primary-btn" onclick="openCompanyCreateModal()"><i class="ri-add-line"></i> Add Company</button>
+            {% endif %}
+            {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 or request.user.user_type == 16 %}
             <button class="primary-btn" id="export-company-btn" data-export-url="{% url 'export-ojt-companies' %}">
                 <i class='bx bx-export'></i> Export Data
             </button>
@@ -106,8 +102,7 @@
             <th>Company Name</th>
             <th>Address</th>
             <th>Contact Number</th>
-            <th>Available Slots</th>
-            <th>Student Count</th>
+            <th>Email</th>
             <th>Status</th>
             <th>Actions</th>
         </tr>
@@ -120,43 +115,72 @@
                 <td>{{ company.name }}</td>
                 <td>{{ company.address|truncatewords:10 }}</td>
                 <td>{{ company.contact_number }}</td>
+                <td>{{ company.email|default:"-" }}</td>
+
+                <!-- Status column - Hide for students -->
+                {% if request.user.user_type != 14 %}
                 <td>
-                    <div class="slot-indicator">
-                        <span class="slot-count">{{ company.remaining_slots }}/{{ company.available_slots }}</span>
-                        <div class="slot-progress">
-                            <div class="slot-progress-bar" style="width: {{ company.utilization_rate }}%"></div>
-                        </div>
-                    </div>
+                    {% if company.is_archived %}
+                        <span class="status-badge status-archived">Archived</span>
+                    {% elif company.status == 'active' %}
+                        <span class="status-badge status-active">Active</span>
+                    {% elif company.status == 'inactive' %}
+                        <span class="status-badge status-inactive">Inactive</span>
+                    {% else %}
+                        <span class="status-badge status-inactive">Inactive</span>
+                    {% endif %}
                 </td>
-                <td>{{ company.filled_slots }}</td>
-                <td>
-                    <span class="status-badge status-{{ company.status|lower }}">{{ company.status }}</span>
-                </td>
+                {% endif %}
+
                 <td class="action-buttons">
                     <!-- View button - always visible for all users -->
                     <button class="btn-action view-btn" onclick="openCompanyViewModal({{ company.id }})" title="View">
                         <i class='bx bx-show'></i>
                     </button>
 
-                    <!-- Edit button - only for user type 1 and 13 -->
-                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
+                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 or request.user.user_type == 16 %}
                     <button class="btn-action edit-btn" onclick="openCompanyEditModal({{ company.id }})" title="Edit">
                         <i class='bx bx-edit'></i>
                     </button>
                     {% endif %}
 
-                    <!-- Archive button - only for user type 1 and 13 -->
-                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
-                    <button class="btn-action archive-btn" onclick="openCompanyArchiveModal({{ company.id }})" title="Archive">
-                        <i class='bx bx-archive'></i>
-                    </button>
+                    {% if request.user.user_type != 14 %}
+                        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 or request.user.user_type == 16 %}
+                            {% if not company.is_archived %}
+                                {% if company.status == 'active' %}
+                                <button class="btn-action deactivate-btn" onclick="openCompanyDeactivateModal({{ company.id }})" title="Deactivate">
+                                    <i class='bx bx-x-circle'></i>
+                                </button>
+                                {% else %}
+                                <button class="btn-action activate-btn" onclick="openCompanyActivateModal({{ company.id }})" title="Activate">
+                                    <i class='bx bx-check-circle'></i>
+                                </button>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+
+                    <!-- Archive/Unarchive button - only for user type 1, 13, and 16, and hide for students -->
+                    {% if request.user.user_type != 14 %}
+                        <!-- FIXED: Add user_type == 16 for archive/unarchive buttons -->
+                        {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 or request.user.user_type == 16 %}
+                            {% if company.is_archived %}
+                            <button class="btn-action unarchive-btn" onclick="openCompanyUnarchiveModal({{ company.id }})" title="Unarchive">
+                                <i class='bx bx-undo'></i>
+                            </button>
+                            {% else %}
+                            <button class="btn-action archive-btn" onclick="openCompanyArchiveModal({{ company.id }})" title="Archive">
+                                <i class='bx bx-archive'></i>
+                            </button>
+                            {% endif %}
+                        {% endif %}
                     {% endif %}
                 </td>
             </tr>
             {% endfor %}
         {% else %}
             <tr id="no-data-row">
-                <td colspan="8" style="text-align: center; padding: 20px; font-style: italic; color: #888;">
+                <td colspan="{% if request.user.user_type == 14 %}6{% else %}7{% endif %}" style="text-align: center; padding: 20px; font-style: italic; color: #888;">
                     No companies found
                 </td>
             </tr>

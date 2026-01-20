@@ -885,21 +885,25 @@ if (ojtCompanySearchInput && ojtCompanyStatusFilter && ojtCompanyDateFilter) {
 
         rows.forEach(row => {
             const name = row.querySelector('.user-name').textContent.toLowerCase();
+            const website = row.querySelector('.user-username')?.textContent.toLowerCase() || '';
             const address = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
             const contact = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+            const email = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
             const status = row.querySelector('td:nth-child(5) span').textContent.toLowerCase();
             const archivedDateText = row.querySelector('td:nth-child(6)').textContent;
             const archivedDate = parseDate(archivedDateText);
 
             const matchesSearch = searchTerm === '' ||
                 name.includes(searchTerm) ||
+                website.includes(searchTerm) ||
                 address.includes(searchTerm) ||
-                contact.includes(searchTerm);
+                contact.includes(searchTerm) ||
+                email.includes(searchTerm);
 
             const matchesStatus = statusFilter === 'all' ||
-                (statusFilter === 'available' && status.includes('available')) ||
-                (statusFilter === 'limited' && status.includes('limited')) ||
-                (statusFilter === 'full' && status.includes('full'));
+                (statusFilter === 'active' && status.includes('active')) ||
+                (statusFilter === 'inactive' && status.includes('inactive')) ||
+                (statusFilter === 'archived' && status.includes('archived'));
 
             let matchesDate = true;
             if (dateFilter !== 'all' && dateFilter !== 'newest' && dateFilter !== 'oldest') {
@@ -947,181 +951,28 @@ if (ojtCompanySearchInput && ojtCompanyStatusFilter && ojtCompanyDateFilter) {
     }
 }
 
-// --------------------------------------- OJT Applications Tab Functionality ----------------------------------------
-const ojtApplicationSearchInput = document.getElementById('ojt-applications-search-archived');
-const ojtApplicationStatusFilter = document.getElementById('ArchivedojtApplicationStatusFilter');
-const ojtApplicationDateFilter = document.getElementById('ArchivedojtApplicationDateFilter');
+// Helper function to parse date
+function parseDate(dateString) {
+    if (!dateString || dateString === '-') return new Date(0);
 
-if (ojtApplicationSearchInput && ojtApplicationStatusFilter && ojtApplicationDateFilter) {
-    ojtApplicationSearchInput.addEventListener('input', filterOjtApplications);
-    ojtApplicationStatusFilter.addEventListener('change', filterOjtApplications);
-    ojtApplicationDateFilter.addEventListener('change', filterOjtApplications);
+    try {
+        const months = {
+            Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+            Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
+        };
 
-    function filterOjtApplications() {
-        const searchTerm = ojtApplicationSearchInput.value.toLowerCase();
-        const statusFilter = ojtApplicationStatusFilter.value;
-        const dateFilter = ojtApplicationDateFilter.value;
+        const parts = dateString.split(' ');
+        const month = months[parts[0]];
+        const day = parseInt(parts[1].replace(',', ''));
+        const year = parseInt(parts[2]);
+        const timeParts = parts[3].split(':');
+        const hours = parseInt(timeParts[0]);
+        const minutes = parseInt(timeParts[1]);
 
-        const rows = Array.from(document.querySelectorAll('#ojt-applications-tab .archived-table tbody tr'));
-
-        rows.forEach(row => {
-            const studentName = row.querySelector('.user-name').textContent.toLowerCase();
-            const studentNumber = row.querySelector('.user-username').textContent.toLowerCase();
-            const companyName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-            const course = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-            const status = row.querySelector('td:nth-child(4) span').textContent.toLowerCase();
-            const archivedDateText = row.querySelector('td:nth-child(6)').textContent;
-            const archivedDate = parseDate(archivedDateText);
-
-            const matchesSearch = searchTerm === '' ||
-                studentName.includes(searchTerm) ||
-                studentNumber.includes(searchTerm) ||
-                companyName.includes(searchTerm) ||
-                course.includes(searchTerm);
-
-            const matchesStatus = statusFilter === 'all' ||
-                (statusFilter === 'draft' && status.includes('draft')) ||
-                (statusFilter === 'submitted' && status.includes('submitted')) ||
-                (statusFilter === 'under_review' && status.includes('under review')) ||
-                (statusFilter === 'approved' && status.includes('approved')) ||
-                (statusFilter === 'rejected' && status.includes('rejected')) ||
-                (statusFilter === 'cancelled' && status.includes('cancelled'));
-
-            let matchesDate = true;
-            if (dateFilter !== 'all' && dateFilter !== 'newest' && dateFilter !== 'oldest') {
-                const now = new Date();
-
-                switch(dateFilter) {
-                    case 'week':
-                        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                        matchesDate = archivedDate >= oneWeekAgo;
-                        break;
-                    case 'month':
-                        const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-                        matchesDate = archivedDate >= oneMonthAgo;
-                        break;
-                    case 'year':
-                        matchesDate = archivedDate.getFullYear() === now.getFullYear();
-                        break;
-                    case 'last_year':
-                        matchesDate = archivedDate.getFullYear() === now.getFullYear() - 1;
-                        break;
-                    default:
-                        if (!isNaN(dateFilter)) {
-                            matchesDate = archivedDate.getFullYear() === parseInt(dateFilter);
-                        }
-                }
-            }
-
-            row.style.display = (matchesSearch && matchesStatus && matchesDate) ? '' : 'none';
-        });
-
-        // Then sort if needed
-        if (dateFilter === 'newest' || dateFilter === 'oldest') {
-            const tbody = document.querySelector('#ojt-applications-tab .archived-table tbody');
-            const visibleRows = rows.filter(row => row.style.display !== 'none');
-
-            visibleRows.sort((a, b) => {
-                const dateA = parseDate(a.querySelector('td:nth-child(6)').textContent);
-                const dateB = parseDate(b.querySelector('td:nth-child(6)').textContent);
-                return dateFilter === 'newest' ? dateB - dateA : dateA - dateB;
-            });
-
-            // Reattach sorted rows
-            visibleRows.forEach(row => tbody.appendChild(row));
-        }
-    }
-}
-
-
-// ----------------------------------------- OJT Reports Tab Functionality -----------------------------------------
-const ojtReportSearchInput = document.getElementById('ojt-reports-search-archived');
-const ojtReportStatusFilter = document.getElementById('ArchivedojtReportStatusFilter');
-const ojtReportTypeFilter = document.getElementById('ArchivedojtReportTypeFilter');
-const ojtReportDateFilter = document.getElementById('ArchivedojtReportDateFilter');
-
-if (ojtReportSearchInput && ojtReportStatusFilter && ojtReportTypeFilter && ojtReportDateFilter) {
-    ojtReportSearchInput.addEventListener('input', filterOjtReports);
-    ojtReportStatusFilter.addEventListener('change', filterOjtReports);
-    ojtReportTypeFilter.addEventListener('change', filterOjtReports);
-    ojtReportDateFilter.addEventListener('change', filterOjtReports);
-
-    function filterOjtReports() {
-        const searchTerm = ojtReportSearchInput.value.toLowerCase();
-        const statusFilter = ojtReportStatusFilter.value;
-        const typeFilter = ojtReportTypeFilter.value;
-        const dateFilter = ojtReportDateFilter.value;
-
-        const rows = Array.from(document.querySelectorAll('#ojt-reports-tab .archived-table tbody tr'));
-
-        rows.forEach(row => {
-            const title = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
-            const type = row.querySelector('td:nth-child(2) span').textContent.toLowerCase();
-            const studentName = row.querySelector('.user-name').textContent.toLowerCase();
-            const companyName = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-            const status = row.querySelector('td:nth-child(6) span').textContent.toLowerCase();
-            const archivedDateText = row.querySelector('td:nth-child(7)').textContent;
-            const archivedDate = parseDate(archivedDateText);
-
-            const matchesSearch = searchTerm === '' ||
-                title.includes(searchTerm) ||
-                studentName.includes(searchTerm) ||
-                companyName.includes(searchTerm);
-
-            const matchesStatus = statusFilter === 'all' ||
-                (statusFilter === 'submitted' && status.includes('submitted')) ||
-                (statusFilter === 'reviewed' && status.includes('reviewed'));
-
-            const matchesType = typeFilter === 'all' ||
-                (typeFilter === 'weekly' && type.includes('weekly')) ||
-                (typeFilter === 'monthly' && type.includes('monthly')) ||
-                (typeFilter === 'final' && type.includes('final')) ||
-                (typeFilter === 'incident' && type.includes('incident')) ||
-                (typeFilter === 'complaint' && type.includes('complaint'));
-
-            let matchesDate = true;
-            if (dateFilter !== 'all' && dateFilter !== 'newest' && dateFilter !== 'oldest') {
-                const now = new Date();
-
-                switch(dateFilter) {
-                    case 'week':
-                        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                        matchesDate = archivedDate >= oneWeekAgo;
-                        break;
-                    case 'month':
-                        const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-                        matchesDate = archivedDate >= oneMonthAgo;
-                        break;
-                    case 'year':
-                        matchesDate = archivedDate.getFullYear() === now.getFullYear();
-                        break;
-                    case 'last_year':
-                        matchesDate = archivedDate.getFullYear() === now.getFullYear() - 1;
-                        break;
-                    default:
-                        if (!isNaN(dateFilter)) {
-                            matchesDate = archivedDate.getFullYear() === parseInt(dateFilter);
-                        }
-                }
-            }
-
-            row.style.display = (matchesSearch && matchesStatus && matchesType && matchesDate) ? '' : 'none';
-        });
-
-        // Then sort if needed
-        if (dateFilter === 'newest' || dateFilter === 'oldest') {
-            const tbody = document.querySelector('#ojt-reports-tab .archived-table tbody');
-            const visibleRows = rows.filter(row => row.style.display !== 'none');
-
-            visibleRows.sort((a, b) => {
-                const dateA = parseDate(a.querySelector('td:nth-child(7)').textContent);
-                const dateB = parseDate(b.querySelector('td:nth-child(7)').textContent);
-                return dateFilter === 'newest' ? dateB - dateA : dateA - dateB;
-            });
-
-            // Reattach sorted rows
-            visibleRows.forEach(row => tbody.appendChild(row));
-        }
+        return new Date(year, month, day, hours, minutes);
+    } catch (e) {
+        console.error('Error parsing date:', dateString, e);
+        return new Date(0);
     }
 }
 
@@ -2504,8 +2355,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 <h3>${data.name}</h3>
                                                 <div class="company-status-badges">
                                                     <span class="badge ${data.status.toLowerCase()}">${data.status}</span>
-                                                    <span class="badge ${data.is_active ? 'active' : 'inactive'}">
-                                                        ${data.is_active ? 'Active' : 'Inactive'}
+                                                    <span class="badge ${data.archived_at ? 'archived' : 'active'}">
+                                                        ${data.archived_at ? 'Archived' : 'Active'}
                                                     </span>
                                                 </div>
                                             </div>
@@ -2523,361 +2374,87 @@ document.addEventListener('DOMContentLoaded', function() {
                                                         <span class="detail-label">Contact Number:</span>
                                                         <span class="detail-value">${data.contact_number}</span>
                                                     </div>
+                                                    ${data.email ? `
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Email:</span>
+                                                        <span class="detail-value">${data.email}</span>
+                                                    </div>
+                                                    ` : ''}
+                                                    ${data.website ? `
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Website:</span>
+                                                        <span class="detail-value"><a href="${data.website}" target="_blank">${data.website}</a></span>
+                                                    </div>
+                                                    ` : ''}
+                                                </div>
+                                            </div>
+
+                                            ${data.description ? `
+                                            <div class="ojt-section">
+                                                <h4>Description</h4>
+                                                <div class="description-content">
+                                                    <p>${data.description}</p>
+                                                </div>
+                                            </div>
+                                            ` : ''}
+
+                                            <div class="ojt-section">
+                                                <h4>Status Information</h4>
+                                                <div class="ojt-details-grid">
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Current Status:</span>
+                                                        <span class="detail-value badge ${data.status.toLowerCase()}">${data.status}</span>
+                                                    </div>
+                                                    ${data.status_updated_at ? `
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Status Last Updated:</span>
+                                                        <span class="detail-value">${data.status_updated_at}</span>
+                                                    </div>
+                                                    ` : ''}
+                                                    ${data.status_updated_by ? `
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Updated By:</span>
+                                                        <span class="detail-value">${data.status_updated_by}</span>
+                                                    </div>
+                                                    ` : ''}
                                                 </div>
                                             </div>
 
                                             <div class="ojt-section">
-                                                <h4>Slot Information</h4>
-                                                <div class="slot-details">
-                                                    <div class="slot-progress">
-                                                        <div class="progress-bar">
-                                                            <div class="progress-fill" style="width: ${data.utilization_rate}%"></div>
-                                                        </div>
-                                                        <div class="slot-numbers">
-                                                            <span>${data.filled_slots} / ${data.available_slots} slots filled</span>
-                                                            <span class="utilization-rate">${data.utilization_rate}% utilization</span>
-                                                        </div>
+                                                <h4>Timestamps</h4>
+                                                <div class="ojt-details-grid">
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Created:</span>
+                                                        <span class="detail-value">${data.created_at}</span>
                                                     </div>
-                                                    <div class="slot-breakdown">
-                                                        <div class="slot-item">
-                                                            <span class="slot-label">Total Slots:</span>
-                                                            <span class="slot-value">${data.available_slots}</span>
-                                                        </div>
-                                                        <div class="slot-item">
-                                                            <span class="slot-label">Filled Slots:</span>
-                                                            <span class="slot-value">${data.filled_slots}</span>
-                                                        </div>
-                                                        <div class="slot-item">
-                                                            <span class="slot-label">Remaining Slots:</span>
-                                                            <span class="slot-value">${data.remaining_slots}</span>
-                                                        </div>
+                                                    ${data.updated_at ? `
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Last Updated:</span>
+                                                        <span class="detail-value">${data.updated_at}</span>
                                                     </div>
+                                                    ` : ''}
                                                 </div>
                                             </div>
 
                                             <div class="ojt-section">
                                                 <h4>Archival Information</h4>
                                                 <div class="ojt-details-grid">
+                                                    ${data.archived_at ? `
                                                     <div class="detail-item">
                                                         <span class="detail-label">Archived Date:</span>
                                                         <span class="detail-value">${data.archived_at}</span>
                                                     </div>
+                                                    ` : ''}
                                                     <div class="detail-item">
                                                         <span class="detail-label">Archived By:</span>
                                                         <span class="detail-value">${data.archived_by || 'System'}</span>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            ${data.current_students && data.current_students.length > 0 ? `
-                                            <div class="ojt-section">
-                                                <h4>Current OJT Students</h4>
-                                                <div class="student-list">
-                                                    ${data.current_students.map(student => `
-                                                        <div class="student-item">
-                                                            <div class="student-avatar">
-                                                                ${student.profile_picture ?
-                                                                    `<img src="${student.profile_picture}" alt="${student.full_name}">` :
-                                                                    `<i class="fas fa-user"></i>`
-                                                                }
-                                                            </div>
-                                                            <div class="student-info">
-                                                                <span class="student-name">${student.full_name}</span>
-                                                                <span class="student-details">${student.student_number} • ${student.course}</span>
-                                                            </div>
-                                                            <span class="student-status ${student.status.toLowerCase()}">${student.status}</span>
-                                                        </div>
-                                                    `).join('')}
-                                                </div>
-                                            </div>
-                                            ` : ''}
                                         </div>
                                     </div>
                                 `;
                                 break;
-                                case 'ojt-application':
-                                    modalBody.innerHTML = `
-                                        <div class="view-ojt-application-details">
-                                            <div class="ojt-application-header">
-                                                <h3>OJT Application Details</h3>
-                                                <div class="application-reference">
-                                                    <span>Application ID:</span>
-                                                    <strong>#${data.id}</strong>
-                                                </div>
-                                                <div class="application-status">
-                                                    <span class="badge ${data.status === 'approved' ? 'approved' :
-                                                                      data.status === 'rejected' ? 'rejected' :
-                                                                      data.status === 'cancelled' ? 'cancelled' :
-                                                                      data.status === 'under_review' ? 'under-review' :
-                                                                      data.status === 'submitted' ? 'submitted' : 'draft'}">
-                                                        ${data.status_display}
-                                                    </span>
-                                                    ${data.previous_status ? `
-                                                    <span class="previous-status">
-                                                        (Previously: ${data.previous_status_display})
-                                                    </span>
-                                                    ` : ''}
-                                                </div>
-                                            </div>
-
-                                            <div class="ojt-application-sections">
-                                                <div class="ojt-section">
-                                                    <h4>Student Information</h4>
-                                                    <div class="student-info">
-                                                        <div class="student-profile">
-                                                            ${data.student.profile_picture ?
-                                                            `<img src="${data.student.profile_picture}" alt="${data.student.full_name}" class="student-avatar">` :
-                                                            `<div class="avatar-placeholder"><i class="fas fa-user"></i></div>`}
-                                                            <div>
-                                                                <h5>${data.student.full_name}</h5>
-                                                                <p>${data.student.student_number}</p>
-                                                                <p>${data.student.course} • ${data.student.section}</p>
-                                                                <p>Year Level: ${data.student.year_level}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="ojt-section">
-                                                    <h4>Company Information</h4>
-                                                    <div class="company-info">
-                                                        <h5>${data.company.name}</h5>
-                                                        <p><strong>Address:</strong> ${data.company.address}</p>
-                                                        <p><strong>Contact:</strong> ${data.company.contact_number}</p>
-                                                        <div class="company-status">
-                                                            <span class="badge ${data.company.is_full ? 'inactive' : 'active'}">
-                                                                ${data.company.status}
-                                                            </span>
-                                                            <span class="slot-info">
-                                                                (Slots: ${data.company.filled_slots}/${data.company.available_slots} filled)
-                                                            </span>
-                                                        </div>
-                                                        ${data.company_is_full ? `
-                                                        <div class="warning-message">
-                                                            <i class="fas fa-exclamation-triangle"></i>
-                                                            <span>Company is currently full. Retrieving will set application to Draft.</span>
-                                                        </div>
-                                                        ` : ''}
-                                                    </div>
-                                                </div>
-
-                                                <div class="ojt-section">
-                                                    <h4>Application Details</h4>
-                                                    <div class="application-details-grid">
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Proposed Start Date:</span>
-                                                            <span class="detail-value">${data.application_details.proposed_start_date}</span>
-                                                        </div>
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Proposed End Date:</span>
-                                                            <span class="detail-value">${data.application_details.proposed_end_date}</span>
-                                                        </div>
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Duration:</span>
-                                                            <span class="detail-value">${data.application_details.duration_days} days (${data.application_details.proposed_hours} hours)</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                ${data.application_details.cover_letter ? `
-                                                <div class="ojt-section">
-                                                    <h4>Cover Letter</h4>
-                                                    <div class="cover-letter">
-                                                        <p>${data.application_details.cover_letter}</p>
-                                                    </div>
-                                                </div>
-                                                ` : ''}
-
-                                                ${data.application_details.skills ? `
-                                                <div class="ojt-section">
-                                                    <h4>Skills & Qualifications</h4>
-                                                    <div class="skills">
-                                                        <p>${data.application_details.skills}</p>
-                                                    </div>
-                                                </div>
-                                                ` : ''}
-
-                                                <div class="ojt-section">
-                                                    <h4>Requirements Status</h4>
-                                                    <div class="requirements-status">
-                                                        <div class="progress-info">
-                                                            <span>${data.requirements_submitted} of ${data.total_requirements} requirements submitted</span>
-                                                            <span class="status ${data.requirements_complete ? 'complete' : 'incomplete'}">
-                                                                ${data.requirements_complete ? 'Complete' : 'Incomplete'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                ${data.requirements && data.requirements.length > 0 ? `
-                                                <div class="ojt-section">
-                                                    <h4>Submitted Requirements</h4>
-                                                    <div class="requirements-list">
-                                                        ${data.requirements.map(req => `
-                                                            <div class="requirement-item">
-                                                                <div class="requirement-info">
-                                                                    <i class="fas fa-file-alt"></i>
-                                                                    <div>
-                                                                        <span class="requirement-name">${req.requirement_type}</span>
-                                                                        <span class="requirement-status ${req.status.toLowerCase()}">${req.status}</span>
-                                                                    </div>
-                                                                </div>
-                                                                ${req.file_url ? `
-                                                                <a href="${req.file_url}" target="_blank" class="btn btn-small">
-                                                                    <i class="fas fa-download"></i> View
-                                                                </a>
-                                                                ` : ''}
-                                                            </div>
-                                                        `).join('')}
-                                                    </div>
-                                                </div>
-                                                ` : ''}
-
-                                                <div class="ojt-application-meta">
-                                                    <div class="meta-item">
-                                                        <span class="meta-label">Applied:</span>
-                                                        <span>${data.application_date}</span>
-                                                    </div>
-                                                    <div class="meta-item">
-                                                        <span class="meta-label">Archived:</span>
-                                                        <span>${data.archived_at}</span>
-                                                    </div>
-                                                    <div class="meta-item">
-                                                        <span class="meta-label">Archived By:</span>
-                                                        <span>${data.archived_by || 'System'}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `;
-                                    break;
-                                    case 'ojt-report':
-                                    modalBody.innerHTML = `
-                                        <div class="view-ojt-report-details">
-                                            <div class="ojt-report-header">
-                                                <h3>${data.title}</h3>
-                                                <div class="report-meta">
-                                                    <span class="badge ${data.report_type}">${data.report_type_display}</span>
-                                                    <span class="badge ${data.status}">${data.status_display}</span>
-                                                </div>
-                                            </div>
-
-                                            <div class="ojt-report-sections">
-                                                <div class="ojt-section">
-                                                    <h4>Report Information</h4>
-                                                    <div class="report-details-grid">
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Student:</span>
-                                                            <span class="detail-value">${data.student_name}</span>
-                                                        </div>
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Company:</span>
-                                                            <span class="detail-value">${data.company_name}</span>
-                                                        </div>
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Report Date:</span>
-                                                            <span class="detail-value">${data.report_date}</span>
-                                                        </div>
-                                                        ${data.period_start ? `
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Period Start:</span>
-                                                            <span class="detail-value">${data.period_start}</span>
-                                                        </div>
-                                                        ` : ''}
-                                                        ${data.period_end ? `
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Period End:</span>
-                                                            <span class="detail-value">${data.period_end}</span>
-                                                        </div>
-                                                        ` : ''}
-                                                    </div>
-                                                </div>
-
-                                                <div class="ojt-section">
-                                                    <h4>Report Content</h4>
-                                                    <div class="report-content">
-                                                        <p>${data.description}</p>
-                                                    </div>
-                                                </div>
-
-                                                ${data.issues_challenges ? `
-                                                <div class="ojt-section">
-                                                    <h4>Issues & Challenges</h4>
-                                                    <div class="issues-content">
-                                                        <p>${data.issues_challenges}</p>
-                                                    </div>
-                                                </div>
-                                                ` : ''}
-
-                                                ${data.feedback ? `
-                                                <div class="ojt-section">
-                                                    <h4>Reviewer Feedback</h4>
-                                                    <div class="feedback-content">
-                                                        <p>${data.feedback}</p>
-                                                    </div>
-                                                </div>
-                                                ` : ''}
-
-                                                <div class="ojt-section">
-                                                    <h4>Submission Details</h4>
-                                                    <div class="submission-details">
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Submitted By:</span>
-                                                            <span class="detail-value">${data.submitted_by}</span>
-                                                        </div>
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Submitted At:</span>
-                                                            <span class="detail-value">${data.submitted_at}</span>
-                                                        </div>
-                                                        ${data.reviewed_by ? `
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Reviewed By:</span>
-                                                            <span class="detail-value">${data.reviewed_by}</span>
-                                                        </div>
-                                                        ` : ''}
-                                                        ${data.reviewed_at ? `
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Reviewed At:</span>
-                                                            <span class="detail-value">${data.reviewed_at}</span>
-                                                        </div>
-                                                        ` : ''}
-                                                    </div>
-                                                </div>
-
-                                                <div class="ojt-section">
-                                                    <h4>Archival Information</h4>
-                                                    <div class="archival-details">
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Archived Date:</span>
-                                                            <span class="detail-value">${data.archived_at}</span>
-                                                        </div>
-                                                        <div class="detail-item">
-                                                            <span class="detail-label">Archived By:</span>
-                                                            <span class="detail-value">${data.archived_by || 'System'}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                ${data.attachments && data.attachments.length > 0 ? `
-                                                <div class="ojt-section">
-                                                    <h4>Attachments (${data.attachments.length})</h4>
-                                                    <div class="attachments-list">
-                                                        ${data.attachments.map(attachment => `
-                                                            <div class="attachment-item">
-                                                                <i class="${attachment.file_type_icon}"></i>
-                                                                <div>
-                                                                    <a href="${attachment.file_url}" target="_blank">${attachment.file_name}</a>
-                                                                    <span class="file-size">${attachment.file_size}</span>
-                                                                </div>
-                                                            </div>
-                                                        `).join('')}
-                                                    </div>
-                                                </div>
-                                                ` : ''}
-                                            </div>
-                                        </div>
-                                    `;
-                                    break;
                                     case 'organization':
                                     modalBody.innerHTML = `
                                         <div class="view-organization-details">
@@ -3388,8 +2965,6 @@ document.addEventListener('DOMContentLoaded', function() {
             'nstp-students': 'nstp-student',
             'nstp-files': 'nstp-file',
             'ojt-companies': 'ojt-company',
-            'ojt-applications': 'ojt-application',
-            'ojt-reports': 'ojt-report',
             'organizations': 'organization',
             'accomplishment-reports': 'accomplishment-report',
         };

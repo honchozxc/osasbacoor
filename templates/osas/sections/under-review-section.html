@@ -1,12 +1,13 @@
 <div class="section-header">
     <div class="header-content">
         <div class="title-section">
-            <h2 class="section-heading">Under Review Complaints</h2>
+            <h2 class="section-heading">Active Complaints</h2>
             <div class="divider"></div>
         </div>
 
         <div class="complaint-stats-section">
             <div class="complaint-stats-container">
+                <!-- Total Complaints -->
                 <div class="complaint-stat-box total">
                     <div class="stat-icon" style="background-color: #4caf50;">
                         <i class='bx bx-file'></i>
@@ -16,13 +17,70 @@
                         <div class="stat-label">Total Complaints</div>
                     </div>
                 </div>
+
+                <!-- Under Review -->
                 <div class="complaint-stat-box under-review">
                     <div class="stat-icon" style="background-color: #2196f3;">
                         <i class='bx bx-time'></i>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-number">{{ under_review_count }}</div>
+                        <div class="stat-number">{{ pure_under_review_count }}</div>
                         <div class="stat-label">Under Review</div>
+                    </div>
+                </div>
+
+                <!-- 1st Hearing -->
+                <div class="complaint-stat-box first-hearing">
+                    <div class="stat-icon" style="background-color: #ff9800;">
+                        <i class='bx bx-calendar-alt'></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ first_hearing_count }}</div>
+                        <div class="stat-label">1st Hearing</div>
+                    </div>
+                </div>
+
+                <!-- 2nd Hearing -->
+                <div class="complaint-stat-box second-hearing">
+                    <div class="stat-icon" style="background-color: #9c27b0;">
+                        <i class='bx bx-calendar'></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ second_hearing_count }}</div>
+                        <div class="stat-label">2nd Hearing</div>
+                    </div>
+                </div>
+
+                <!-- Other Hearing -->
+                <div class="complaint-stat-box other-hearing">
+                    <div class="stat-icon" style="background-color: #673ab7;">
+                        <i class='bx bx-calendar-event'></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ other_hearing_count }}</div>
+                        <div class="stat-label">Other Hearing</div>
+                    </div>
+                </div>
+
+                <!-- Ongoing Hearing -->
+                <div class="complaint-stat-box ongoing-hearing">
+                    <div class="stat-icon" style="background-color: #ff5722;">
+                        <i class='bx bx-microphone'></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ ongoing_hearing_count }}</div>
+                        <div class="stat-label">Ongoing Hearing</div>
+                    </div>
+                </div>
+
+                <!-- Canceled -->
+                <div class="complaint-stat-box canceled">
+                    <div class="stat-icon" style="background-color: #f44336;">
+                        <i class='bx bx-x-circle'></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ canceled_count }}</div>
+                        <div class="stat-label">Canceled</div>
                     </div>
                 </div>
             </div>
@@ -34,6 +92,17 @@
                 <input type="text" id="under-review-search" placeholder="Search complaints..." class="search-input">
             </div>
             <div class="filter-group">
+                <select id="statusFilter" class="styled-select">
+                    <option value="all">All Statuses</option>
+                    <option value="under_review">Under Review</option>
+                    <option value="1st_hearing">1st Hearing</option>
+                    <option value="2nd_hearing">2nd Hearing</option>
+                    <option value="other_hearing">Other Hearing</option>
+                    <option value="ongoing_hearing">Ongoing Hearing</option>
+                    <option value="canceled">Canceled</option>
+                </select>
+            </div>
+            <div class="filter-group">
                 <select id="underReviewDateFilter" class="styled-select">
                     <option value="all">Sort by Dates</option>
                     <option value="incident_oldest">Oldest Incident</option>
@@ -43,8 +112,6 @@
                     <option value="incident_month">Incident This Month</option>
                     <option value="this_year">This Year</option>
                     <option value="last_year">Last Year</option>
-                    <option value="2023">2023</option>
-                    <option value="2022">2022</option>
                 </select>
             </div>
             {% if perms.osas.add_complaint %}
@@ -75,35 +142,72 @@
                 <th data-sort="title">Title <i class='bx bx-sort'></i></th>
                 <th data-sort="complainant">Complainant <i class='bx bx-sort'></i></th>
                 <th data-sort="incident_date">Incident Date <i class='bx bx-sort'></i></th>
-                <th data-sort="created_at">Date Submitted <i class='bx bx-sort'></i></th>
                 <th>Status</th>
+                <th>Next Hearing</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for complaint in complaints %}
-            {% if complaint.status == 'under_review' %}
-            <tr data-id="{{ complaint.id }}" data-created="{{ complaint.created_at|date:'Y-m-d' }}">
+            {% if complaint.status != 'resolved' and not complaint.is_archived %}
+            <tr data-id="{{ complaint.id }}"
+                data-created="{{ complaint.created_at|date:'Y-m-d' }}"
+                data-status="{{ complaint.status }}">
                 <td>{{ complaint.reference_number }}</td>
                 <td>{{ complaint.title }}</td>
                 <td>{{ complaint.complainant_first_name }} {{ complaint.complainant_last_name }}</td>
                 <td>{{ complaint.incident_date|date:"M d, Y" }}</td>
-                <td>{{ complaint.created_at|date:"M d, Y" }}</td>
                 <td>
+                    {% if complaint.status == 'under_review' %}
                     <span class="status-badge under-review">
                         Under Review
                     </span>
+                    {% elif complaint.status == '1st_hearing' %}
+                    <span class="status-badge first-hearing">
+                        1st Hearing
+                    </span>
+                    {% elif complaint.status == '2nd_hearing' %}
+                    <span class="status-badge second-hearing">
+                        2nd Hearing
+                    </span>
+                    {% elif complaint.status == 'other_hearing' %}
+                    <span class="status-badge other-hearing">
+                        Other Hearing
+                    </span>
+                    {% elif complaint.status == 'ongoing_hearing' %}
+                    <span class="status-badge ongoing-hearing">
+                        Ongoing Hearing
+                    </span>
+                    {% elif complaint.status == 'resolved' %}
+                    <span class="status-badge resolved">
+                        Resolved
+                    </span>
+                    {% elif complaint.status == 'canceled' %}
+                    <span class="status-badge canceled">
+                        Canceled
+                    </span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if complaint.next_hearing %}
+                        {{ complaint.next_hearing.schedule_date|date:"M d, Y" }}
+                        {{ complaint.next_hearing.schedule_time|time:"g:i A" }}
+                    {% else %}
+                        No hearing scheduled
+                    {% endif %}
                 </td>
                 <td class="actions">
                     {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 11 or complaint.created_by == request.user %}
                         {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 11 %}
-                        <button class="btn-action resolve btn-icon"
-                                title="Mark as Resolved"
-                                data-id="{{ complaint.id }}"
-                                data-ref="{{ complaint.reference_number }}"
-                                data-title="{{ complaint.title }}">
-                            <i class='bx bx-check'></i>
-                        </button>
+                            {% if complaint.status != 'canceled' %}
+                            <button class="btn-action resolve btn-icon"
+                                    title="Update Status"
+                                    data-id="{{ complaint.id }}"
+                                    data-ref="{{ complaint.reference_number }}"
+                                    data-title="{{ complaint.title }}">
+                                <i class='bx bx-check'></i>
+                            </button>
+                            {% endif %}
                         {% endif %}
                         {% if perms.osas.view_complaint %}
                         <button class="view-complaint btn-action view btn-icon" data-id="{{ complaint.id }}">
@@ -128,10 +232,6 @@
                 </td>
             </tr>
             {% endif %}
-            {% empty %}
-            <tr>
-                <td colspan="7" class="no-data">No complaints under review</td>
-            </tr>
             {% endfor %}
         </tbody>
     </table>

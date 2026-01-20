@@ -411,21 +411,31 @@
     cursor: not-allowed !important;
 }
 
-#organizations-table-container .actions {
+/* Fix for action buttons in table - horizontal alignment */
+#organizations-table-container .actions-cell {
+    position: relative;
+    padding: 8px 12px;
+    min-width: 200px;
+    white-space: nowrap;
+}
+
+#organizations-table-container .action-buttons {
     display: flex;
-    gap: 0.5rem;
+    flex-direction: row;
+    gap: 4px;
     justify-content: flex-start;
     align-items: center;
-    height: 100%;
-    min-height: 100%;
-    flex-wrap: wrap;
-    align-content: center;
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow: visible;
+    padding: 0;
+    margin: 0;
 }
 
 #organizations-table-container .btn-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -433,143 +443,151 @@
     border: none;
     background: none;
     transition: all 0.2s ease;
-    margin: 1px 0;
-    color: var(--white);
-    font-size: 1.1rem;
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin: 0;
+    font-size: 1rem;
+    flex-shrink: 0;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-#organizations-table-container .btn-icon:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Organization Specific Button Types */
+/* Specific button colors */
 #organizations-table-container .btn-view-organization {
-    color: var(--info);
-    background-color: rgba(72, 149, 239, 0.1);
-    border-color: rgba(72, 149, 239, 0.2);
-}
-
-#organizations-table-container .btn-view-organization:hover {
-    background-color: rgba(72, 149, 239, 0.2);
+    color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 #organizations-table-container .btn-edit-organization {
-    color: var(--warning);
-    background-color: rgba(248, 150, 30, 0.1);
-    border-color: rgba(248, 150, 30, 0.2);
-}
-
-#organizations-table-container .btn-edit-organization:hover {
-    background-color: rgba(248, 150, 30, 0.2);
+    color: #f59e0b;
+    background-color: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
 #organizations-table-container .btn-approve-organization {
-    color: var(--success);
-    background-color: rgba(40, 167, 69, 0.1);
-    border-color: rgba(40, 167, 69, 0.2);
+    color: #10b981;
+    background-color: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
-#organizations-table-container .btn-approve-organization:hover {
-    background-color: rgba(40, 167, 69, 0.2);
+#organizations-table-container .btn-renew-organization {
+    color: #f59e0b;
+    background-color: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
-#organizations-table-container .btn-reject-organization {
-    color: var(--danger);
-    background-color: rgba(239, 35, 60, 0.1);
-    border-color: rgba(239, 35, 60, 0.2);
-}
-
-#organizations-table-container .btn-reject-organization:hover {
-    background-color: rgba(239, 35, 60, 0.2);
+#organizations-table-container .btn-reactivate-organization {
+    color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 #organizations-table-container .btn-archive-organization {
-    color: var(--archive);
-    background-color: rgba(111, 66, 193, 0.1);
-    border-color: rgba(111, 66, 193, 0.2);
+    color: #8b5cf6;
+    background-color: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Hover effects */
+#organizations-table-container .btn-icon:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+#organizations-table-container .btn-view-organization:hover {
+    background-color: rgba(59, 130, 246, 0.2);
+}
+
+#organizations-table-container .btn-edit-organization:hover {
+    background-color: rgba(245, 158, 11, 0.2);
+}
+
+#organizations-table-container .btn-approve-organization:hover {
+    background-color: rgba(16, 185, 129, 0.2);
+}
+
+#organizations-table-container .btn-renew-organization:hover {
+    background-color: rgba(245, 158, 11, 0.2);
+}
+
+#organizations-table-container .btn-reactivate-organization:hover {
+    background-color: rgba(59, 130, 246, 0.2);
 }
 
 #organizations-table-container .btn-archive-organization:hover {
-    background-color: rgba(111, 66, 193, 0.2);
+    background-color: rgba(139, 92, 246, 0.2);
 }
 
-/* Active states for all organization buttons */
-#organizations-table-container .btn-view-organization:active,
-#organizations-table-container .btn-edit-organization:active,
-#organizations-table-container .btn-approve-organization:active,
-#organizations-table-container .btn-reject-organization:active,
-#organizations-table-container .btn-archive-organization:active {
-    transform: translateY(0);
-    box-shadow: none;
+/* Ensure table cell doesn't wrap */
+#organizations-table-container .data-table tbody td.actions-cell {
+    white-space: nowrap;
+    padding: 8px;
 }
 
-/* Focus states for accessibility */
-#organizations-table-container .btn-view-organization:focus,
-#organizations-table-container .btn-edit-organization:focus,
-#organizations-table-container .btn-approve-organization:focus,
-#organizations-table-container .btn-reject-organization:focus,
-#organizations-table-container .btn-archive-organization:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.3);
+/* Fix for table responsiveness */
+@media (max-width: 768px) {
+    #organizations-table-container .action-buttons {
+        gap: 3px;
+        justify-content: center;
+    }
+
+    #organizations-table-container .btn-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+    }
+
+    #organizations-table-container .actions-cell {
+        min-width: 180px;
+    }
 }
 
-#organizations-table-container .btn-edit-organization:focus {
-    box-shadow: 0 0 0 3px rgba(248, 150, 30, 0.3);
+/* Tooltip styling for buttons */
+#organizations-table-container .btn-icon[title] {
+    position: relative;
 }
 
-#organizations-table-container .btn-approve-organization:focus {
-    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
-}
-
-#organizations-table-container .btn-reject-organization:focus {
-    box-shadow: 0 0 0 3px rgba(239, 35, 60, 0.3);
-}
-
-#organizations-table-container .btn-archive-organization:focus {
-    box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.3);
-}
-
-/* Tooltip styles for organization buttons */
 #organizations-table-container .btn-icon[title]:hover::after {
     content: attr(title);
     position: absolute;
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background-color: #333;
-    color: #fff;
-    padding: 4px 8px;
+    background: #1f2937;
+    color: white;
+    padding: 6px 10px;
     border-radius: 4px;
     font-size: 0.75rem;
     white-space: nowrap;
-    z-index: 100;
-    margin-bottom: 5px;
+    z-index: 1000;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Ensure proper spacing in table cells */
-#organizations-table-container .actions {
-    min-width: 200px;
+#organizations-table-container .btn-icon[title]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1f2937;
+    margin-bottom: 3px;
+    z-index: 1000;
 }
 
-/* Responsive adjustments for organization buttons */
-@media (max-width: 768px) {
-    #organizations-table-container .actions {
-        gap: 0.25rem;
-        justify-content: center;
-    }
+/* Add to existing table styles */
+#organizations-table-container .data-table {
+    table-layout: fixed;
+    width: 100%;
+}
 
-    #organizations-table-container .btn-icon {
-        width: 32px;
-        height: 32px;
-        font-size: 1rem;
-    }
+#organizations-table-container .data-table th:nth-child(8),
+#organizations-table-container .data-table td:nth-child(8) {
+    width: 200px;
+    text-align: center;
 }
 
 /* --------------------------------------------------- Status Style ------------------------------------------------- */
-/* Organization Section - Minimalist Status Styles */
 #organizations-table-container .status-badge {
     padding: 4px 12px;
     border-radius: 6px;

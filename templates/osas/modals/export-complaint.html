@@ -30,31 +30,82 @@
                             <span class="export-radio-custom"></span>
                             By Respondent Type
                         </label>
+                        <label class="export-radio-label">
+                            <input type="radio" name="export_option" value="custom">
+                            <span class="export-radio-custom"></span>
+                            Custom Selection
+                        </label>
                     </div>
                 </div>
 
+                <!-- Status Options -->
                 <div id="statusOptions" class="export-form-group" style="display: none;">
                     <div class="export-form-row">
                         <div class="export-form-col">
                             <label class="export-form-label">Status</label>
                             <select name="status" class="export-form-select">
                                 <option value="all">All Statuses</option>
-                                <option value="under_review">Under Review</option>
-                                <option value="resolved">Resolved</option>
-                                <option value="canceled">Canceled</option>
+                                {% for code, name in complaint_status_choices %}
+                                <option value="{{ code }}">{{ name }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
                 </div>
 
+                <!-- Respondent Type Options -->
                 <div id="respondentOptions" class="export-form-group" style="display: none;">
                     <div class="export-form-row">
                         <div class="export-form-col">
                             <label class="export-form-label">Respondent Type</label>
                             <select name="respondent_type" class="export-form-select">
                                 <option value="all">All Types</option>
-                                <option value="student">Student</option>
-                                <option value="faculty_staff">Faculty/Staff</option>
+                                {% for code, name in respondent_type_choices %}
+                                <option value="{{ code }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Selection Options -->
+                <div id="customOptions" class="export-form-group" style="display: none;">
+                    <div class="export-form-row">
+                        <div class="export-form-col">
+                            <label class="export-form-label">Status</label>
+                            <select name="custom_status" class="export-form-select">
+                                <option value="">All Statuses</option>
+                                {% for code, name in complaint_status_choices %}
+                                <option value="{{ code }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="export-form-col">
+                            <label class="export-form-label">Respondent Type</label>
+                            <select name="custom_respondent_type" class="export-form-select">
+                                <option value="">All Types</option>
+                                {% for code, name in respondent_type_choices %}
+                                <option value="{{ code }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="export-form-row">
+                        <div class="export-form-col">
+                            <label class="export-form-label">Include Archived</label>
+                            <select name="include_archived" class="export-form-select">
+                                <option value="no">Exclude Archived</option>
+                                <option value="yes">Include Archived</option>
+                                <option value="archived_only">Archived Only</option>
+                            </select>
+                        </div>
+                        <div class="export-form-col">
+                            <label class="export-form-label">Has Hearing</label>
+                            <select name="has_hearing" class="export-form-select">
+                                <option value="">All</option>
+                                <option value="yes">Has Hearing Scheduled</option>
+                                <option value="no">No Hearing Scheduled</option>
                             </select>
                         </div>
                     </div>
@@ -62,6 +113,16 @@
 
                 <div class="export-form-group">
                     <label class="export-form-label">Date Range (Optional)</label>
+                    <div class="export-form-row">
+                        <div class="export-form-col">
+                            <label>Date Type</label>
+                            <select name="date_type" class="export-form-select">
+                                <option value="incident">Incident Date</option>
+                                <option value="submission">Submission Date</option>
+                                <option value="updated">Last Updated Date</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="export-form-row">
                         <div class="export-form-col">
                             <input type="date" name="start_date" class="export-form-input" placeholder="Start Date">

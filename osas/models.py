@@ -1,6 +1,6 @@
 import json
 import string
-from datetime import date
+from datetime import date, datetime
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
@@ -56,6 +56,7 @@ class CustomUser(AbstractUser):
         (13, 'Job Placement'),
         (14, 'Student'),
         (15, 'Organization'),
+        (16, 'OJT Adviser'),
     )
 
     OSAS_POSITION_CHOICES = (
@@ -1814,9 +1815,29 @@ class SDSPageContent(models.Model):
 
 
 # ---------------------------------------------- Misdeamenor | Complaint Section ---------------------------------------
+class Hearing(models.Model):
+    complaint = models.ForeignKey('Complaint', related_name='hearings', on_delete=models.CASCADE)
+    schedule_date = models.DateField()
+    schedule_time = models.TimeField()
+    location = models.TextField()
+    description = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey('CustomUser', on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"Hearing for Complaint #{self.complaint.reference_number} on {self.schedule_date}"
+
+    class Meta:
+        ordering = ['schedule_date', 'schedule_time']
+
+
 class Complaint(models.Model):
     STATUS_CHOICES = (
         ('under_review', 'Under Review'),
+        ('1st_hearing', '1st Hearing'),
+        ('2nd_hearing', '2nd Hearing'),
+        ('other_hearing', 'Other Hearing'),
+        ('ongoing_hearing', 'Ongoing Hearing'),
         ('resolved', 'Resolved'),
         ('canceled', 'Canceled'),
     )
@@ -1910,6 +1931,7 @@ class Complaint(models.Model):
         help_text="Unique reference number for the complaint"
     )
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='complaints_created')
+
     def generate_reference_number(self):
         """ Reference Number format: ABC-123456-X"""
         while True:
@@ -1924,6 +1946,76 @@ class Complaint(models.Model):
 
             if not Complaint.objects.filter(reference_number=ref_num).exists():
                 return ref_num
+
+    def get_next_hearing(self):
+        """
+        Returns the next scheduled hearing for this complaint.
+        """
+        try:
+            # Get the next hearing that hasn't occurred yet
+            next_hearing = self.hearings.filter(
+                schedule_date__gte=timezone.now().date()
+            ).order_by('schedule_date', 'schedule_time').first()
+
+            return next_hearing
+        except Exception as e:
+            print(f"Error getting next hearing for complaint {self.id}: {e}")
+            return None
+
+    @property
+    def next_hearing(self):
+        """
+        Property version that returns the next hearing.
+        """
+        try:
+            next_hearing = self.hearings.filter(
+                schedule_date__gte=timezone.now().date()
+            ).order_by('schedule_date', 'schedule_time').first()
+
+            return next_hearing
+        except Exception as e:
+            print(f"Error getting next hearing for complaint {self.id}: {e}")
+            return None
+
+    def add_hearing(self, schedule_date, schedule_time, location, description, created_by):
+        """Helper method to add a hearing"""
+        hearing = Hearing.objects.create(
+            complaint=self,
+            schedule_date=schedule_date,
+            schedule_time=schedule_time,
+            location=location,
+            description=description,
+            created_by=created_by
+        )
+        return hearing
+
+    def get_next_hearing_display(self):
+        """Returns formatted string of next hearing date and time"""
+        next_hearing = self.next_hearing
+        if next_hearing:
+            # Format the date and time
+            date_str = next_hearing.schedule_date.strftime('%b %d, %Y')
+            time_str = next_hearing.schedule_time.strftime('%I:%M %p')
+            return f"{date_str} {time_str}"
+        return "No hearing scheduled"
+
+    def is_hearing_status(self):
+        """Check if current status is a hearing status"""
+        return self.status in ['1st_hearing', '2nd_hearing', 'other_hearing', 'ongoing_hearing']
+
+    def get_hearing_type(self):
+        """Get hearing type based on status"""
+        if self.status in ['1st_hearing', '2nd_hearing', 'other_hearing']:
+            return self.status
+        return None
+
+    def get_hearing_type_display(self):
+        """Get display name for hearing type"""
+        if self.is_hearing_status():
+            for code, name in self.STATUS_CHOICES:
+                if code == self.status:
+                    return name
+        return None
 
     def save(self, *args, **kwargs):
         if not self.reference_number:
@@ -2562,15 +2654,33 @@ class NSTPFile(models.Model):
 
 # ----------------------------------------------------- OJT Models -----------------------------------------------------
 class OJTCompany(models.Model):
+    # Status choices
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+    ]
+
     name = models.CharField(max_length=255)
     address = models.TextField()
     contact_number = models.CharField(max_length=20)
-    available_slots = models.PositiveIntegerField(default=5, help_text="Number of available OJT slots")
 
     # Company details
     description = models.TextField(blank=True, null=True)
     website = models.URLField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='active'
+    )
+    status_updated_at = models.DateTimeField(null=True, blank=True)
+    status_updated_by = models.ForeignKey(
+        'CustomUser',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='status_updated_ojt_companies'
+    )
 
     # Archive fields
     is_archived = models.BooleanField(default=False)
@@ -2590,577 +2700,14 @@ class OJTCompany(models.Model):
         return self.name
 
     @property
-    def filled_slots(self):
-        """Calculate number of filled slots (ONLY approved students in OJT)"""
-        return self.ojt_applications.filter(
-            is_archived=False,
-            status='approved'
-        ).count()
-
-    @property
-    def remaining_slots(self):
-        """Calculate remaining available slots"""
-        return max(0, self.available_slots - self.filled_slots)
-
-    def can_accept_more_students(self):
-        """Check if company can accept more students"""
-        return self.remaining_slots > 0 and not self.is_archived
-
-    @property
-    def is_full(self):
-        """Check if company slots are full"""
-        return self.remaining_slots <= 0
-
-    @property
-    def utilization_rate(self):
-        """Calculate slot utilization percentage"""
-        if self.available_slots == 0:
-            return 0
-        return (self.filled_slots / self.available_slots) * 100
-
-    @property
-    def status(self):
-        """Get company status based on slot availability"""
+    def display_status(self):
         if self.is_archived:
             return "Archived"
-        elif self.remaining_slots == 0:
-            return "Full"
-        elif self.remaining_slots <= 2:
-            return "Limited"
         else:
-            return "Available"
-
-    def get_pending_applications_count(self):
-        """Get count of pending applications (for information only)"""
-        return self.ojt_applications.filter(
-            is_archived=False,
-            status__in=['submitted', 'under_review']
-        ).count()
-
-    @classmethod
-    def get_available_companies(cls):
-        """Get companies that are available for applications"""
-        return cls.objects.filter(
-            is_archived=False
-        ).annotate(
-            filled_slots_count=Count(
-                'ojt_applications',
-                filter=Q(ojt_applications__status='approved', ojt_applications__is_archived=False)
-            )
-        ).filter(
-            available_slots__gt=F('filled_slots_count')
-        ).order_by('name')
+            return self.get_status_display()
 
     class Meta:
         verbose_name_plural = "OJT Companies"
-        ordering = ['name']
+        ordering = ['-created_at']
 
-
-class OJTApplication(models.Model):
-    STATUS_CHOICES = [
-        ('draft', 'Draft'),
-        ('submitted', 'Submitted'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-        ('cancelled', 'Cancelled'),
-    ]
-
-    student = models.ForeignKey(
-        'CustomUser',
-        on_delete=models.CASCADE,
-        limit_choices_to={'user_type': 14},
-        related_name='ojt_applications'
-    )
-
-    # OJT Company
-    company = models.ForeignKey(
-        OJTCompany,
-        on_delete=models.CASCADE,
-        related_name='ojt_applications'
-    )
-
-    # Proposed OJT period
-    proposed_start_date = models.DateField()
-    proposed_end_date = models.DateField()
-    proposed_hours = models.PositiveIntegerField(
-        default=240,
-        help_text="Total required OJT hours"
-    )
-
-    # Application status
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
-    previous_status = models.CharField(max_length=20, choices=STATUS_CHOICES, blank=True, null=True)
-    application_date = models.DateTimeField(auto_now_add=True)
-
-    # Application details
-    cover_letter = models.TextField(
-        blank=True,
-        help_text="Why you want to do OJT at this company"
-    )
-    skills = models.TextField(
-        blank=True,
-        help_text="Relevant skills and qualifications"
-    )
-
-    # Approval information
-    approved_by = models.ForeignKey(
-        'CustomUser',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='approved_ojt_applications'
-    )
-    approved_at = models.DateTimeField(null=True, blank=True)
-
-    # Review information
-    reviewed_by = models.ForeignKey(
-        'CustomUser',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='reviewed_ojt_applications'
-    )
-    reviewed_at = models.DateTimeField(null=True, blank=True)
-    review_notes = models.TextField(blank=True, null=True)
-
-    rejection_reason = models.TextField(blank=True, null=True)
-
-    # Archive fields
-    is_archived = models.BooleanField(default=False)
-    archived_at = models.DateTimeField(null=True, blank=True)
-    archived_by = models.ForeignKey(
-        'CustomUser',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='archived_ojt_applications'
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.student.get_full_name()} - {self.company.name}"
-
-    def save(self, *args, **kwargs):
-        if self.is_archived and self.status != 'cancelled':
-            self.previous_status = self.status
-            self.status = 'cancelled'
-
-        # Handle retrieval logic
-        if not self.is_archived and hasattr(self, '_retrieving') and self._retrieving:
-            # Check if company is full when retrieving
-            if self.company and self.company.is_full:
-                self.status = 'draft'
-            elif self.previous_status:
-                self.status = self.previous_status
-                self.previous_status = None
-
-            # Clear archive fields
-            self.archived_at = None
-            self.archived_by = None
-            self._retrieving = False
-
-        super().save(*args, **kwargs)
-
-    @property
-    def student_name(self):
-        """Get student's full name"""
-        return self.student.get_full_name()
-
-    @property
-    def student_course(self):
-        """Get student's course"""
-        return self.student.course.name if self.student.course else "Not specified"
-
-    @property
-    def student_section(self):
-        """Get student's section"""
-        return self.student.section
-
-    @property
-    def student_year_level(self):
-        """Get student's year level"""
-        return self.student.year_level
-
-    @property
-    def requirements_submitted(self):
-        """Get count of submitted requirements"""
-        return self.requirements.filter(is_submitted=True).count()
-
-    @property
-    def total_requirements(self):
-        """Get total required requirements"""
-        return self.requirements.count()
-
-    @property
-    def requirements_complete(self):
-        """Check if all requirements are submitted"""
-        return self.requirements_submitted == self.total_requirements
-
-    def approve_application(self, approved_by):
-        """Approve the OJT application"""
-        if self.status not in ['submitted', 'under_review']:
-            raise ValidationError("Only submitted applications can be approved.")
-
-        if not self.company.can_accept_more_students():
-            raise ValidationError("Company has no available slots.")
-
-        # Check if this application is already approved to avoid double-counting
-        if self.status == 'approved':
-            raise ValidationError("This application is already approved.")
-
-        self.status = 'approved'
-        self.approved_by = approved_by
-        self.approved_at = timezone.now()
-        self.save()
-
-    def reject_application(self, reason, reviewed_by=None):
-        """Reject the OJT application"""
-        if self.status not in ['submitted', 'under_review']:
-            raise ValidationError("Only submitted applications can be rejected.")
-
-        self.status = 'rejected'
-        self.rejection_reason = reason
-        if reviewed_by:
-            self.reviewed_by = reviewed_by
-            self.reviewed_at = timezone.now()
-        self.save()
-
-    def cancel_application(self):
-        """Cancel the application"""
-        if self.status in ['approved']:
-            raise ValidationError("Cannot cancel an approved application.")
-
-        self.status = 'cancelled'
-        self.save()
-
-    @property
-    def duration_days(self):
-        """Calculate proposed OJT duration in days"""
-        if self.proposed_start_date and self.proposed_end_date:
-            return (self.proposed_end_date - self.proposed_start_date).days
-        return 0
-
-    def clean(self):
-        """Validate the OJT application"""
-        super().clean()
-
-        if self.proposed_start_date and self.proposed_end_date:
-            if self.proposed_end_date <= self.proposed_start_date:
-                raise ValidationError("End date must be after start date.")
-
-            # Check if OJT duration is reasonable
-            duration = (self.proposed_end_date - self.proposed_start_date).days
-            if duration < 30:
-                raise ValidationError("OJT duration should be at least 1 month.")
-            if duration > 365:
-                raise ValidationError("OJT duration cannot exceed 1 year.")
-
-        if self.proposed_hours and self.proposed_hours < 240:
-            raise ValidationError("OJT hours must be at least 240 hours.")
-
-        # Check if company can accept more students (only for new applications)
-        if not self.pk and self.company and not self.company.can_accept_more_students():
-            raise ValidationError("This company has no available slots for OJT.")
-
-    class Meta:
-        ordering = ['-application_date']
-        unique_together = ['student', 'company']
-        verbose_name = "OJT Application"
-        verbose_name_plural = "OJT Applications"
-
-
-class OJTRequirement(models.Model):
-    REQUIREMENT_TYPES = [
-        ('resume', 'Resume/CV'),
-        ('application_form', 'Application Form'),
-        ('parent_consent', 'Parent Consent Form'),
-        ('medical_certificate', 'Medical Certificate'),
-        ('barangay_clearance', 'Barangay Clearance'),
-        ('police_clearance', 'Police Clearance'),
-        ('nbi_clearance', 'NBI Clearance'),
-        ('photo_2x2', '2x2 Photo'),
-        ('registration_form', 'Registration Form'),
-        ('endorsement_letter', 'Endorsement Letter'),
-        ('waiver', 'Waiver Form'),
-        ('academic_records', 'Academic Records'),
-        ('other', 'Other Document'),
-    ]
-
-    application = models.ForeignKey(
-        OJTApplication,
-        on_delete=models.CASCADE,
-        related_name='requirements'
-    )
-
-    requirement_type = models.CharField(max_length=50, choices=REQUIREMENT_TYPES)
-    file = models.FileField(
-        upload_to='ojt_requirements/%Y/%m/%d/',
-        validators=[
-            FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'])
-        ]
-    )
-
-    # Submission info
-    is_submitted = models.BooleanField(default=False)
-    submitted_at = models.DateTimeField(null=True, blank=True)
-
-    # Verification info
-    is_verified = models.BooleanField(default=False)
-    verified_by = models.ForeignKey(
-        'CustomUser',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='verified_requirements'
-    )
-    verified_at = models.DateTimeField(null=True, blank=True)
-    verification_notes = models.TextField(blank=True, null=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.get_requirement_type_display()} - {self.application.student.get_full_name()}"
-
-    def save(self, *args, **kwargs):
-        # Auto-set submitted_at when file is uploaded
-        if self.file and not self.submitted_at:
-            self.is_submitted = True
-            self.submitted_at = timezone.now()
-
-        super().save(*args, **kwargs)
-
-    def verify(self, verified_by, notes=""):
-        """Verify this requirement"""
-        self.is_verified = True
-        self.verified_by = verified_by
-        self.verified_at = timezone.now()
-        self.verification_notes = notes
-        self.save()
-
-    def unverify(self):
-        """Unverify this requirement"""
-        self.is_verified = False
-        self.verified_by = None
-        self.verified_at = None
-        self.verification_notes = ""
-        self.save()
-
-    @property
-    def file_name(self):
-        """Get the file name"""
-        return self.file.name.split('/')[-1]
-
-    @property
-    def status(self):
-        """Get requirement status"""
-        if self.is_verified:
-            return "Verified"
-        elif self.is_submitted:
-            return "Submitted"
-        else:
-            return "Pending"
-
-    class Meta:
-        verbose_name = "OJT Requirement"
-        verbose_name_plural = "OJT Requirements"
-        unique_together = ['application', 'requirement_type']
-
-
-class OJTReport(models.Model):
-    REPORT_TYPES = [
-        ('weekly', 'Weekly Report'),
-        ('monthly', 'Monthly Report'),
-        ('final', 'Final Report'),
-        ('incident', 'Incident Report'),
-        ('complaint', 'Complaint Report'),
-    ]
-
-    REPORT_STATUS = [
-        ('submitted', 'Submitted'),
-        ('reviewed', 'Reviewed'),
-    ]
-
-    # Basic report info
-    title = models.CharField(max_length=255, help_text="Brief title of the report")
-    report_type = models.CharField(max_length=20, choices=REPORT_TYPES)
-
-    # Related OJT application
-    application = models.ForeignKey(
-        OJTApplication,
-        on_delete=models.CASCADE,
-        related_name='reports'
-    )
-
-    # Report dates
-    report_date = models.DateField(default=timezone.now)
-    period_start = models.DateField(help_text="Start date of reporting period", blank=True, null=True)
-    period_end = models.DateField(help_text="End date of reporting period", blank=True, null=True)
-
-    # Simple content fields
-    description = models.TextField(help_text="Report content - activities, incidents, or accomplishments")
-    issues_challenges = models.TextField(blank=True, null=True, help_text="Any issues or challenges faced")
-
-    # Simple status
-    status = models.CharField(max_length=20, choices=REPORT_STATUS, default='submitted')
-
-    # Submitted by (automatically set)
-    submitted_by = models.ForeignKey(
-        'CustomUser',
-        on_delete=models.CASCADE,
-        related_name='submitted_ojt_reports'
-    )
-    submitted_at = models.DateTimeField(auto_now_add=True)
-
-    # Simple review info
-    reviewed_by = models.ForeignKey(
-        'CustomUser',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='reviewed_ojt_reports'
-    )
-    reviewed_at = models.DateTimeField(blank=True, null=True)
-    feedback = models.TextField(blank=True, null=True, help_text="Feedback from reviewer")
-
-    # Archive fields
-    is_archived = models.BooleanField(default=False)
-    archived_at = models.DateTimeField(blank=True, null=True)
-    archived_by = models.ForeignKey(
-        'CustomUser',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='archived_ojt_reports'
-    )
-
-    def __str__(self):
-        return f"{self.title} - {self.application.student.get_full_name()}"
-
-    def save(self, *args, **kwargs):
-        # Auto-set reviewed_at when status changes to reviewed
-        if self.status == 'reviewed' and not self.reviewed_at:
-            self.reviewed_at = timezone.now()
-        super().save(*args, **kwargs)
-
-    @property
-    def student_name(self):
-        """Get student's full name"""
-        return self.application.student.get_full_name()
-
-    @property
-    def company_name(self):
-        """Get company name"""
-        return self.application.company.name
-
-    @property
-    def is_complaint_report(self):
-        """Check if this is a complaint/incident report"""
-        return self.report_type in ['complaint', 'incident']
-
-    @property
-    def has_attachments(self):
-        """Check if report has any attachments"""
-        return self.attachments.exists()
-
-    @property
-    def attachments_count(self):
-        """Get number of attachments"""
-        return self.attachments.count()
-
-    def mark_as_reviewed(self, reviewed_by, feedback=""):
-        """Mark report as reviewed"""
-        self.status = 'reviewed'
-        self.reviewed_by = reviewed_by
-        self.reviewed_at = timezone.now()
-        self.feedback = feedback
-        self.save()
-
-    def archive(self, archived_by):
-        """Archive the report"""
-        self.is_archived = True
-        self.archived_at = timezone.now()
-        self.archived_by = archived_by
-        self.save()
-
-    def unarchive(self):
-        """Unarchive the report"""
-        self.is_archived = False
-        self.archived_at = None
-        self.archived_by = None
-        self.save()
-
-    def clean(self):
-        """Simple validation"""
-        super().clean()
-
-        if self.period_start and self.period_end:
-            if self.period_end <= self.period_start:
-                raise ValidationError("Period end date must be after start date.")
-
-    class Meta:
-        ordering = ['-report_date', '-submitted_at']
-        verbose_name = "OJT Report"
-        verbose_name_plural = "OJT Reports"
-
-
-class OJTReportAttachment(models.Model):
-    report = models.ForeignKey(
-        OJTReport,
-        on_delete=models.CASCADE,
-        related_name='attachments'
-    )
-    file = models.FileField(
-        upload_to='ojt_reports/attachments/%Y/%m/%d/',
-        validators=[
-            FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'])
-        ]
-    )
-    file_name = models.CharField(max_length=255, blank=True)
-    file_size = models.PositiveIntegerField(default=0)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-    def save(self, *args, **kwargs):
-        # Auto-populate file_name and file_size if not set
-        if self.file and not self.file_name:
-            self.file_name = self.file.name.split('/')[-1]  # Get filename only
-        if self.file and not self.file_size:
-            self.file_size = self.file.size
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.file_name} - {self.report.title}"
-
-    @property
-    def file_type(self):
-        """Get file type for icon display"""
-        ext = self.file_name.split('.')[-1].lower() if '.' in self.file_name else ''
-        if ext in ['pdf']:
-            return 'pdf'
-        elif ext in ['doc', 'docx']:
-            return 'word'
-        elif ext in ['jpg', 'jpeg', 'png']:
-            return 'image'
-        else:
-            return 'file'
-
-    @property
-    def file_type_icon(self):
-        """Get icon class based on file type"""
-        file_type = self.file_type
-        if file_type == 'pdf':
-            return 'bx-file-pdf'
-        elif file_type == 'word':
-            return 'bx-file-doc'
-        elif file_type == 'image':
-            return 'bx-image'
-        else:
-            return 'bx-file'
-
-    class Meta:
-        verbose_name = "OJT Report Attachment"
-        verbose_name_plural = "OJT Report Attachments"
-        ordering = ['-uploaded_at']
 

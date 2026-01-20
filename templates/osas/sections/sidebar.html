@@ -62,7 +62,7 @@
                 <h3>News Feed</h3>
             </a>
 
-            {% if user_type != "Student" and request.user.user_type != 14 and request.user.user_type != 15 %}
+            {% if user_type != "Student" and request.user.user_type != 14 and request.user.user_type != 15 and request.user.user_type != 16 %}
                 <a href="#" class="menu-item" onclick="showSection('about')">
                     <span><i class='bx bx-info-circle'></i></span>
                     <h3>Pages</h3>
@@ -112,15 +112,13 @@
             </div>
             {% endif %}
 
-            {% if request.user.user_type == 1 or request.user.user_type == 13 or request.user.user_type == 14 and request.user.year_level == '4' %}
+            {% if request.user.user_type == 1 or request.user.user_type == 13 or request.user.user_type == 16 or request.user.user_type == 14 and request.user.year_level == '4' %}
             <div class="menu-item dropdown-toggle" data-dropdown="ojt">
               <span><i class='bx bxs-briefcase'></i></span>
               <h3>OJT <i class='bx bx-chevron-down'></i></h3>
             </div>
             <div class="dropdown-items hidden" data-content="ojt">
               <a href="#" class="menu-item" onclick="showSection('ojt-company')">OJT Company</a>
-              <a href="#" class="menu-item" onclick="showSection('ojt-records')">OJT Records</a>
-              <a href="#" class="menu-item" onclick="showSection('ojt-reports')">OJT Reports</a>
             </div>
             {% endif %}
 

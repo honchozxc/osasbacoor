@@ -47,14 +47,6 @@
             <button class="tab-button" data-tab="ojt-companies">OJT Companies</button>
             {% endif %}
 
-            {% if request.user.is_superuser or archived_ojt_applications or request.user.user_type == 1 or request.user.user_type == 13 or request.user.user_type == 14 %}
-            <button class="tab-button" data-tab="ojt-applications">OJT Applications</button>
-            {% endif %}
-
-            {% if request.user.is_superuser or archived_ojt_reports or request.user.user_type == 1 or request.user.user_type == 13 or request.user.user_type == 14 %}
-            <button class="tab-button" data-tab="ojt-reports">OJT Reports</button>
-            {% endif %}
-
             {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 10 or request.user.user_type == 15 %}
             <button class="tab-button" data-tab="organizations">Organizations</button>
             {% endif %}
@@ -971,354 +963,109 @@
     </div>
 
         <div class="tab-content" id="ojt-companies-tab">
-        <div class="archived-controls">
-            <div class="controls">
-                <div class="search-box">
-                    <i class='bx bx-search'></i>
-                    <input type="text" id="ojt-companies-search-archived" placeholder="Search archived OJT companies..." class="search-input">
-                </div>
-                <div class="status-filter">
-                    <select id="ArchivedojtCompanyStatusFilter" class="styled-select">
-                        <option value="all">All Statuses</option>
-                        <option value="available">Available</option>
-                        <option value="limited">Limited</option>
-                        <option value="full">Full</option>
-                    </select>
-                </div>
-                <div class="date-filter">
-                    <select id="ArchivedojtCompanyDateFilter" class="styled-select">
-                        <option value="all">Sort by Dates</option>
-                        <option value="newest">Newest First</option>
-                        <option value="oldest">Oldest First</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                        <option value="year">This Year</option>
-                        <option value="last_year">Last Year</option>
-                    </select>
-                </div>
+    <div class="archived-controls">
+        <div class="controls">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="ojt-companies-search-archived" placeholder="Search archived OJT companies..." class="search-input">
             </div>
-        </div>
-
-        <div class="archived-table-container">
-            <table class="archived-table">
-                <thead>
-                    <tr>
-                        <th>Company Name</th>
-                        <th>Address</th>
-                        <th>Contact Number</th>
-                        <th>Slots (Used/Total)</th>
-                        <th>Status</th>
-                        <th>Archived Date</th>
-                        <th>Archived By</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for company in archived_ojt_companies %}
-                    <tr>
-                        <td>
-                            <div class="user-info">
-                                <div class="avatar-placeholder">
-                                    <i class="fas fa-building"></i>
-                                </div>
-                                <div>
-                                    <span class="user-name">{{ company.name }}</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td>{{ company.address|truncatewords:5 }}</td>
-                        <td>{{ company.contact_number }}</td>
-                        <td>
-                            <span class="slot-info">
-                                {{ company.filled_slots }}/{{ company.available_slots }}
-                                <span class="utilization">({{ company.utilization_rate|floatformat:1 }}%)</span>
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge
-                                {% if company.status == 'Available' %}active
-                                {% elif company.status == 'Limited' %}warning
-                                {% elif company.status == 'Full' %}inactive
-                                {% else %}inactive{% endif %}">
-                                {{ company.status }}
-                            </span>
-                        </td>
-                        <td>{{ company.archived_at|date:"M d, Y H:i" }}</td>
-                        <td>
-                            {% if company.archived_by %}
-                            {{ company.archived_by.get_full_name }}
-                            {% else %}
-                            System
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn view-btn" data-id="{{ company.id }}" data-type="ojt-company">
-                                    <i class="fas fa-eye"></i> View
-                                </button>
-                                {% if request.user.is_superuser or company.archived_by == request.user %}
-                                <button class="action-btn retrieve-btn" data-id="{{ company.id }}" data-type="ojt-company">
-                                    <i class="fas fa-undo"></i> Retrieve
-                                </button>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" class="no-data">
-                            <i class="fas fa-inbox"></i>
-                            <span>No archived OJT companies found</span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="status-filter">
+                <select id="ArchivedojtCompanyStatusFilter" class="styled-select">
+                    <option value="all">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="archived">Archived</option>
+                </select>
+            </div>
+            <div class="date-filter">
+                <select id="ArchivedojtCompanyDateFilter" class="styled-select">
+                    <option value="all">Sort by Dates</option>
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="year">This Year</option>
+                    <option value="last_year">Last Year</option>
+                </select>
+            </div>
         </div>
     </div>
 
-        <div class="tab-content" id="ojt-applications-tab">
-            <div class="archived-controls">
-                <div class="controls">
-                    <div class="search-box">
-                        <i class='bx bx-search'></i>
-                        <input type="text" id="ojt-applications-search-archived" placeholder="Search archived OJT applications..." class="search-input">
-                    </div>
-                    <div class="status-filter">
-                        <select id="ArchivedojtApplicationStatusFilter" class="styled-select">
-                            <option value="all">All Statuses</option>
-                            <option value="draft">Draft</option>
-                            <option value="submitted">Submitted</option>
-                            <option value="under_review">Under Review</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                    </div>
-                    <div class="date-filter">
-                        <select id="ArchivedojtApplicationDateFilter" class="styled-select">
-                            <option value="all">Sort by Dates</option>
-                            <option value="newest">Newest First</option>
-                            <option value="oldest">Oldest First</option>
-                            <option value="week">This Week</option>
-                            <option value="month">This Month</option>
-                            <option value="year">This Year</option>
-                            <option value="last_year">Last Year</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="archived-table-container">
-                <table class="archived-table">
-                    <thead>
-                        <tr>
-                            <th>Student</th>
-                            <th>Company</th>
-                            <th>Course</th>
-                            <th>Status</th>
-                            <th>Application Date</th>
-                            <th>Archived Date</th>
-                            <th>Archived By</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for application in archived_ojt_applications %}
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    {% if application.student.profile_picture %}
-                                    <img src="{{ application.student.profile_picture.url }}" alt="{{ application.student.username }}" class="user-avatar">
-                                    {% else %}
-                                    <div class="avatar-placeholder">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    {% endif %}
-                                    <div>
-                                        <span class="user-name">{{ application.student.get_full_name }}</span>
-                                        <span class="user-username">{{ application.student.student_number }}</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>{{ application.company.name }}</td>
-                            <td>{{ application.student_course }}</td>
-                            <td>
-                                <span class="badge
-                                    {% if application.status == 'approved' %}approved
-                                    {% elif application.status == 'rejected' %}rejected
-                                    {% elif application.status == 'cancelled' %}cancelled
-                                    {% elif application.status == 'under_review' %}under-review
-                                    {% elif application.status == 'submitted' %}submitted
-                                    {% else %}draft{% endif %}">
-                                    {{ application.get_status_display }}
-                                </span>
-                            </td>
-                            <td>{{ application.application_date|date:"M d, Y H:i" }}</td>
-                            <td>{{ application.archived_at|date:"M d, Y H:i" }}</td>
-                            <td>
-                                {% if application.archived_by %}
-                                {{ application.archived_by.get_full_name }}
-                                {% else %}
-                                System
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <!-- View button - always visible for all users -->
-                                    <button class="action-btn view-btn" data-id="{{ application.id }}" data-type="ojt-application">
-                                        <i class="fas fa-eye"></i> View
-                                    </button>
-
-                                    <!-- Retrieve button logic -->
-                                    {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
-                                        <!-- OSAS Staff (user types 1, 13) and superusers can always see retrieve -->
-                                        <button class="action-btn retrieve-btn" data-id="{{ application.id }}" data-type="ojt-application">
-                                            <i class="fas fa-undo"></i> Retrieve
-                                        </button>
-                                    {% elif request.user.user_type == 14 and application.archived_by == request.user %}
-                                        <!-- Student users (type 14) can only see retrieve if THEY archived it -->
-                                        <button class="action-btn retrieve-btn" data-id="{{ application.id }}" data-type="ojt-application">
-                                            <i class="fas fa-undo"></i> Retrieve
-                                        </button>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="no-data">
-                                <i class="fas fa-inbox"></i>
-                                <span>No archived OJT applications found</span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="tab-content" id="ojt-reports-tab">
-        <div class="archived-controls">
-            <div class="controls">
-                <div class="search-box">
-                    <i class='bx bx-search'></i>
-                    <input type="text" id="ojt-reports-search-archived" placeholder="Search archived OJT reports..." class="search-input">
-                </div>
-                <div class="status-filter">
-                    <select id="ArchivedojtReportStatusFilter" class="styled-select">
-                        <option value="all">All Statuses</option>
-                        <option value="submitted">Submitted</option>
-                        <option value="reviewed">Reviewed</option>
-                    </select>
-                </div>
-                <div class="type-filter">
-                    <select id="ArchivedojtReportTypeFilter" class="styled-select">
-                        <option value="all">All Types</option>
-                        <option value="weekly">Weekly Report</option>
-                        <option value="monthly">Monthly Report</option>
-                        <option value="final">Final Report</option>
-                        <option value="incident">Incident Report</option>
-                        <option value="complaint">Complaint Report</option>
-                    </select>
-                </div>
-                <div class="date-filter">
-                    <select id="ArchivedojtReportDateFilter" class="styled-select">
-                        <option value="all">Sort by Dates</option>
-                        <option value="newest">Newest First</option>
-                        <option value="oldest">Oldest First</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                        <option value="year">This Year</option>
-                        <option value="last_year">Last Year</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="archived-table-container">
-            <table class="archived-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Type</th>
-                        <th>Student</th>
-                        <th>Company</th>
-                        <th>Report Date</th>
-                        <th>Status</th>
-                        <th>Archived Date</th>
-                        <th>Archived By</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for report in archived_ojt_reports %}
-                    <tr>
-                        <td>{{ report.title }}</td>
-                        <td><span class="badge">{{ report.get_report_type_display }}</span></td>
-                        <td>
-                            <div class="user-info">
-                                {% if report.submitted_by.profile_picture %}
-                                <img src="{{ report.submitted_by.profile_picture.url }}" alt="{{ report.submitted_by.username }}" class="user-avatar">
-                                {% else %}
-                                <div class="avatar-placeholder">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                {% endif %}
-                                <div>
-                                    <span class="user-name">{{ report.student_name }}</span>
-                                    <span class="user-username">{{ report.application.student.student_number }}</span>
-                                </div>
+    <div class="archived-table-container">
+        <table class="archived-table">
+            <thead>
+                <tr>
+                    <th>Company Name</th>
+                    <th>Address</th>
+                    <th>Contact Number</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Archived Date</th>
+                    <th>Archived By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for company in archived_ojt_companies %}
+                <tr>
+                    <td>
+                        <div class="user-info">
+                            <div class="avatar-placeholder">
+                                <i class="fas fa-building"></i>
                             </div>
-                        </td>
-                        <td>{{ report.company_name }}</td>
-                        <td>{{ report.report_date|date:"M d, Y" }}</td>
-                        <td>
-                            <span class="badge {% if report.status == 'reviewed' %}reviewed{% else %}submitted{% endif %}">
-                                {{ report.get_status_display }}
-                            </span>
-                        </td>
-                        <td>{{ report.archived_at|date:"M d, Y H:i" }}</td>
-                        <td>
-                            {% if report.archived_by %}
-                            {{ report.archived_by.get_full_name }}
-                            {% else %}
-                            System
+                            <div>
+                                <span class="user-name">{{ company.name }}</span>
+                                {% if company.website %}
+                                <br><small class="user-username">{{ company.website }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ company.address|truncatewords:5 }}</td>
+                    <td>{{ company.contact_number }}</td>
+                    <td>{{ company.email|default:"-" }}</td>
+                    <td>
+                        <span class="badge
+                            {% if company.display_status == 'Active' %}active
+                            {% elif company.display_status == 'Inactive' %}inactive
+                            {% elif company.display_status == 'Archived' %}archived
+                            {% else %}inactive{% endif %}">
+                            {{ company.display_status }}
+                        </span>
+                    </td>
+                    <td>{{ company.archived_at|date:"M d, Y H:i"|default:"-" }}</td>
+                    <td>
+                        {% if company.archived_by %}
+                        {{ company.archived_by.get_full_name }}
+                        {% else %}
+                        System
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn view-btn" data-id="{{ company.id }}" data-type="ojt-company">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            {% if request.user.is_superuser or company.archived_by == request.user %}
+                            <button class="action-btn retrieve-btn" data-id="{{ company.id }}" data-type="ojt-company">
+                                <i class="fas fa-undo"></i> Retrieve
+                            </button>
                             {% endif %}
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn view-btn" data-id="{{ report.id }}" data-type="ojt-report">
-                                    <i class="fas fa-eye"></i> View
-                                </button>
-
-                                <!-- Retrieve button logic -->
-                                {% if request.user.is_superuser or request.user.user_type == 1 or request.user.user_type == 13 %}
-                                    <!-- OSAS Staff (user types 1, 13) and superusers can always see retrieve -->
-                                    <button class="action-btn retrieve-btn" data-id="{{ report.id }}" data-type="ojt-report">
-                                        <i class="fas fa-undo"></i> Retrieve
-                                    </button>
-                                {% elif request.user.user_type == 14 and report.archived_by == request.user %}
-                                    <!-- Student users (type 14) can only see retrieve if THEY archived it -->
-                                    <button class="action-btn retrieve-btn" data-id="{{ report.id }}" data-type="ojt-report">
-                                        <i class="fas fa-undo"></i> Retrieve
-                                    </button>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="9" class="no-data">
-                            <i class="fas fa-inbox"></i>
-                            <span>No archived OJT reports found</span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="no-data">
+                        <i class="fas fa-inbox"></i>
+                        <span>No archived OJT companies found</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+</div>
 
         <div class="tab-content" id="organizations-tab">
             <div class="archived-controls">
